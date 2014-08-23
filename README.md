@@ -3,6 +3,8 @@ SwiftTask
 
 [Promise](http://www.html5rocks.com/en/tutorials/es6/promises/) + progress + pause + cancel, using [SwiftState](https://github.com/inamiy/SwiftState) (state machine).
 
+(2014/08/23 Currently testing in Xcode6-beta5)
+
 ![SwiftTask](Screenshots/diagram.png)
 
 
