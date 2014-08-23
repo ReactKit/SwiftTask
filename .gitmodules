@@ -1,0 +1,6 @@
+[submodule "Vendor/SwiftState"]
+	path = Vendor/SwiftState
+	url = https://github.com/inamiy/SwiftState.git
+[submodule "Vendor/Alamofire"]
+	path = Vendor/Alamofire
+	url = https://github.com/Alamofire/Alamofire.git
