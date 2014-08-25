@@ -501,6 +501,50 @@ class SwiftTaskTests: _TestCase
         self.wait()
     }
     
+    func testCancel_thenTask()
+    {
+        var expect = self.expectationWithDescription(__FUNCTION__)
+        
+        // 1. 3 progresses at t=20ms
+        // 2. checks cancel & pause, add 2 progresses at t=100ms
+        let task1 = self._interruptableTask()
+        
+        var task2: _InterruptableTask? = nil
+        
+        let task3 = task1.then { (value: String) -> _InterruptableTask in
+            
+            // 1. 3 progresses at t=20ms
+            // 2. checks cancel & pause, add 2 progresses at t=100ms
+            task2 = self._interruptableTask()
+            return task2!
+            
+        }
+        
+        task3.catch { (error: ErrorString?, isCancelled: Bool) -> String in
+            
+            XCTAssertEqual(error!, "I get bored.")
+            XCTAssertTrue(isCancelled)
+            
+            expect.fulfill()
+            
+            return "DUMMY"
+        }
+        
+        // cancel task3 at time between task1 fulfilled & before task2 completed (t=150ms)
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 150_000_000), dispatch_get_main_queue()) {
+            
+            task3.cancel(error: "I get bored.")
+            
+            XCTAssertEqual(task3.state, TaskState.Cancelled)
+            
+            XCTAssertTrue(task2 != nil, "task2 should be created.")
+            XCTAssertEqual(task2!.state, TaskState.Cancelled, "task2 should be cancelled because task2 is created and then task3 (wrapper) is cancelled.")
+            
+        }
+        
+        self.wait()
+    }
+    
     //--------------------------------------------------
     // MARK: - Pause & Resume
     //--------------------------------------------------
