@@ -51,6 +51,15 @@ public enum TaskEvent: String, StateEventType, Printable
     }
 }
 
+// NOTE: use class instead of struct to pass reference to closures so that future values can be stored
+// TODO: nest inside Task class
+public class TaskConfiguration
+{
+    public var pause: (Void -> Void)?
+    public var resume: (Void -> Void)?
+    public var cancel: (Void -> Void)?
+}
+
 public class Task<Progress, Value, Error>
 {
     public typealias ErrorInfo = (error: Error?, isCancelled: Bool)
@@ -58,14 +67,14 @@ public class Task<Progress, Value, Error>
     public typealias ProgressHandler = (Progress) -> Void
     public typealias FulFillHandler = (Value) -> Void
     public typealias RejectHandler = (Error) -> Void
-    public typealias ConfigureHandler = (pause: (Void -> Void)?, resume: (Void -> Void)?, cancel: (Void -> Void)?)
+    public typealias Configuration = TaskConfiguration
     
     public typealias BulkProgress = (completedCount: Int, totalCount: Int)
     
-    public typealias TaskClosure = (progress: ProgressHandler, fulfill: FulFillHandler, reject: RejectHandler, inout configure: ConfigureHandler) -> Void
+    public typealias TaskClosure = (progress: ProgressHandler, fulfill: FulFillHandler, reject: RejectHandler, configure: TaskConfiguration) -> Void
     
     internal typealias _RejectHandler = (ErrorInfo) -> Void
-    internal typealias _TaskClosure = (progress: ProgressHandler, fulfill: FulFillHandler, _reject: _RejectHandler, inout configure: ConfigureHandler) -> Void
+    internal typealias _TaskClosure = (progress: ProgressHandler, fulfill: FulFillHandler, _reject: _RejectHandler, configure: TaskConfiguration) -> Void
     
     internal typealias Machine = StateMachine<TaskState, TaskEvent>
     
@@ -93,7 +102,7 @@ public class Task<Progress, Value, Error>
     {
         self.init(_closure: { (progress, fulfill, _reject: ErrorInfo -> Void, configure) in
             // NOTE: don't expose rejectHandler with ErrorInfo (isCancelled) for public init
-            closure(progress: progress, fulfill: fulfill, reject: { (error: Error?) in _reject(ErrorInfo(error: error, isCancelled: false)) }, configure: &configure)
+            closure(progress: progress, fulfill: fulfill, reject: { (error: Error?) in _reject(ErrorInfo(error: error, isCancelled: false)) }, configure: configure)
             return
         })
     }
@@ -116,7 +125,7 @@ public class Task<Progress, Value, Error>
     
     internal init(_closure: _TaskClosure)
     {
-        var configureHandler: ConfigureHandler
+        let configuration = Configuration()
         
         // setup state machine
         self.machine = Machine(state: .Running) {
@@ -128,18 +137,18 @@ public class Task<Progress, Value, Error>
             $0.addRouteEvent(.Reject, transitions: [.Running => .Rejected, .Paused => .Rejected])
             
             $0.addEventHandler(.Resume) { context in
-                configureHandler.resume?()
+                configuration.resume?()
                 return
             }
             
             $0.addEventHandler(.Pause) { context in
-                configureHandler.pause?()
+                configuration.pause?()
                 return
             }
             
         }
         
-        // TODO: how to nest these inside StateMachine's initClosure?
+        // TODO: how to nest these inside StateMachine's initClosure? (using `self` is not permitted)
         self.machine.addEventHandler(.Progress, order: 90) { [weak self] context in
             if let progress = context.userInfo as? Progress {
                 self!.progress = progress
@@ -154,7 +163,7 @@ public class Task<Progress, Value, Error>
         self.machine.addEventHandler(.Reject, order: 90) { [weak self] context in
             if let errorInfo = context.userInfo as? ErrorInfo {
                 self!.errorInfo = errorInfo
-                configureHandler.cancel?() // NOTE: call configured cancellation on reject as well
+                configuration.cancel?() // NOTE: call configured cancellation on reject as well
             }
         }
         
@@ -172,8 +181,9 @@ public class Task<Progress, Value, Error>
             self.machine <-! (.Reject, errorInfo)  // NOTE: capture self
             return
         }
-
-        _closure(progress: progressHandler, fulfill: fulfillHandler, _reject: rejectHandler, configure: &configureHandler)
+        
+        _closure(progress: progressHandler, fulfill: fulfillHandler, _reject: rejectHandler, configure: configuration)
+        
     }
     
 //    deinit
@@ -225,23 +235,32 @@ public class Task<Progress, Value, Error>
     {
         let newTask = Task<Progress2, Value2, Error> { [weak self] (progress, fulfill, _reject: _RejectHandler, configure) in
             
+            func bind(value: Value)
+            {
+                let innerTask = thenClosure(value)
+                
+                innerTask.then { (value: Value2) -> Void in
+                    fulfill(value)
+                }.catch { (errorInfo: ErrorInfo) -> Void in
+                    _reject(errorInfo)
+                }
+                
+                configure.pause = { innerTask.pause(); return }
+                configure.resume = { innerTask.resume(); return }
+                configure.cancel = { innerTask.cancel(); return }
+            }
+            
             switch self!.machine.state {
                 case .Fulfilled:
-                    thenClosure(self!.value!).then { (value: Value2) -> Void in
-                        fulfill(value)
-                    }.catch { (errorInfo: ErrorInfo) -> Void in
-                        _reject(errorInfo)
-                    }
+                    let value = self!.value!
+                    bind(value)
+                
                 case .Rejected:
                     _reject(self!.errorInfo!)
                 default:
                     self!.machine.addEventHandler(.Fulfill) { context in
                         if let value = context.userInfo as? Value {
-                            thenClosure(value).then { (value: Value2) -> Void in
-                                fulfill(value)
-                            }.catch { (errorInfo: ErrorInfo) -> Void in
-                                _reject(errorInfo)
-                            }
+                            bind(value)
                         }
                     }
                     self!.machine.addEventHandler(.Reject) { context in
@@ -289,15 +308,27 @@ public class Task<Progress, Value, Error>
     {
         let newTask = Task { [weak self] (progress, fulfill, _reject: _RejectHandler, configure) in
             
+            func bind(errorInfo: ErrorInfo)
+            {
+                let innerTask = catchClosure(errorInfo)
+                
+                innerTask.then { (value: Value) -> Void in
+                    fulfill(value)
+                }.catch { (errorInfo: ErrorInfo) -> Void in
+                    _reject(errorInfo)
+                }
+                
+                configure.pause = { innerTask.pause(); return }
+                configure.resume = { innerTask.resume(); return }
+                configure.cancel = { innerTask.cancel(); return}
+            }
+            
             switch self!.machine.state {
                 case .Fulfilled:
                     fulfill(self!.value!)
                 case .Rejected:
-                    catchClosure(self!.errorInfo!).then { (value: Value) -> Void in
-                        fulfill(value)
-                    }.catch { (errorInfo: ErrorInfo) -> Void in
-                        _reject(errorInfo)
-                    }
+                    let errorInfo = self!.errorInfo!
+                    bind(errorInfo)
                 default:
                     self!.machine.addEventHandler(.Fulfill) { context in
                         if let value = context.userInfo as? Value {
@@ -306,11 +337,7 @@ public class Task<Progress, Value, Error>
                     }
                     self!.machine.addEventHandler(.Reject) { context in
                         if let errorInfo = context.userInfo as? ErrorInfo {
-                            catchClosure(errorInfo).then { (value: Value) -> Void in
-                                fulfill(value)
-                            }.catch { (errorInfo: ErrorInfo) -> Void in
-                                _reject(errorInfo)
-                            }
+                            bind(errorInfo)
                         }
                     }
             }
@@ -378,18 +405,9 @@ extension Task
                 }
             }
             
-            configure.cancel = {
-                self.cancelAll(tasks)
-                return
-            }
-            configure.pause = {
-                self.pauseAll(tasks)
-                return
-            }
-            configure.resume = {
-                self.resumeAll(tasks)
-                return
-            }
+            configure.pause = { self.pauseAll(tasks); return }
+            configure.resume = { self.resumeAll(tasks); return }
+            configure.cancel = { self.cancelAll(tasks); return }
             
         }
     }
@@ -430,18 +448,10 @@ extension Task
                 }
             }
             
-            configure.cancel = {
-                self.cancelAll(tasks)
-                return
-            }
-            configure.pause = {
-                self.pauseAll(tasks)
-                return
-            }
-            configure.resume = {
-                self.resumeAll(tasks)
-                return
-            }
+            configure.pause = { self.pauseAll(tasks); return }
+            configure.resume = { self.resumeAll(tasks); return }
+            configure.cancel = { self.cancelAll(tasks); return }
+            
         }
     }
     
