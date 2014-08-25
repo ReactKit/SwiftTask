@@ -9,6 +9,8 @@
 import SwiftTask
 import XCTest
 
+typealias ErrorString = String
+
 class _TestCase: XCTestCase
 {
     override func setUp()

@@ -397,36 +397,50 @@ class SwiftTaskTests: _TestCase
     // MARK: - Cancel
     //--------------------------------------------------
     
-    func testCancel()
+    // 1. 3 progresses at t=20ms
+    // 2. checks cancel & pause, add 2 progresses at t=100ms
+    typealias _InterruptableTask = Task<Float, String, String>
+    func _interruptableTask() -> _InterruptableTask
     {
-        typealias ErrorString = String
-        
-        var expect = self.expectationWithDescription(__FUNCTION__)
-        var progressCount = 0
-        
-        // define task
-        let task = Task<Float, String, ErrorString> { (progress, fulfill, reject, configure) in
+        return Task<Float, String, String> { (progress, fulfill, reject, configure) in
             
+            // NOTE: not a good flag, watch out for race condition!
             var isCancelled = false
+            var isPaused = false
+            
+            let globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
             
             // 1st delay (t=20ms)
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 20_000_000), dispatch_get_main_queue()) {
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 20_000_000), globalQueue) {
+                
                 progress(0.0)
                 progress(0.2)
                 progress(0.5)
                 
-                // 2nd delay (t=120ms)
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 100_000_000), dispatch_get_main_queue()) {
+                // 2nd delay (t=100ms)
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 80_000_000), globalQueue) {
                     
                     // NOTE: no need to call reject() because it's already rejected (cancelled) internally
                     if isCancelled { return }
                     
-                    XCTFail("Should never reach here because of cancellation.")
+                    while isPaused {
+                        NSThread.sleepForTimeInterval(0.1)
+                    }
                     
                     progress(0.8)
                     progress(1.0)
                     fulfill("OK")
                 }
+            }
+            
+            // configure pause & cancel
+            configure.pause = {
+                isPaused = true;
+                return
+            }
+            configure.resume = {
+                isPaused = false;
+                return
             }
             
             // configure cancel for cleanup after reject or task.cancel()
@@ -436,6 +450,16 @@ class SwiftTaskTests: _TestCase
             }
             
         }
+    }
+    
+    func testCancel()
+    {
+        var expect = self.expectationWithDescription(__FUNCTION__)
+        var progressCount = 0
+        
+        // 1. 3 progresses at t=20ms
+        // 2. checks cancel & pause, add 2 progresses at t=100ms
+        let task = self._interruptableTask()
             
         task.progress { (progress: Float) in
             
@@ -488,42 +512,9 @@ class SwiftTaskTests: _TestCase
         var expect = self.expectationWithDescription(__FUNCTION__)
         var progressCount = 0
         
-        // define task
-        let task = Task<Float, String, NSError> { (progress, fulfill, reject, configure) in
-            
-            var isPaused = false
-            
-            let globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
-            
-            // 1st delay (t=20ms)
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 20_000_000), globalQueue) {
-                progress(0.0)
-                progress(0.2)
-                progress(0.5)
-                
-                // 2nd delay (t=120ms)
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 100_000_000), globalQueue) {
-                    
-                    while isPaused {
-                        NSThread.sleepForTimeInterval(0.1)
-                    }
-                    
-                    progress(0.8)
-                    progress(1.0)
-                    fulfill("OK")
-                }
-            }
-            
-            configure.pause = {
-                isPaused = true;
-                return
-            }
-            configure.resume = {
-                isPaused = false;
-                return
-            }
-            
-        }
+        // 1. 3 progresses at t=20ms
+        // 2. checks cancel & pause, add 2 progresses at t=100ms
+        let task = self._interruptableTask()
         
         task.progress { (progress: Float) in
             
@@ -542,10 +533,15 @@ class SwiftTaskTests: _TestCase
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 50_000_000), dispatch_get_main_queue()) {
             
             task.pause()
-            XCTAssertEqual(task.state, TaskState.Paused)
             
-            // resume after 100ms (t=200ms)
+            XCTAssertEqual(task.state, TaskState.Paused)
+            XCTAssertEqual(task.progress!, 0.5)
+            
+            // resume after 150ms (t=200ms)
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 150_000_000), dispatch_get_main_queue()) {
+                
+                XCTAssertEqual(task.state, TaskState.Paused)
+                XCTAssertEqual(task.progress!, 0.5)
                 
                 task.resume()
                 XCTAssertEqual(task.state, TaskState.Running)
@@ -672,7 +668,6 @@ class SwiftTaskTests: _TestCase
         if !self.isAsync { return }
         
         typealias Task = SwiftTask.Task<Any, String, ErrorString>
-        typealias ErrorString = String
         
         var expect = self.expectationWithDescription(__FUNCTION__)
         var tasks: [Task] = Array()
@@ -732,7 +727,6 @@ class SwiftTaskTests: _TestCase
         if !self.isAsync { return }
         
         typealias Task = SwiftTask.Task<Any, String, ErrorString>
-        typealias ErrorString = String
         
         var expect = self.expectationWithDescription(__FUNCTION__)
         var tasks: [Task] = Array()
@@ -807,7 +801,6 @@ class SwiftTaskTests: _TestCase
         if !self.isAsync { return }
         
         typealias Task = SwiftTask.Task<Any, String, ErrorString>
-        typealias ErrorString = String
         
         var expect = self.expectationWithDescription(__FUNCTION__)
         var tasks: [Task] = Array()
@@ -852,7 +845,6 @@ class SwiftTaskTests: _TestCase
         if !self.isAsync { return }
         
         typealias Task = SwiftTask.Task<Any, String, ErrorString>
-        typealias ErrorString = String
         
         var expect = self.expectationWithDescription(__FUNCTION__)
         var tasks: [Task] = Array()
@@ -894,7 +886,6 @@ class SwiftTaskTests: _TestCase
         if !self.isAsync { return }
         
         typealias Task = SwiftTask.Task<Any, String, ErrorString>
-        typealias ErrorString = String
         
         var expect = self.expectationWithDescription(__FUNCTION__)
         var tasks: [Task] = Array()
@@ -954,7 +945,6 @@ class SwiftTaskTests: _TestCase
         if !self.isAsync { return }
         
         typealias Task = SwiftTask.Task<Any, String, ErrorString>
-        typealias ErrorString = String
         
         var expect = self.expectationWithDescription(__FUNCTION__)
         var tasks: [Task] = Array()
