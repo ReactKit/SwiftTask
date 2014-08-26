@@ -202,20 +202,20 @@ public class Task<Progress, Value, Error>
         return self
     }
     
-    /// then + returning value
-    public func then<Value2>(thenClosure: Value -> Value2) -> Task<Progress, Value2, Error>
+    /// then (fulfilled only) + returning value
+    public func then<Value2>(fulfilledClosure: Value -> Value2) -> Task<Progress, Value2, Error>
     {
         let newTask = Task<Progress, Value2, Error> { [weak self] (progress, fulfill, _reject: _RejectHandler, configure) in
         
             switch self!.machine.state {
                 case .Fulfilled:
-                    fulfill(thenClosure(self!.value!))
+                    fulfill(fulfilledClosure(self!.value!))
                 case .Rejected:
                     _reject(self!.errorInfo!)
                 default:
                     self!.machine.addEventHandler(.Fulfill) { context in
                         if let value = context.userInfo as? Value {
-                            fulfill(thenClosure(value))
+                            fulfill(fulfilledClosure(value))
                         }
                     }
                     self!.machine.addEventHandler(.Reject) { context in
@@ -230,14 +230,14 @@ public class Task<Progress, Value, Error>
         return newTask
     }
     
-    /// then + returning task
-    public func then<Progress2, Value2>(thenClosure: Value -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
+    /// then (fulfilled only) + returning task
+    public func then<Progress2, Value2>(fulfilledClosure: Value -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
     {
         let newTask = Task<Progress2, Value2, Error> { [weak self] (progress, fulfill, _reject: _RejectHandler, configure) in
             
             func bind(value: Value)
             {
-                let innerTask = thenClosure(value)
+                let innerTask = fulfilledClosure(value)
                 
                 innerTask.then { (value: Value2) -> Void in
                     fulfill(value)
@@ -268,6 +268,78 @@ public class Task<Progress, Value, Error>
                             _reject(errorInfo)
                         }
                     }
+            }
+            
+        }
+        
+        return newTask
+    }
+    
+    /// then (fulfilled & rejected) + returning value
+    public func then<Value2>(thenClosure: (Value?, ErrorInfo?) -> Value2) -> Task<Progress, Value2, Error>
+    {
+        let newTask = Task<Progress, Value2, Error> { [weak self] (progress, fulfill, _reject: _RejectHandler, configure) in
+            
+            switch self!.machine.state {
+            case .Fulfilled:
+                fulfill(thenClosure(self!.value, nil))
+            case .Rejected:
+                fulfill(thenClosure(nil, self!.errorInfo))
+            default:
+                self!.machine.addEventHandler(.Fulfill) { context in
+                    if let value = context.userInfo as? Value {
+                        fulfill(thenClosure(value, nil))
+                    }
+                }
+                self!.machine.addEventHandler(.Reject) { context in
+                    if let errorInfo = context.userInfo as? ErrorInfo {
+                        fulfill(thenClosure(nil, errorInfo))
+                    }
+                }
+            }
+            
+        }
+        
+        return newTask
+    }
+    
+    /// then (fulfilled & rejected) + returning task
+    public func then<Progress2, Value2>(thenClosure: (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
+    {
+        let newTask = Task<Progress2, Value2, Error> { [weak self] (progress, fulfill, _reject: _RejectHandler, configure) in
+            
+            let bind = { (value: Value?, errorInfo: ErrorInfo?) -> Void in
+                let innerTask = thenClosure(value, errorInfo)
+                
+                innerTask.then { (value: Value2) -> Void in
+                    fulfill(value)
+                    }.catch { (errorInfo: ErrorInfo) -> Void in
+                        _reject(errorInfo)
+                }
+                
+                configure.pause = { innerTask.pause(); return }
+                configure.resume = { innerTask.resume(); return }
+                configure.cancel = { innerTask.cancel(); return }
+            }
+            
+            switch self!.machine.state {
+            case .Fulfilled:
+                let value = self!.value!
+                bind(value, nil)
+                
+            case .Rejected:
+                bind(nil, self!.errorInfo!)
+            default:
+                self!.machine.addEventHandler(.Fulfill) { context in
+                    if let value = context.userInfo as? Value {
+                        bind(value, nil)
+                    }
+                }
+                self!.machine.addEventHandler(.Reject) { context in
+                    if let errorInfo = context.userInfo as? ErrorInfo {
+                        bind(nil, errorInfo)
+                    }
+                }
             }
             
         }
