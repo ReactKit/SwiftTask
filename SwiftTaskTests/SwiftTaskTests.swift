@@ -187,6 +187,36 @@ class SwiftTaskTests: _TestCase
         self.wait()
     }
     
+    func testFulfill_then2()
+    {
+        typealias Task = SwiftTask.Task<Float, String, ErrorString>
+        
+        var expect = self.expectationWithDescription(__FUNCTION__)
+        
+        Task { (progress, fulfill, reject, configure) in
+            
+            self.perform {
+                fulfill("OK")
+            }
+            
+        }.then { (value: String?, errorInfo: Task.ErrorInfo?) -> String in
+            // thenClosure can handle both fulfilled & rejected
+                
+            XCTAssertEqual(value!, "OK")
+            XCTAssertTrue(errorInfo == nil)
+            return "OK2"
+                
+        }.then { (value: String?, errorInfo: Task.ErrorInfo?) -> Void in
+                
+            XCTAssertEqual(value!, "OK2")
+            XCTAssertTrue(errorInfo == nil)
+            expect.fulfill()
+                
+        }
+        
+        self.wait()
+    }
+    
     //--------------------------------------------------
     // MARK: - Reject
     //--------------------------------------------------
@@ -334,6 +364,38 @@ class SwiftTaskTests: _TestCase
             
             expect.fulfill()
             
+        }
+        
+        self.wait()
+    }
+    
+    func testReject_then2()
+    {
+        typealias Task = SwiftTask.Task<Float, String, ErrorString>
+        
+        var expect = self.expectationWithDescription(__FUNCTION__)
+        
+        Task { (progress, fulfill, reject, configure) in
+            
+            self.perform {
+                reject("ERROR")
+            }
+            
+        }.then { (value: String?, errorInfo: Task.ErrorInfo?) -> String in
+            // thenClosure can handle both fulfilled & rejected
+            
+            XCTAssertTrue(value == nil)
+            XCTAssertEqual(errorInfo!.error!, "ERROR")
+            XCTAssertFalse(errorInfo!.isCancelled)
+            
+            return "OK"
+            
+        }.then { (value: String?, errorInfo: Task.ErrorInfo?) -> Void in
+            
+            XCTAssertEqual(value!, "OK")
+            XCTAssertTrue(errorInfo == nil)
+            expect.fulfill()
+                
         }
         
         self.wait()
