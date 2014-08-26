@@ -3,4 +3,4 @@
 	url = https://github.com/inamiy/SwiftState.git
 [submodule "Vendor/Alamofire"]
 	path = Vendor/Alamofire
-	url = https://github.com/Alamofire/Alamofire.git
+	url = https://github.com/inamiy/Alamofire.git
