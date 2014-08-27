@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1F2024FF19AD97A700DE0495 /* CustomOperatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F2024FE19AD97A700DE0495 /* CustomOperatorTests.swift */; };
+		1F20250219ADA8FD00DE0495 /* BasicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F20250119ADA8FD00DE0495 /* BasicTests.swift */; };
 		1F46DEDA199EDF1000F97868 /* SwiftTask.h in Headers */ = {isa = PBXBuildFile; fileRef = 1F46DED9199EDF1000F97868 /* SwiftTask.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1F46DEFB199EDF8100F97868 /* SwiftTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEFA199EDF8100F97868 /* SwiftTask.swift */; };
 		1F46DEFD199EE2C200F97868 /* _TestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEFC199EE2C200F97868 /* _TestCase.swift */; };
@@ -41,6 +43,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1F2024FE19AD97A700DE0495 /* CustomOperatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomOperatorTests.swift; sourceTree = "<group>"; };
+		1F20250119ADA8FD00DE0495 /* BasicTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasicTests.swift; sourceTree = "<group>"; };
 		1F46DED4199EDF1000F97868 /* SwiftTask.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftTask.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F46DED8199EDF1000F97868 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1F46DED9199EDF1000F97868 /* SwiftTask.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftTask.h; sourceTree = "<group>"; };
@@ -114,7 +118,9 @@
 			isa = PBXGroup;
 			children = (
 				1F46DEFC199EE2C200F97868 /* _TestCase.swift */,
+				1F20250119ADA8FD00DE0495 /* BasicTests.swift */,
 				1F46DEE3199EDF1000F97868 /* SwiftTaskTests.swift */,
+				1F2024FE19AD97A700DE0495 /* CustomOperatorTests.swift */,
 				1F5FA35619A374E600975FB9 /* AlamofireTests.swift */,
 				1F46DEE1199EDF1000F97868 /* Supporting Files */,
 			);
@@ -309,7 +315,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1F2024FF19AD97A700DE0495 /* CustomOperatorTests.swift in Sources */,
 				1FA4634919A8D73300DD8729 /* Alamofire.swift in Sources */,
+				1F20250219ADA8FD00DE0495 /* BasicTests.swift in Sources */,
 				1F6A8CA619A5090E00369A5D /* AlamofireTests.swift in Sources */,
 				1F6A8CA319A4E4F200369A5D /* SwiftTaskTests.swift in Sources */,
 				1F46DEFD199EE2C200F97868 /* _TestCase.swift in Sources */,

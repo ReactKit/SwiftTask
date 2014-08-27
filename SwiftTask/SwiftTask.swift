@@ -507,16 +507,51 @@ extension Task
 // MARK: - Custom Operators
 //--------------------------------------------------
 
-infix operator => { associativity left precedence 255 }
+// then (fulfilled & rejected)
+infix operator >>> { associativity left }
 
-public func => <P, V1, V2, E>(left: Task<P, V1, E>, right: V1 -> V2) -> Task<P, V2, E>
+public func >>> <P, V1, V2, E>(left: Task<P, V1, E>, right: (V1?, (E?, Bool)?) -> V2) -> Task<P, V2, E>
 {
     return left.then(right)
 }
 
-public func => <P1, V1, P2, V2, E>(left: Task<P1, V1, E>, right: V1 -> Task<P2, V2, E>) -> Task<P2, V2, E>
+public func >>> <P1, V1, P2, V2, E>(left: Task<P1, V1, E>, right: (V1?, (E?, Bool)?) -> Task<P2, V2, E>) -> Task<P2, V2, E>
 {
     return left.then(right)
+}
+
+// then (fulfilled only)
+infix operator *** { associativity left }
+
+public func *** <P, V1, V2, E>(left: Task<P, V1, E>, right: V1 -> V2) -> Task<P, V2, E>
+{
+    return left.then(right)
+}
+
+public func *** <P1, V1, P2, V2, E>(left: Task<P1, V1, E>, right: V1 -> Task<P2, V2, E>) -> Task<P2, V2, E>
+{
+    return left.then(right)
+}
+
+// catch (rejected only)
+infix operator !!! { associativity left }
+
+public func !!! <P, V, E>(left: Task<P, V, E>, right: (E?, Bool) -> V) -> Task<P, V, E>
+{
+    return left.catch(right)
+}
+
+public func !!! <P, V, E>(left: Task<P, V, E>, right: (E?, Bool) -> Task<P, V, E>) -> Task<P, V, E>
+{
+    return left.catch(right)
+}
+
+// progress
+infix operator ~ { associativity left }
+
+public func ~ <P, V, E>(left: Task<P, V, E>, right: P -> Void) -> Task<P, V, E>
+{
+    return left.progress(right)
 }
 
 //--------------------------------------------------
