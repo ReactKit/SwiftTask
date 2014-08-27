@@ -95,6 +95,50 @@ task.progress { progress in
 }
 ```
 
+### Using custom operator
+
+You can even use custom operators for chaining! :dizzy:
+
+- `task ~ {...}` = `task.progress { progress in ...}`
+- `task >>> {...}` = `task.then { value, errorInfo in ...}` (fulfilled & rejected)
+- `task *** {...}` = `task.then { value in ...}` (fulfilled only)
+- `task !!! {...}` = `task.catch { errorInfo in ...}` (rejected only)
+
+```
+task ~ { (progress: Float) in
+
+    println("progress = \(progress)")
+
+} *** { (value: String) -> String in
+
+    XCTAssertEqual(value, "OK")
+    return "Now OK"
+
+} !!! { (error: ErrorString?, isCancelled: Bool) -> String in
+
+    XCTAssertEqual(error!, "ERROR")
+    return "Now RECOVERED"
+
+} >>> { (value: String?, errorInfo: Task.ErrorInfo?) -> Task in
+
+    println("value = \(value)") // either "Now OK" or "Now RECOVERED"
+
+    XCTAssertTrue(value!.hasPrefix("Now"))
+    XCTAssertTrue(errorInfo == nil)
+
+    return Task(error: "ABORT")
+
+} >>> { (value: String?, errorInfo: Task.ErrorInfo?) -> Void in
+
+    println("errorInfo = \(errorInfo)")
+
+    XCTAssertTrue(value == nil)
+    XCTAssertEqual(errorInfo!.error!, "ABORT")
+    expect.fulfill()
+
+}
+```
+
 For more examples, please see XCTest cases.
 
 
@@ -118,11 +162,11 @@ let task = Task<Float, NSString?, NSError> { (progress, fulfill, reject, configu
 }
 ```
 
-In order to pipeline future `task.value` or `task.errorInfo` via `then` and `catch` methods, you have to call `fulfill(value)` and `reject(error)` inside closure.
+In order to pipeline future `task.value` or `task.errorInfo` (tuple of `(error: Error?, isCancelled: Bool)`) via `then` and `catch` methods, you have to call `fulfill(value)` and `reject(error)` inside closure.
 
 Optionally, you can call `progress(progressValue)` multiple times before calling `fulfill`/`reject` to transfer `progressValue` outside of the closure, notifying it to `task` itself.
 
-To add `pause`/`resume`/`cancel` functionality to your `task`, use `configure` tuple to wrap up the original one.
+To add `pause`/`resume`/`cancel` functionality to your `task`, use `configure` to wrap up the original one.
 
 ```
 configure.pause = { player.pause() }
@@ -130,7 +174,7 @@ configure.resume = { player.resume() }
 configure.cancel = { player.cancel() }
 ```
 
-### task.progress(_ progressHandler:) -> task
+### task.progress(_ progressClosure:) -> task
 
 ```
 task.progress { (progressValue: Progress) in
@@ -139,14 +183,23 @@ task.progress { (progressValue: Progress) in
 }.then { ... }
 ```
 
-`task.progress(progressHandler)` will add `progressHandler` to observe `progressValue` which is notified in previous init-closure. This method will return same task, so it is useful to chain with forthcoming `then` and `catch`.
+`task.progress(progressClosure)` will add `progressClosure` to observe `progressValue` which is notified from inside previous init-closure. This method will return same task, so it is useful to chain with forthcoming `then` and `catch`.
 
 
-### task.then(_ thenClosure:) -> newTask
+### task.then(_ closure:) -> newTask
 
-When `task` is *fulfilled*, `thenClosure` will be invoked, which can have 2 different closure types:
+`task.then(closure)` will return a new task which behaves differently depending on what kind of `closure` is passed in.
 
-- `thenClosure: Value -> Value2` (flow: *task => newTask*)
+1. `closure` used for **fulfilled only**
+2. `closure` used for both **fulfilled & rejected**
+
+#### 1. closure used for fulfilled only = `fulfilledClosure`
+
+`fulfilledClosure` will be invoked only when `task` is only *fulfilled*.
+
+This case is similar to JavaScript's `promise.then(onFulfilled)`.
+
+- `fulfilledClosure: Value -> Value2` (flow: *task => newTask*)
 
   ```
   // task will be fulfilled with value "Hello"
@@ -159,7 +212,7 @@ When `task` is *fulfilled*, `thenClosure` will be invoked, which can have 2 diff
   }
   ```
 
-- `thenClosure: Value -> Task` (flow: *task => task2 => newTask*)
+- `fulfilledClosure: Value -> Task` (flow: *task => task2 => newTask*)
 
   ```
   // task will be fulfilled with value "Hello"
@@ -174,9 +227,56 @@ When `task` is *fulfilled*, `thenClosure` will be invoked, which can have 2 diff
   }
   ```
 
+#### 2. closure for both fulfilled & rejected = `thenClosure`
+
+In this case, `thenClosure` will be invoked when `task` is either *fulfilled* or *rejected*. This means, `thenClosure` is mostly called in future compared to `fulfilledClosure`, which is invoked only when *fulfilled*.
+
+This case is similar to JavaScript's `promise.then(onFulfilled, onRejected)`.
+
+- `thenClosure: (Value?, ErrorInfo?) -> Value2` (flow: *task => newTask*)
+
+  ```
+  // task will be fulfilled with value "Hello"
+
+  task.then { (value: String?, errorInfo: ErrorInfo?) -> String in
+      // nil-check to find out whether task is fulfilled or rejected
+      if errorInfo == nil {
+          return "\(value) World"  // string value returns new string
+      }
+      else {
+          return "\(value) Error"
+      }
+  }.then { (value: String) -> Void in
+      println("\(value)")  // Hello World
+      return"
+  }
+  ```
+
+- `thenClosure: (Value?, ErrorInfo?) -> Task` (flow: *task => task2 => newTask*)
+
+  ```
+  // task will be fulfilled with value "Hello"
+  // task2 will be fulfilled with value "\(value) Swift"
+
+  task.then { (value: String) -> Task<Float, String, NSError> in
+      if errorInfo == nil {
+          let task2 = ... // fulfilling "\(value) Swift"
+          return task2
+      }
+      else {
+          return someOtherTask
+      }
+  }.then { (value: String) -> Void in
+      println("\(value)")  // Hello Swift
+      return"
+  }
+  ```
+
 ### task.catch(_ catchClosure:) -> newTask
 
-Similar to `then`, but `catchClosure` will be invoked only when `task` is either *rejected* or *cancelled*.
+Similar to `task.then(fulfilledClosure)` for fulfilled only, `task.catch(catchClosure)` will invoke `catchClosure` only when `task` is either *rejected* or *cancelled*.
+
+This case is similar to JavaScript's `promise.then(undefined, onRejected)` or `promise.catch(onRejected)`.
 
 ```
 // task will be rejected with error "Oh My God"
