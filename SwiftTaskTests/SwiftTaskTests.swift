@@ -43,6 +43,22 @@ class SwiftTaskTests: _TestCase
         }
     }
     
+    // fulfill/reject handlers only, like JavaScript Promise
+    func testInit_fulfill_reject()
+    {
+        // NOTE: this is non-async test
+        if self.isAsync { return }
+        
+        Task<Any, String, ErrorString> { (fulfill, reject) in
+            
+            fulfill("OK")
+            return
+            
+        }.then { (value: String) -> Void in
+            XCTAssertEqual(value, "OK")
+        }
+    }
+    
     //--------------------------------------------------
     // MARK: - Fulfill
     //--------------------------------------------------

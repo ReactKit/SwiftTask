@@ -71,10 +71,11 @@ public class Task<Progress, Value, Error>
     
     public typealias BulkProgress = (completedCount: Int, totalCount: Int)
     
-    public typealias TaskClosure = (progress: ProgressHandler, fulfill: FulFillHandler, reject: RejectHandler, configure: TaskConfiguration) -> Void
+    public typealias PromiseInitClosure = (fulfill: FulFillHandler, reject: RejectHandler) -> Void
+    public typealias InitClosure = (progress: ProgressHandler, fulfill: FulFillHandler, reject: RejectHandler, configure: TaskConfiguration) -> Void
     
     internal typealias _RejectHandler = (ErrorInfo) -> Void
-    internal typealias _TaskClosure = (progress: ProgressHandler, fulfill: FulFillHandler, _reject: _RejectHandler, configure: TaskConfiguration) -> Void
+    internal typealias _InitClosure = (progress: ProgressHandler, fulfill: FulFillHandler, _reject: _RejectHandler, configure: TaskConfiguration) -> Void
     
     internal typealias Machine = StateMachine<TaskState, TaskEvent>
     
@@ -98,7 +99,15 @@ public class Task<Progress, Value, Error>
         return self.machine.state
     }
     
-    public convenience init(closure: TaskClosure)
+    public convenience init(closure: PromiseInitClosure)
+    {
+        self.init(closure: { (progress, fulfill, reject, configure) in
+            closure(fulfill: fulfill, reject: { (error: Error) in reject(error) })
+            return
+        })
+    }
+    
+    public convenience init(closure: InitClosure)
     {
         self.init(_closure: { (progress, fulfill, _reject: ErrorInfo -> Void, configure) in
             // NOTE: don't expose rejectHandler with ErrorInfo (isCancelled) for public init
@@ -123,7 +132,7 @@ public class Task<Progress, Value, Error>
         })
     }
     
-    internal init(_closure: _TaskClosure)
+    internal init(_closure: _InitClosure)
     {
         let configuration = Configuration()
         
