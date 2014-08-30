@@ -309,6 +309,11 @@ task.then { (value: String) -> Void in
 `Task.some(tasks)` is a new task that performs all `tasks` without internal rejection, and is fulfilled with given `tasks`'s fulfilled values. Note that this new task will also become *fulfilled* with empty value-array, even though all `tasks` are rejected.
 
 
+## Related Articles
+
+- [SwiftTask（Promise拡張）を使う - Qiita](http://qiita.com/inamiy/items/0756339aee35849384c3) (Japanese)
+
+
 ## Licence
 
 [MIT](https://github.com/inamiy/SwiftTask/blob/master/LICENSE)
