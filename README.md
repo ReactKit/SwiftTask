@@ -304,6 +304,10 @@ task.then { (value: String) -> Void in
 - fulfilled when **any of the task will be fulfilled**
 - rejected when **all tasks will be rejected**
 
+### Task.some(_ tasks:) -> newTask
+
+`Task.some(tasks)` is a new task that performs all `tasks` without internal rejection, and is fulfilled with given `tasks`'s fulfilled values. Note that this new task will also become *fulfilled* with empty value-array, even though all `tasks` are rejected.
+
 
 ## Licence
 
