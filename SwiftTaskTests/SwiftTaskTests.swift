@@ -1127,4 +1127,58 @@ class SwiftTaskTests: _TestCase
         
         self.wait()
     }
+    
+    //--------------------------------------------------
+    // MARK: - Some
+    //--------------------------------------------------
+    
+    /// some fulfilled test
+    func testSome_then()
+    {
+        // NOTE: this is async test
+        if !self.isAsync { return }
+        
+        typealias Task = SwiftTask.Task<Any, String, ErrorString>
+        
+        var expect = self.expectationWithDescription(__FUNCTION__)
+        var tasks: [Task] = Array()
+        
+        for i in 0..<10 {
+            
+            let globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
+            
+            // define task
+            let task = Task { (progress, fulfill, reject, configure) in
+                
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 100_000_000), globalQueue) {
+                    
+                    if i == 3 || i == 5 {
+                        fulfill("OK \(i)")
+                    }
+                    else {
+                        reject("Failed \(i)")
+                    }
+                }
+                
+            }
+            
+            tasks.append(task)
+        }
+        
+        Task.some(tasks).then { (values: [String]) -> Void in
+            
+            XCTAssertEqual(values.count, 2)
+            XCTAssertEqual(values[0], "OK 3")
+            XCTAssertEqual(values[1], "OK 5")
+            
+            expect.fulfill()
+            
+        }.catch { (error: ErrorString?, isCancelled: Bool) -> Void in
+            
+            XCTFail("Should never reach here because Task.some() will never reject internally.")
+            
+        }
+        
+        self.wait()
+    }
 }

@@ -403,7 +403,7 @@ extension Task
 {
     public class func all(tasks: [Task]) -> Task<BulkProgress, [Value], Error>
     {
-        return Task<BulkProgress, [Value], Error> { (progress, fulfill, _reject: _RejectHandler, configure) -> Void in
+        return Task<BulkProgress, [Value], Error> { (progress, fulfill, _reject: _RejectHandler, configure) in
             
             var completedCount = 0
             let totalCount = tasks.count
@@ -449,7 +449,7 @@ extension Task
     
     public class func any(tasks: [Task]) -> Task
     {
-        return Task<Progress, Value, Error> { (progress, fulfill, _reject: _RejectHandler, configure) -> Void in
+        return Task<Progress, Value, Error> { (progress, fulfill, _reject: _RejectHandler, configure) in
             
             var completedCount = 0
             var rejectedCount = 0
@@ -480,6 +480,47 @@ extension Task
                             _reject(errorInfo)
                         }
                     }
+                }
+            }
+            
+            configure.pause = { self.pauseAll(tasks); return }
+            configure.resume = { self.resumeAll(tasks); return }
+            configure.cancel = { self.cancelAll(tasks); return }
+            
+        }
+    }
+    
+    /// Returns new task which performs all given tasks and stores only fulfilled values.
+    /// This new task will NEVER be internally rejected (thus uncatchable from outside).
+    public class func some(tasks: [Task]) -> Task<BulkProgress, [Value], Error>
+    {
+        return Task<BulkProgress, [Value], Error> { (progress, fulfill, _reject: _RejectHandler, configure) in
+            
+            var completedCount = 0
+            let totalCount = tasks.count
+            
+            for task in tasks {
+                task.then { (value: Value?, errorInfo: ErrorInfo?) -> Void in
+                    
+                    synchronized(self) {
+                        completedCount++
+                        
+                        let progressTuple = BulkProgress(completedCount: completedCount, totalCount: totalCount)
+                        progress(progressTuple)
+                        
+                        if completedCount == totalCount {
+                            var values: [Value] = Array()
+                            
+                            for task in tasks {
+                                if task.state == .Fulfilled {
+                                    values.append(task.value!)
+                                }
+                            }
+                            
+                            fulfill(values)
+                        }
+                    }
+                    
                 }
             }
             
