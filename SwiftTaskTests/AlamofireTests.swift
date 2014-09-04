@@ -19,7 +19,7 @@ class AlamofireTests: _TestCase
         
         let task = Task<Progress, String, NSError> { (progress, fulfill, reject, configure) in
             
-            Alamofire.request(.GET, "http://httpbin.org/get", parameters: ["foo": "bar"])
+            request(.GET, "http://httpbin.org/get", parameters: ["foo": "bar"])
             .response { (request, response, data, error) in
                     
                 println(request)
@@ -56,7 +56,7 @@ class AlamofireTests: _TestCase
             
             let dummyURLString = "http://xxx-swift-task.org/get"
             
-            Alamofire.request(.GET, dummyURLString, parameters: ["foo": "bar"])
+            request(.GET, dummyURLString, parameters: ["foo": "bar"])
             .response { (request, response, data, error) in
                 
                 println(request)
@@ -98,7 +98,7 @@ class AlamofireTests: _TestCase
         // define task
         let task = Task<Progress, String, NSError> { (progress, fulfill, reject, configure) in
             
-            Alamofire.download(.GET, "http://httpbin.org/stream/100", destination: Alamofire.Request.suggestedDownloadDestination(directory: .DocumentDirectory, domain: .UserDomainMask))
+            download(.GET, "http://httpbin.org/stream/100", Request.suggestedDownloadDestination(directory: .DocumentDirectory, domain: .UserDomainMask))
                 
             .progress { (bytesWritten, totalBytesWritten, totalBytesExpectedToWrite) in
                 
@@ -151,7 +151,7 @@ class AlamofireTests: _TestCase
             nsProgress.becomeCurrentWithPendingUnitCount(50)
             
             // NOTE: test with url which returns totalBytesExpectedToWrite != -1
-            let download = Alamofire.download(.GET, "http://httpbin.org/bytes/1024", destination: Alamofire.Request.suggestedDownloadDestination(directory: .DocumentDirectory, domain: .UserDomainMask))
+            download(.GET, "http://httpbin.org/bytes/1024", Request.suggestedDownloadDestination(directory: .DocumentDirectory, domain: .UserDomainMask))
             
             .response { (request, response, data, error) in
                 
@@ -201,7 +201,7 @@ class AlamofireTests: _TestCase
         
         let task = Task<Progress, String?, NSError> { (progress, fulfill, reject, configure) in
             
-            let download = Alamofire.download(.GET, "http://httpbin.org/stream/100", destination: Alamofire.Request.suggestedDownloadDestination(directory: .DocumentDirectory, domain: .UserDomainMask))
+            let downloadRequst = download(.GET, "http://httpbin.org/stream/100", Request.suggestedDownloadDestination(directory: .DocumentDirectory, domain: .UserDomainMask))
 
             .response { (request, response, data, error) in
                 
@@ -220,7 +220,7 @@ class AlamofireTests: _TestCase
             
             // configure cancel for cleanup after reject or task.cancel()
             configure.cancel = {
-                download.cancel()
+                downloadRequst.cancel()
                 return
             }
             
