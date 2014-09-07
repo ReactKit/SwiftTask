@@ -3,8 +3,6 @@ SwiftTask
 
 [Promise](http://www.html5rocks.com/en/tutorials/es6/promises/) + progress + pause + cancel, using [SwiftState](https://github.com/inamiy/SwiftState) (state machine).
 
-(2014/08/23 Currently testing in Xcode6-beta5)
-
 ![SwiftTask](Screenshots/diagram.png)
 
 
@@ -12,7 +10,7 @@ SwiftTask
 
 ### Basic
 
-```
+```swift
 // define task
 let task = Task<Float, String, NSError> { (progress, fulfill, reject, configure) in
 
@@ -58,7 +56,8 @@ One of the best example would be [Alamofire](https://github.com/Alamofire/Alamof
  as seen below.
 
 ### Using [Alamofire](https://github.com/Alamofire/Alamofire)
-```
+
+```swift
 typealias Progress = (bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64)
 
 // define task
@@ -104,7 +103,7 @@ You can even use custom operators for chaining! :dizzy:
 - `task *** {...}` = `task.then { value in ...}` (fulfilled only)
 - `task !!! {...}` = `task.catch { errorInfo in ...}` (rejected only)
 
-```
+```swift
 task ~ { (progress: Float) in
 
     println("progress = \(progress)")
@@ -148,7 +147,7 @@ For more examples, please see XCTest cases.
 
 Define your `task` inside `closure`.
 
-```
+```swift
 let task = Task<Float, NSString?, NSError> { (progress, fulfill, reject, configure) in
 
     player.doSomethingWithCompletion { (value: NSString?, error: NSError?) in
@@ -168,7 +167,7 @@ Optionally, you can call `progress(progressValue)` multiple times before calling
 
 To add `pause`/`resume`/`cancel` functionality to your `task`, use `configure` to wrap up the original one.
 
-```
+```swift
 configure.pause = { player.pause() }
 configure.resume = { player.resume() }
 configure.cancel = { player.cancel() }
@@ -176,7 +175,7 @@ configure.cancel = { player.cancel() }
 
 ### task.progress(_ progressClosure:) -> task
 
-```
+```swift
 task.progress { (progressValue: Progress) in
     println(progressValue)
     return
@@ -201,7 +200,7 @@ This case is similar to JavaScript's `promise.then(onFulfilled)`.
 
 - `fulfilledClosure: Value -> Value2` (flow: *task => newTask*)
 
-  ```
+  ```swift
   // task will be fulfilled with value "Hello"
 
   task.then { (value: String) -> String in
@@ -214,7 +213,7 @@ This case is similar to JavaScript's `promise.then(onFulfilled)`.
 
 - `fulfilledClosure: Value -> Task` (flow: *task => task2 => newTask*)
 
-  ```
+  ```swift
   // task will be fulfilled with value "Hello"
   // task2 will be fulfilled with value "\() Swift"
 
@@ -235,7 +234,7 @@ This case is similar to JavaScript's `promise.then(onFulfilled, onRejected)`.
 
 - `thenClosure: (Value?, ErrorInfo?) -> Value2` (flow: *task => newTask*)
 
-  ```
+  ```swift
   // task will be fulfilled with value "Hello"
 
   task.then { (value: String?, errorInfo: ErrorInfo?) -> String in
@@ -254,7 +253,7 @@ This case is similar to JavaScript's `promise.then(onFulfilled, onRejected)`.
 
 - `thenClosure: (Value?, ErrorInfo?) -> Task` (flow: *task => task2 => newTask*)
 
-  ```
+  ```swift
   // task will be fulfilled with value "Hello"
   // task2 will be fulfilled with value "\(value) Swift"
 
@@ -278,7 +277,7 @@ Similar to `task.then(fulfilledClosure)` for fulfilled only, `task.catch(catchCl
 
 This case is similar to JavaScript's `promise.then(undefined, onRejected)` or `promise.catch(onRejected)`.
 
-```
+```swift
 // task will be rejected with error "Oh My God"
 
 task.then { (value: String) -> Void in
