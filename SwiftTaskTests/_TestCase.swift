@@ -42,8 +42,7 @@ class _TestCase: XCTestCase
     func perform(closure: Void -> Void)
     {
         if self.isAsync {
-            let delaySeconds: Int64 = 100_000_000  // 100ms
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, delaySeconds), dispatch_get_main_queue(), closure)
+            Async.main(after: 0.1, block: closure)
         }
         else {
             closure()

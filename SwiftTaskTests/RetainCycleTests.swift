@@ -47,7 +47,7 @@ class RetainCycleTests: _TestCase
     weak var task: Task?
     weak var player: Player?
     
-    func _testPlayer_completionAsArgument_notConfigured()
+    func testPlayer_completionAsArgument_notConfigured()
     {
         var expect = self.expectationWithDescription(__FUNCTION__)
         
@@ -93,7 +93,7 @@ class RetainCycleTests: _TestCase
         }
     }
     
-    func _testPlayer_completionAsArgument_configured()
+    func testPlayer_completionAsArgument_configured()
     {
         var expect = self.expectationWithDescription(__FUNCTION__)
         
@@ -141,7 +141,7 @@ class RetainCycleTests: _TestCase
         }
     }
     
-    func _testPlayer_completionAsStoredProperty_notConfigured()
+    func testPlayer_completionAsStoredProperty_notConfigured()
     {
         var expect = self.expectationWithDescription(__FUNCTION__)
         

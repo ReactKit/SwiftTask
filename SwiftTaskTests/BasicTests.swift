@@ -21,7 +21,7 @@ class BasicTests: _TestCase
         // define task
         let task = Task { (progress, fulfill, reject, configure) in
             
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 100_000_000), dispatch_get_main_queue()) {
+            Async.main(after: 0.1) {
                 progress(0.0)
                 progress(1.0)
                 
@@ -32,6 +32,7 @@ class BasicTests: _TestCase
                     reject("ERROR")
                 }
             }
+            return
             
         }
             

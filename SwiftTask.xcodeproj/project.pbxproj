@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1F0E284019C1DEA0005EF467 /* Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F0E282319C1DEA0005EF467 /* Async.swift */; };
 		1F2024FF19AD97A700DE0495 /* CustomOperatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F2024FE19AD97A700DE0495 /* CustomOperatorTests.swift */; };
 		1F20250219ADA8FD00DE0495 /* BasicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F20250119ADA8FD00DE0495 /* BasicTests.swift */; };
 		1F46DEDA199EDF1000F97868 /* SwiftTask.h in Headers */ = {isa = PBXBuildFile; fileRef = 1F46DED9199EDF1000F97868 /* SwiftTask.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -48,6 +49,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1F0E282319C1DEA0005EF467 /* Async.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Async.swift; sourceTree = "<group>"; };
 		1F2024FE19AD97A700DE0495 /* CustomOperatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomOperatorTests.swift; sourceTree = "<group>"; };
 		1F20250119ADA8FD00DE0495 /* BasicTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasicTests.swift; sourceTree = "<group>"; };
 		1F46DED4199EDF1000F97868 /* SwiftTask.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftTask.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -93,6 +95,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1F0E282119C1DEA0005EF467 /* Async */ = {
+			isa = PBXGroup;
+			children = (
+				1F0E282319C1DEA0005EF467 /* Async.swift */,
+			);
+			path = Async;
+			sourceTree = "<group>";
+		};
 		1F46DECA199EDF1000F97868 = {
 			isa = PBXGroup;
 			children = (
@@ -158,6 +168,7 @@
 			children = (
 				1FA4631E19A8D70A00DD8729 /* SwiftState */,
 				1FA4631319A8D70A00DD8729 /* Alamofire */,
+				1F0E282119C1DEA0005EF467 /* Async */,
 			);
 			path = Vendor;
 			sourceTree = "<group>";
@@ -297,6 +308,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = 1F46DECA199EDF1000F97868;
 			productRefGroup = 1F46DED5199EDF1000F97868 /* Products */;
@@ -381,6 +393,7 @@
 				1FA4634919A8D73300DD8729 /* Alamofire.swift in Sources */,
 				1F20250219ADA8FD00DE0495 /* BasicTests.swift in Sources */,
 				1F6A8CA619A5090E00369A5D /* AlamofireTests.swift in Sources */,
+				1F0E284019C1DEA0005EF467 /* Async.swift in Sources */,
 				1F6A8CA319A4E4F200369A5D /* SwiftTaskTests.swift in Sources */,
 				48511C5B19C17563002FE03C /* RetainCycleTests.swift in Sources */,
 				1F46DEFD199EE2C200F97868 /* _TestCase.swift in Sources */,

@@ -476,8 +476,8 @@ class SwiftTaskTests: _TestCase
     // MARK: - Cancel
     //--------------------------------------------------
     
-    // 1. 3 progresses at t=20ms
-    // 2. checks cancel & pause, add 2 progresses at t=100ms
+    // 1. 3 progresses at t=200ms
+    // 2. checks cancel & pause, add 2 progresses at t=400ms
     typealias _InterruptableTask = Task<Float, String, ErrorString>
     func _interruptableTask() -> _InterruptableTask
     {
@@ -487,17 +487,15 @@ class SwiftTaskTests: _TestCase
             var isCancelled = false
             var isPaused = false
             
-            let globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
-            
-            // 1st delay (t=20ms)
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 20_000_000), globalQueue) {
+            // 1st delay (t=200ms)
+            Async.background(after: 0.2) {
                 
-                progress(0.0)
-                progress(0.2)
-                progress(0.5)
+                Async.main { progress(0.0) }
+                Async.main { progress(0.2) }
+                Async.main { progress(0.5) }
                 
-                // 2nd delay (t=100ms)
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 80_000_000), globalQueue) {
+                // 2nd delay (t=400ms)
+                Async.background(after: 0.2) {
                     
                     // NOTE: no need to call reject() because it's already rejected (cancelled) internally
                     if isCancelled { return }
@@ -506,9 +504,9 @@ class SwiftTaskTests: _TestCase
                         NSThread.sleepForTimeInterval(0.1)
                     }
                     
-                    progress(0.8)
-                    progress(1.0)
-                    fulfill("OK")
+                    Async.main { progress(0.8) }
+                    Async.main { progress(1.0) }
+                    Async.main { fulfill("OK") }
                 }
             }
             
@@ -536,8 +534,6 @@ class SwiftTaskTests: _TestCase
         var expect = self.expectationWithDescription(__FUNCTION__)
         var progressCount = 0
         
-        // 1. 3 progresses at t=20ms
-        // 2. checks cancel & pause, add 2 progresses at t=100ms
         let task = self._interruptableTask()
             
         task.progress { (progress: Float) in
@@ -567,8 +563,8 @@ class SwiftTaskTests: _TestCase
                 
         }
         
-        // cancel at time between 1st & 2nd delay (t=50ms)
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 50_000_000), dispatch_get_main_queue()) {
+        // cancel at time between 1st & 2nd delay (t=300ms)
+        Async.main(after: 0.3) {
             
             task.cancel(error: "I get bored.")
             
@@ -583,16 +579,12 @@ class SwiftTaskTests: _TestCase
     {
         var expect = self.expectationWithDescription(__FUNCTION__)
         
-        // 1. 3 progresses at t=20ms
-        // 2. checks cancel & pause, add 2 progresses at t=100ms
         let task1 = self._interruptableTask()
         
         var task2: _InterruptableTask? = nil
         
         let task3 = task1.then { (value: String) -> _InterruptableTask in
             
-            // 1. 3 progresses at t=20ms
-            // 2. checks cancel & pause, add 2 progresses at t=100ms
             task2 = self._interruptableTask()
             return task2!
             
@@ -608,8 +600,8 @@ class SwiftTaskTests: _TestCase
             return "DUMMY"
         }
         
-        // cancel task3 at time between task1 fulfilled & before task2 completed (t=150ms)
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 150_000_000), dispatch_get_main_queue()) {
+        // cancel task3 at time between task1 fulfilled & before task2 completed (t=600ms)
+        Async.main(after: 0.6) {
             
             task3.cancel(error: "I get bored.")
             
@@ -635,8 +627,6 @@ class SwiftTaskTests: _TestCase
         var expect = self.expectationWithDescription(__FUNCTION__)
         var progressCount = 0
         
-        // 1. 3 progresses at t=20ms
-        // 2. checks cancel & pause, add 2 progresses at t=100ms
         let task = self._interruptableTask()
         
         task.progress { (progress: Float) in
@@ -652,16 +642,16 @@ class SwiftTaskTests: _TestCase
             
         }
         
-        // pause at time between 1st & 2nd delay (t=50ms)
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 50_000_000), dispatch_get_main_queue()) {
+        // pause at time between 1st & 2nd delay (t=300ms)
+        Async.main(after: 0.3) {
             
             task.pause()
             
             XCTAssertEqual(task.state, TaskState.Paused)
             XCTAssertEqual(task.progress!, 0.5)
             
-            // resume after 150ms (t=200ms)
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 150_000_000), dispatch_get_main_queue()) {
+            // resume after 300ms (t=600ms)
+            Async.main(after: 0.3) {
                 
                 XCTAssertEqual(task.state, TaskState.Paused)
                 XCTAssertEqual(task.progress!, 0.5)
@@ -692,18 +682,17 @@ class SwiftTaskTests: _TestCase
         
         for i in 0..<10 {
             
-            let globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
-            
             // define task
             let task = Task { (progress, fulfill, reject, configure) in
                 
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 10_000_000), globalQueue) {
-                    progress(0.1)
+                Async.background(after: 0.1) {
+                    Async.main { progress(0.1) }
+                    return
                 }
                 
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 100_000_000), globalQueue) {
+                Async.background(after: 0.2) {
                     progress(1.0)
-                    fulfill("OK \(i)")
+                    Async.main { fulfill("OK \(i)") }
                 }
                 
             }
@@ -749,14 +738,14 @@ class SwiftTaskTests: _TestCase
         var expect = self.expectationWithDescription(__FUNCTION__)
         var tasks: [Task] = Array()
         
-        let globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
-        
         for i in 0..<5 {
             // define fulfilling task
             let task = Task { (progress, fulfill, reject, configure) in
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 100_000_000), globalQueue) {
-                    fulfill("OK \(i)")
+                Async.background(after: 0.1) {
+                    Async.main { fulfill("OK \(i)") }
+                    return
                 }
+                return
             }
             tasks.append(task)
         }
@@ -764,9 +753,11 @@ class SwiftTaskTests: _TestCase
         for i in 0..<5 {
             // define rejecting task
             let task = Task { (progress, fulfill, reject, configure) in
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 100_000_000), globalQueue) {
-                    reject("ERROR")
+                Async.background(after: 0.1) {
+                    Async.main { reject("ERROR") }
+                    return
                 }
+                return
             }
             tasks.append(task)
         }
@@ -797,18 +788,16 @@ class SwiftTaskTests: _TestCase
         
         for i in 0..<10 {
             
-            let globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
-            
             // define task
             let task = Task { (progress, fulfill, reject, configure) in
                 
                 var isCancelled = false
                 
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 100_000_000), globalQueue) {
+                Async.background(after: 0.1) {
                     if isCancelled {
                         return
                     }
-                    fulfill("OK \(i)")
+                    Async.main { fulfill("OK \(i)") }
                 }
                 
                 configure.cancel = {
@@ -836,7 +825,7 @@ class SwiftTaskTests: _TestCase
         }
         
         // cancel before fulfilled
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1_000_000), dispatch_get_main_queue()) {
+        Async.main(after: 0.1) {
             groupedTask.cancel(error: "Cancel")
             return
         }
@@ -856,18 +845,16 @@ class SwiftTaskTests: _TestCase
         
         for i in 0..<10 {
             
-            let globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
-            
             // define task
             let task = Task { (progress, fulfill, reject, configure) in
                 
                 var isPaused = false
                 
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 500_000_000), globalQueue) {
+                Async.background(after: 0.5) {
                     while isPaused {
                         NSThread.sleepForTimeInterval(0.1)
                     }
-                    fulfill("OK \(i)")
+                    Async.main { fulfill("OK \(i)") }
                 }
                 
                 configure.pause = {
@@ -897,12 +884,12 @@ class SwiftTaskTests: _TestCase
         }
         
         // pause & resume
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1_000_000), dispatch_get_main_queue()) {
+        Async.main(after: 0.1) {
             
             groupedTask.pause()
             XCTAssertEqual(groupedTask.state, TaskState.Paused)
             
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1_000_000_000), dispatch_get_main_queue()) {
+            Async.main(after: 1.0) {
                 
                 groupedTask.resume()
                 XCTAssertEqual(groupedTask.state, TaskState.Running)
@@ -930,20 +917,21 @@ class SwiftTaskTests: _TestCase
         
         for i in 0..<10 {
             
-            let globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
-            
             // define task
             let task = Task { (progress, fulfill, reject, configure) in
                 
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 100_000_000), globalQueue) {
-                    
-                    if i == 5 {
-                        fulfill("OK \(i)")
+                Async.background(after: 0.1) {
+                    Async.main {
+                        if i == 5 {
+                            fulfill("OK \(i)")
+                        }
+                        else {
+                            reject("Failed \(i)")
+                        }
                     }
-                    else {
-                        reject("Failed \(i)")
-                    }
+                    return
                 }
+                return
                 
             }
             
@@ -974,14 +962,14 @@ class SwiftTaskTests: _TestCase
         
         for i in 0..<10 {
             
-            let globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
-            
             // define task
             let task = Task { (progress, fulfill, reject, configure) in
                 
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 100_000_000), globalQueue) {
-                    reject("Failed \(i)")
+                Async.background(after: 0.1) {
+                    Async.main { reject("Failed \(i)") }
+                    return
                 }
+                return
                 
             }
             
@@ -1015,18 +1003,16 @@ class SwiftTaskTests: _TestCase
         
         for i in 0..<10 {
             
-            let globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
-            
             // define task
             let task = Task { (progress, fulfill, reject, configure) in
                 
                 var isCancelled = false
                 
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 100_000_000), globalQueue) {
+                Async.background(after: 0.1) {
                     if isCancelled {
                         return
                     }
-                    fulfill("OK \(i)")
+                    Async.main { fulfill("OK \(i)") }
                 }
                 
                 configure.cancel = {
@@ -1054,7 +1040,7 @@ class SwiftTaskTests: _TestCase
         }
         
         // cancel before fulfilled
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1_000_000), dispatch_get_main_queue()) {
+        Async.main(after: 0.1) {
             groupedTask.cancel(error: "Cancel")
             return
         }
@@ -1074,18 +1060,17 @@ class SwiftTaskTests: _TestCase
         
         for i in 0..<10 {
             
-            let globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
-            
             // define task
             let task = Task { (progress, fulfill, reject, configure) in
                 
                 var isPaused = false
                 
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 500_000_000), globalQueue) {
+                Async.background(after: 0.2) {
                     while isPaused {
                         NSThread.sleepForTimeInterval(0.1)
                     }
-                    fulfill("OK \(i)")
+
+                    Async.main { fulfill("OK \(i)") }
                 }
                 
                 configure.pause = {
@@ -1112,12 +1097,12 @@ class SwiftTaskTests: _TestCase
         }
         
         // pause & resume
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1_000_000), dispatch_get_main_queue()) {
+        Async.main(after: 0.1) {
             
             groupedTask.pause()
             XCTAssertEqual(groupedTask.state, TaskState.Paused)
             
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1_000_000_000), dispatch_get_main_queue()) {
+            Async.main(after: 0.4) {
                 
                 groupedTask.resume()
                 XCTAssertEqual(groupedTask.state, TaskState.Running)
@@ -1145,12 +1130,10 @@ class SwiftTaskTests: _TestCase
         
         for i in 0..<10 {
             
-            let globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
-            
             // define task
             let task = Task { (progress, fulfill, reject, configure) in
                 
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 100_000_000), globalQueue) {
+                Async.main(after: 0.1) {
                     
                     if i == 3 || i == 5 {
                         fulfill("OK \(i)")
@@ -1159,6 +1142,7 @@ class SwiftTaskTests: _TestCase
                         reject("Failed \(i)")
                     }
                 }
+                return
                 
             }
             
