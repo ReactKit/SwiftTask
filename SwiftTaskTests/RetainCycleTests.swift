@@ -225,7 +225,6 @@ class RetainCycleTests: _TestCase
             
         }
         
-        // TODO: this test will fail
         self.wait {
             XCTAssertNil(self.task)
             XCTAssertNil(self.player)
