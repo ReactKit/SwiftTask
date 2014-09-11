@@ -25,9 +25,16 @@ class _TestCase: XCTestCase
         super.tearDown()
     }
     
-    func wait()
+    func wait(handler: (Void -> Void)? = nil)
     {
-        self.waitForExpectationsWithTimeout(3) { error in println("wait error = \(error)") }
+        self.waitForExpectationsWithTimeout(3) { error in
+            
+            println("wait error = \(error)")
+            
+            if let handler = handler {
+                handler()
+            }
+        }
     }
     
     var isAsync: Bool { return false }

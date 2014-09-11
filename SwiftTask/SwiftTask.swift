@@ -58,6 +58,18 @@ public class TaskConfiguration
     public var pause: (Void -> Void)?
     public var resume: (Void -> Void)?
     public var cancel: (Void -> Void)?
+    
+//    deinit
+//    {
+//        println("deinit: TaskConfiguration")
+//    }
+    
+    internal func clear()
+    {
+        self.pause = nil
+        self.resume = nil
+        self.cancel = nil
+    }
 }
 
 public class Task<Progress, Value, Error>
@@ -168,12 +180,14 @@ public class Task<Progress, Value, Error>
             if let value = context.userInfo as? Value {
                 self!.value = value
             }
+            configuration.clear()
         }
         self.machine.addEventHandler(.Reject, order: 90) { [weak self] context in
             if let errorInfo = context.userInfo as? ErrorInfo {
                 self!.errorInfo = errorInfo
                 configuration.cancel?() // NOTE: call configured cancellation on reject as well
             }
+            configuration.clear()
         }
         
         let progressHandler: ProgressHandler = { /*[weak self]*/ (progress: Progress) in
