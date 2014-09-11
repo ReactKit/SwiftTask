@@ -91,7 +91,7 @@ public class Task<Progress, Value, Error>
     
     internal typealias Machine = StateMachine<TaskState, TaskEvent>
     
-    internal let machine: Machine
+    internal var machine: Machine!
 
     public internal(set) var progress: Progress?
     public internal(set) var value: Value?
@@ -119,13 +119,13 @@ public class Task<Progress, Value, Error>
         })
     }
     
-    public convenience init(closure: InitClosure)
+    public init(closure: InitClosure)
     {
-        self.init(_closure: { (progress, fulfill, _reject: ErrorInfo -> Void, configure) in
+        setup { (progress, fulfill, _reject: ErrorInfo -> Void, configure) in
             // NOTE: don't expose rejectHandler with ErrorInfo (isCancelled) for public init
             closure(progress: progress, fulfill: fulfill, reject: { (error: Error?) in _reject(ErrorInfo(error: error, isCancelled: false)) }, configure: configure)
             return
-        })
+        }
     }
     
     public convenience init(value: Value)
@@ -145,6 +145,11 @@ public class Task<Progress, Value, Error>
     }
     
     internal init(_closure: _InitClosure)
+    {
+        setup(_closure)
+    }
+    
+    internal func setup(_closure: _InitClosure)
     {
         let configuration = Configuration()
         
