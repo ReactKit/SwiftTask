@@ -194,10 +194,10 @@ class RetainCycleTests: _TestCase
         // ("x->" = will be released shortly)
         //
         // 1. dispatch_queue x-> player -> task
-        // dispatch_queue (via player impl) -> player -> player.completionHandler -> fulfill -> task
+        // dispatch_queue (via player impl) x-> player -> player.completionHandler -> fulfill -> task
         //
-        // 2. task -> player
-        // task -> task.machine -> configure (via pause/resume addEventHandler) -> configure.pause/resume/cancel -> player
+        // 2. task x-> player
+        // task -> task.machine -> configure (via pause/resume addEventHandler) -> configure.pause/resume/cancel x-> player
         //
         self.task = Task { (progress, fulfill, reject, configure) in
             
