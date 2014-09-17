@@ -221,10 +221,13 @@ public class Task<Progress, Value, Error>
         
     }
     
-//    deinit
-//    {
+    deinit
+    {
 //        println("deinit: \(self)")
-//    }
+        
+        // cancel in case machine is still running
+        self._cancel(error: nil)
+    }
     
     public func progress(progressClosure: Progress -> Void) -> Task
     {
@@ -426,9 +429,13 @@ public class Task<Progress, Value, Error>
     
     public func cancel(error: Error? = nil) -> Bool
     {
-        return self.machine <-! (.Reject, ErrorInfo(error: error, isCancelled: true))
+        return self._cancel(error: error)
     }
     
+    internal func _cancel(error: Error? = nil) -> Bool
+    {
+        return self.machine <-! (.Reject, ErrorInfo(error: error, isCancelled: true))
+    }
 }
 
 extension Task
