@@ -195,9 +195,10 @@ public class Task<Progress, Value, Error>
             configuration.clear()
         }
         
-        let progressHandler: ProgressHandler = { /*[weak self]*/ (progress: Progress) in
-            self.machine <-! (.Progress, progress)  // NOTE: capture self
-            return
+        let progressHandler: ProgressHandler = { [weak self] (progress: Progress) in
+            if let self_ = self {
+                self_.machine <-! (.Progress, progress)
+            }
         }
         
         let fulfillHandler: FulFillHandler = { /*[weak self]*/ (value: Value) in
