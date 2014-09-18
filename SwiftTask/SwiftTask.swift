@@ -26,7 +26,7 @@ public enum TaskState: String, StateType, Printable
     
     public var description: String
     {
-        return self.toRaw()
+        return self.rawValue
     }
 }
 
@@ -47,7 +47,7 @@ public enum TaskEvent: String, StateEventType, Printable
     
     public var description: String
     {
-        return self.toRaw()
+        return self.rawValue
     }
 }
 
