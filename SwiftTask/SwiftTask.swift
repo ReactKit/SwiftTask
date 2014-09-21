@@ -570,21 +570,21 @@ extension Task
         }
     }
     
-    internal class func cancelAll(tasks: [Task])
+    public class func cancelAll(tasks: [Task])
     {
         for task in tasks {
-            task.cancel()
+            task._cancel()
         }
     }
     
-    internal class func pauseAll(tasks: [Task])
+    public class func pauseAll(tasks: [Task])
     {
         for task in tasks {
             task.pause()
         }
     }
     
-    internal class func resumeAll(tasks: [Task])
+    public class func resumeAll(tasks: [Task])
     {
         for task in tasks {
             task.resume()
