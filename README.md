@@ -26,9 +26,15 @@ let task = Task<Float, String, NSError> { (progress, fulfill, reject, configure)
     })
 
     // pause/resume/cancel configuration (optional)
-    configure.pause = { player.pause() }
-    configure.resume = { player.resume() }
-    configure.cancel = { player.cancel() }
+    configure.pause = { [weak player] in
+        if let p = player { p.pause() }
+    }
+    configure.resume = { [weak player] in
+        if let p = player { p.resume() }
+    }
+    configure.cancel = { [weak player] in
+        if let p = player { p.cancel() }
+    }
 
 }
 
@@ -168,9 +174,16 @@ Optionally, you can call `progress(progressValue)` multiple times before calling
 To add `pause`/`resume`/`cancel` functionality to your `task`, use `configure` to wrap up the original one.
 
 ```swift
-configure.pause = { player.pause() }
-configure.resume = { player.resume() }
-configure.cancel = { player.cancel() }
+// NOTE: use weak to let task NOT CAPTURE player via configure
+configure.pause = { [weak player] in
+    if let p = player { p.pause() }
+}
+configure.resume = { [weak player] in
+    if let p = player { p.resume() }
+}
+configure.cancel = { [weak player] in
+    if let p = player { p.cancel() }
+}
 ```
 
 ### task.progress(_ progressClosure:) -> task
@@ -215,7 +228,7 @@ This case is similar to JavaScript's `promise.then(onFulfilled)`.
 
   ```swift
   // task will be fulfilled with value "Hello"
-  // task2 will be fulfilled with value "\() Swift"
+  // task2 will be fulfilled with value "\(value) Swift"
 
   task.then { (value: String) -> Task<Float, String, NSError> in
       let task2 = ... // fulfilling "\(value) Swift"
