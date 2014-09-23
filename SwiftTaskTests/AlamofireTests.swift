@@ -219,9 +219,11 @@ class AlamofireTests: _TestCase
             }
             
             // configure cancel for cleanup after reject or task.cancel()
-            configure.cancel = {
-                downloadRequst.cancel()
-                return
+            // NOTE: use weak to let task NOT CAPTURE downloadRequst via configure
+            configure.cancel = { [weak downloadRequst] in
+                if let downloadRequst = downloadRequst {
+                    downloadRequst.cancel()
+                }
             }
             
         } // end of 1st task definition (NOTE: don't chain with `then` or `catch` for 1st task cancellation)
