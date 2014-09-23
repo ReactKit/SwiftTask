@@ -111,45 +111,64 @@ public class Task<Progress, Value, Error>
         return self.machine.state
     }
     
-    public convenience init(closure: PromiseInitClosure)
+    ///
+    /// Creates new task.
+    /// e.g. Task<P, V, E>(weakified: false) { (progress, fulfill, reject, configure) in ... }
+    ///
+    /// :param: weakified Weakifies progress/fulfill/reject handlers to let player (inner asynchronous implementation inside initClosure) NOT CAPTURE this created new task. Normally, weakified = false should be set to gain "player -> task" retaining, so that task will be automatically deinited when player is deinited. If weakified = true, task must be manually retained somewhere else, or it will be immediately deinited.
+    ///
+    /// :param: initClosure e.g. { (progress, fulfill, reject, configure) in ... }. fulfill(value) and reject(error) handlers must be called inside this closure, where calling progress(progressValue) handler is optional. Also as options, configure.pause/resume/cancel closures can be set to gain control from outside e.g. task.pause()/resume()/cancel(). When using configure, make sure to use weak modifier when appropriate to avoid "task -> player" retaining which often causes retain cycle.
+    ///
+    /// :returns: New task.
+    ///
+    public init(weakified: Bool, initClosure: InitClosure)
     {
-        self.init(closure: { (progress, fulfill, reject, configure) in
-            closure(fulfill: fulfill, reject: { (error: Error) in reject(error) })
-            return
-        })
-    }
-    
-    public init(closure: InitClosure)
-    {
-        setup { (progress, fulfill, _reject: ErrorInfo -> Void, configure) in
+        self.setup(weakified) { (progress, fulfill, _reject: ErrorInfo -> Void, configure) in
             // NOTE: don't expose rejectHandler with ErrorInfo (isCancelled) for public init
-            closure(progress: progress, fulfill: fulfill, reject: { (error: Error?) in _reject(ErrorInfo(error: error, isCancelled: false)) }, configure: configure)
+            initClosure(progress: progress, fulfill: fulfill, reject: { (error: Error?) in _reject(ErrorInfo(error: error, isCancelled: false)) }, configure: configure)
             return
         }
     }
     
+    /// creates task without weakifying progress/fulfill/reject handlers
+    public convenience init(initClosure: InitClosure)
+    {
+        self.init(weakified: false, initClosure: initClosure)
+    }
+    
+    /// creates fulfilled task
     public convenience init(value: Value)
     {
-        self.init(closure: { (progress, fulfill, reject, configure) in
+        self.init(initClosure: { (progress, fulfill, reject, configure) in
             fulfill(value)
             return
         })
     }
     
+    /// creates rejected task
     public convenience init(error: Error)
     {
-        self.init(closure: { (progress, fulfill, reject, configure) in
+        self.init(initClosure: { (progress, fulfill, reject, configure) in
             reject(error)
             return
         })
     }
     
-    internal init(_closure: _InitClosure)
+    /// creates promise-like task which only allows fulfill & reject (no progress & configure)
+    public convenience init(promiseInitClosure: PromiseInitClosure)
     {
-        setup(_closure)
+        self.init(initClosure: { (progress, fulfill, reject, configure) in
+            promiseInitClosure(fulfill: fulfill, reject: { (error: Error) in reject(error) })
+            return
+        })
     }
     
-    internal func setup(_closure: _InitClosure)
+    internal init(_initClosure: _InitClosure)
+    {
+        self.setup(false, _initClosure)
+    }
+    
+    internal func setup(weakified: Bool, _initClosure: _InitClosure)
     {
         let configuration = Configuration()
         
@@ -201,23 +220,47 @@ public class Task<Progress, Value, Error>
             configuration.clear()
         }
         
-        let progressHandler: ProgressHandler = { [weak self] (progress: Progress) in
-            if let self_ = self {
-                self_.machine <-! (.Progress, progress)
+        var progressHandler: ProgressHandler
+        var fulfillHandler: FulFillHandler
+        var rejectHandler: _RejectHandler
+        
+        if weakified {
+            progressHandler = { [weak self] (progress: Progress) in
+                if let self_ = self {
+                    self_.machine <-! (.Progress, progress)
+                }
+            }
+            
+            fulfillHandler = { [weak self] (value: Value) in
+                if let self_ = self {
+                    self_.machine <-! (.Fulfill, value)
+                }
+            }
+            
+            rejectHandler = { [weak self] (errorInfo: ErrorInfo) in
+                if let self_ = self {
+                    self_.machine <-! (.Reject, errorInfo)
+                }
+            }
+        }
+        else {
+            progressHandler = { (progress: Progress) in
+                self.machine <-! (.Progress, progress)
+                return
+            }
+            
+            fulfillHandler = { (value: Value) in
+                self.machine <-! (.Fulfill, value)
+                return
+            }
+            
+            rejectHandler = { (errorInfo: ErrorInfo) in
+                self.machine <-! (.Reject, errorInfo)
+                return
             }
         }
         
-        let fulfillHandler: FulFillHandler = { /*[weak self]*/ (value: Value) in
-            self.machine <-! (.Fulfill, value)     // NOTE: capture self
-            return
-        }
-        
-        let rejectHandler: _RejectHandler = { /*[weak self]*/ (errorInfo: ErrorInfo) in
-            self.machine <-! (.Reject, errorInfo)  // NOTE: capture self
-            return
-        }
-        
-        _closure(progress: progressHandler, fulfill: fulfillHandler, _reject: rejectHandler, configure: configuration)
+        _initClosure(progress: progressHandler, fulfill: fulfillHandler, _reject: rejectHandler, configure: configuration)
         
     }
     
