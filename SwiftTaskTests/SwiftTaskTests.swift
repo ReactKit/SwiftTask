@@ -825,7 +825,7 @@ class SwiftTaskTests: _TestCase
         }
         
         // cancel before fulfilled
-        Async.main(after: 0.1) {
+        Async.main(after: 0.01) {
             groupedTask.cancel(error: "Cancel")
             return
         }
@@ -1040,7 +1040,7 @@ class SwiftTaskTests: _TestCase
         }
         
         // cancel before fulfilled
-        Async.main(after: 0.1) {
+        Async.main(after: 0.01) {
             groupedTask.cancel(error: "Cancel")
             return
         }
@@ -1097,7 +1097,7 @@ class SwiftTaskTests: _TestCase
         }
         
         // pause & resume
-        Async.main(after: 0.1) {
+        Async.main(after: 0.01) {
             
             groupedTask.pause()
             XCTAssertEqual(groupedTask.state, TaskState.Paused)
