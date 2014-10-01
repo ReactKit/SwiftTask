@@ -19,14 +19,14 @@ public enum TaskState: String, StateType, Printable
     
     case Cancelled = "Cancelled" // NOTE: .Cancelled is never added to StateMachine's routes, but is returned via `task.state`
     
-    public static func convertFromNilLiteral() -> TaskState
+    public init(nilLiteral: Void)
     {
-        return Any
+        self = Any
     }
     
     public var description: String
     {
-        return self.toRaw()
+        return self.rawValue
     }
 }
 
@@ -40,14 +40,14 @@ public enum TaskEvent: String, StateEventType, Printable
     case Reject = "Reject"      // also used in cancellation for simplicity
     case Any = "Any"
     
-    public static func convertFromNilLiteral() -> TaskEvent
+    public init(nilLiteral: Void)
     {
-        return Any
+        self = Any
     }
     
     public var description: String
     {
-        return self.toRaw()
+        return self.rawValue
     }
 }
 

@@ -443,8 +443,10 @@ class SwiftTaskTests: _TestCase
             
             if self.isAsync {
                 // 0.0 <= progress <= 1.0
-                XCTAssertGreaterThanOrEqual(progress, 0)
-                XCTAssertLessThanOrEqual(progress, 1)
+//                XCTAssertGreaterThanOrEqual(progress, 0)  // TODO: Xcode6.1-GM bug
+//                XCTAssertLessThanOrEqual(progress, 1)     // TODO: Xcode6.1-GM bug
+                XCTAssertTrue(progress >= 0)
+                XCTAssertTrue(progress <= 1)
                 
                 // 1 <= progressCount <= 5
                 XCTAssertGreaterThanOrEqual(progressCount, 1)
@@ -541,8 +543,10 @@ class SwiftTaskTests: _TestCase
             progressCount++
             
             // 0.0 <= progress <= 0.5 (not 1.0)
-            XCTAssertGreaterThanOrEqual(progress, 0)
-            XCTAssertLessThanOrEqual(progress, 0.5)
+//            XCTAssertGreaterThanOrEqual(progress, 0)  // TODO: Xcode6.1-GM bug
+//            XCTAssertLessThanOrEqual(progress, 0.5)   // TODO: Xcode6.1-GM bug
+            XCTAssertTrue(progress >= 0)
+            XCTAssertTrue(progress <= 0.5)
             
             // 1 <= progressCount <= 3 (not 5)
             XCTAssertGreaterThanOrEqual(progressCount, 1)
@@ -648,13 +652,15 @@ class SwiftTaskTests: _TestCase
             task.pause()
             
             XCTAssertEqual(task.state, TaskState.Paused)
-            XCTAssertEqual(task.progress!, 0.5)
+//            XCTAssertEqual(task.progress!, 0.5)   // TODO: Xcode6.1-GM bug
+            XCTAssertTrue(task.progress! == 0.5)
             
             // resume after 300ms (t=600ms)
             Async.main(after: 0.3) {
                 
                 XCTAssertEqual(task.state, TaskState.Paused)
-                XCTAssertEqual(task.progress!, 0.5)
+//                XCTAssertEqual(task.progress!, 0.5)   // TODO: Xcode6.1-GM bug
+                XCTAssertTrue(task.progress! == 0.5)
                 
                 task.resume()
                 XCTAssertEqual(task.state, TaskState.Running)
