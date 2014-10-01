@@ -105,8 +105,10 @@ class CustomOperatorTests: _TestCase
             
             if self.isAsync {
                 // 0.0 <= progress <= 1.0
-                XCTAssertGreaterThanOrEqual(progress, 0)
-                XCTAssertLessThanOrEqual(progress, 1)
+//                XCTAssertGreaterThanOrEqual(progress, 0)  // Xcode6.1-GM bug
+//                XCTAssertLessThanOrEqual(progress, 1)     // Xcode6.1-GM bug
+                XCTAssertTrue(progress >= 0)
+                XCTAssertTrue(progress <= 1)
                 
                 // 1 <= progressCount <= 5
                 XCTAssertGreaterThanOrEqual(progressCount, 1)

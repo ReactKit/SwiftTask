@@ -16,15 +16,11 @@
 		1F46DEFD199EE2C200F97868 /* _TestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEFC199EE2C200F97868 /* _TestCase.swift */; };
 		1F53421819B4998A00CB93D9 /* SwiftTask.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F46DED4199EDF1000F97868 /* SwiftTask.framework */; };
 		1F6A8CA319A4E4F200369A5D /* SwiftTaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEE3199EDF1000F97868 /* SwiftTaskTests.swift */; };
-		1F6A8CA619A5090E00369A5D /* AlamofireTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F5FA35619A374E600975FB9 /* AlamofireTests.swift */; };
-		1FA4634919A8D73300DD8729 /* Alamofire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FA4631719A8D70A00DD8729 /* Alamofire.swift */; };
 		4822F0DC19D00B2300F5F572 /* _TestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEFC199EE2C200F97868 /* _TestCase.swift */; };
 		4822F0DD19D00B2300F5F572 /* BasicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F20250119ADA8FD00DE0495 /* BasicTests.swift */; };
 		4822F0DE19D00B2300F5F572 /* SwiftTaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEE3199EDF1000F97868 /* SwiftTaskTests.swift */; };
 		4822F0DF19D00B2300F5F572 /* CustomOperatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F2024FE19AD97A700DE0495 /* CustomOperatorTests.swift */; };
 		4822F0E019D00B2300F5F572 /* RetainCycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48511C5A19C17563002FE03C /* RetainCycleTests.swift */; };
-		4822F0E119D00B2300F5F572 /* AlamofireTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F5FA35619A374E600975FB9 /* AlamofireTests.swift */; };
-		4822F0E219D00B2E00F5F572 /* Alamofire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FA4631719A8D70A00DD8729 /* Alamofire.swift */; };
 		4822F0E319D00B3100F5F572 /* Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F0E282319C1DEA0005EF467 /* Async.swift */; };
 		48511C5B19C17563002FE03C /* RetainCycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48511C5A19C17563002FE03C /* RetainCycleTests.swift */; };
 		48797D6619B42CEF0085D80F /* SwiftState.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FA4634319A8D70A00DD8729 /* SwiftState.framework */; };
@@ -452,9 +448,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1F2024FF19AD97A700DE0495 /* CustomOperatorTests.swift in Sources */,
-				1FA4634919A8D73300DD8729 /* Alamofire.swift in Sources */,
 				1F20250219ADA8FD00DE0495 /* BasicTests.swift in Sources */,
-				1F6A8CA619A5090E00369A5D /* AlamofireTests.swift in Sources */,
 				1F0E284019C1DEA0005EF467 /* Async.swift in Sources */,
 				1F6A8CA319A4E4F200369A5D /* SwiftTaskTests.swift in Sources */,
 				48511C5B19C17563002FE03C /* RetainCycleTests.swift in Sources */,
@@ -468,12 +462,10 @@
 			files = (
 				4822F0DE19D00B2300F5F572 /* SwiftTaskTests.swift in Sources */,
 				4822F0DD19D00B2300F5F572 /* BasicTests.swift in Sources */,
-				4822F0E119D00B2300F5F572 /* AlamofireTests.swift in Sources */,
 				4822F0DF19D00B2300F5F572 /* CustomOperatorTests.swift in Sources */,
 				4822F0E319D00B3100F5F572 /* Async.swift in Sources */,
 				4822F0DC19D00B2300F5F572 /* _TestCase.swift in Sources */,
 				4822F0E019D00B2300F5F572 /* RetainCycleTests.swift in Sources */,
-				4822F0E219D00B2E00F5F572 /* Alamofire.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
