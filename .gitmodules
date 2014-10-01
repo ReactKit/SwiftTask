@@ -1,6 +1,6 @@
 [submodule "Vendor/SwiftState"]
 	path = Vendor/SwiftState
-	url = https://github.com/inamiy/SwiftState.git
+	url = https://github.com/ReactKit/SwiftState.git
 [submodule "Vendor/Alamofire"]
 	path = Vendor/Alamofire
 	url = https://github.com/inamiy/Alamofire.git
