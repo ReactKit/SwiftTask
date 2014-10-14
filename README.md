@@ -100,50 +100,6 @@ task.progress { progress in
 }
 ```
 
-### Using custom operator
-
-You can even use custom operators for chaining! :dizzy:
-
-- `task ~ {...}` = `task.progress { progress in ...}`
-- `task >>> {...}` = `task.then { value, errorInfo in ...}` (fulfilled & rejected)
-- `task *** {...}` = `task.then { value in ...}` (fulfilled only)
-- `task !!! {...}` = `task.catch { errorInfo in ...}` (rejected only)
-
-```swift
-task ~ { (progress: Float) in
-
-    println("progress = \(progress)")
-
-} *** { (value: String) -> String in
-
-    XCTAssertEqual(value, "OK")
-    return "Now OK"
-
-} !!! { (error: ErrorString?, isCancelled: Bool) -> String in
-
-    XCTAssertEqual(error!, "ERROR")
-    return "Now RECOVERED"
-
-} >>> { (value: String?, errorInfo: Task.ErrorInfo?) -> Task in
-
-    println("value = \(value)") // either "Now OK" or "Now RECOVERED"
-
-    XCTAssertTrue(value!.hasPrefix("Now"))
-    XCTAssertTrue(errorInfo == nil)
-
-    return Task(error: "ABORT")
-
-} >>> { (value: String?, errorInfo: Task.ErrorInfo?) -> Void in
-
-    println("errorInfo = \(errorInfo)")
-
-    XCTAssertTrue(value == nil)
-    XCTAssertEqual(errorInfo!.error!, "ABORT")
-    expect.fulfill()
-
-}
-```
-
 For more examples, please see XCTest cases.
 
 
