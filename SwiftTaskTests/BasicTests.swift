@@ -36,21 +36,21 @@ class BasicTests: _TestCase
             
         }
             
-        task ~ { (progress: Float) in
+        task.progress { (progress: Float) in
             
             println("progress = \(progress)")
             
-        } *** { (value: String) -> String in  // then(onFulfilled)
+        }.then { (value: String) -> String in  // then(onFulfilled)
             
             XCTAssertEqual(value, "OK")
             return "Now OK"
                 
-        } !!! { (error: ErrorString?, isCancelled: Bool) -> String in  // catch(onRejected)
+        }.catch { (error: ErrorString?, isCancelled: Bool) -> String in  // catch(onRejected)
             
             XCTAssertEqual(error!, "ERROR")
             return "Now RECOVERED"
             
-        } >>> { (value: String?, errorInfo: Task.ErrorInfo?) -> Task in // then(onFulfilled+onRejected)
+        }.then { (value: String?, errorInfo: Task.ErrorInfo?) -> Task in // then(onFulfilled+onRejected)
             
             println("value = \(value)") // either "Now OK" or "Now RECOVERED"
             
@@ -59,7 +59,7 @@ class BasicTests: _TestCase
             
             return Task(error: "ABORT")
             
-        } >>> { (value: String?, errorInfo: Task.ErrorInfo?) -> Void in // then(onFulfilled+onRejected)
+        }.then { (value: String?, errorInfo: Task.ErrorInfo?) -> Void in // then(onFulfilled+onRejected)
                 
             println("errorInfo = \(errorInfo)")
             

@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		1F0E284019C1DEA0005EF467 /* Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F0E282319C1DEA0005EF467 /* Async.swift */; };
-		1F2024FF19AD97A700DE0495 /* CustomOperatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F2024FE19AD97A700DE0495 /* CustomOperatorTests.swift */; };
 		1F20250219ADA8FD00DE0495 /* BasicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F20250119ADA8FD00DE0495 /* BasicTests.swift */; };
 		1F24C72B19D0688800C2FDC7 /* SwiftTask.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48CD5A0C19AEE3570042B9F1 /* SwiftTask.framework */; };
 		1F46DEDA199EDF1000F97868 /* SwiftTask.h in Headers */ = {isa = PBXBuildFile; fileRef = 1F46DED9199EDF1000F97868 /* SwiftTask.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -19,7 +18,6 @@
 		4822F0DC19D00B2300F5F572 /* _TestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEFC199EE2C200F97868 /* _TestCase.swift */; };
 		4822F0DD19D00B2300F5F572 /* BasicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F20250119ADA8FD00DE0495 /* BasicTests.swift */; };
 		4822F0DE19D00B2300F5F572 /* SwiftTaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEE3199EDF1000F97868 /* SwiftTaskTests.swift */; };
-		4822F0DF19D00B2300F5F572 /* CustomOperatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F2024FE19AD97A700DE0495 /* CustomOperatorTests.swift */; };
 		4822F0E019D00B2300F5F572 /* RetainCycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48511C5A19C17563002FE03C /* RetainCycleTests.swift */; };
 		4822F0E319D00B3100F5F572 /* Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F0E282319C1DEA0005EF467 /* Async.swift */; };
 		48511C5B19C17563002FE03C /* RetainCycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48511C5A19C17563002FE03C /* RetainCycleTests.swift */; };
@@ -62,7 +60,6 @@
 
 /* Begin PBXFileReference section */
 		1F0E282319C1DEA0005EF467 /* Async.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Async.swift; sourceTree = "<group>"; };
-		1F2024FE19AD97A700DE0495 /* CustomOperatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomOperatorTests.swift; sourceTree = "<group>"; };
 		1F20250119ADA8FD00DE0495 /* BasicTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasicTests.swift; sourceTree = "<group>"; };
 		1F46DED4199EDF1000F97868 /* SwiftTask.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftTask.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F46DED8199EDF1000F97868 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -169,7 +166,6 @@
 				1F46DEFC199EE2C200F97868 /* _TestCase.swift */,
 				1F20250119ADA8FD00DE0495 /* BasicTests.swift */,
 				1F46DEE3199EDF1000F97868 /* SwiftTaskTests.swift */,
-				1F2024FE19AD97A700DE0495 /* CustomOperatorTests.swift */,
 				48511C5A19C17563002FE03C /* RetainCycleTests.swift */,
 				1F5FA35619A374E600975FB9 /* AlamofireTests.swift */,
 				1F46DEE1199EDF1000F97868 /* Supporting Files */,
@@ -447,7 +443,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1F2024FF19AD97A700DE0495 /* CustomOperatorTests.swift in Sources */,
 				1F20250219ADA8FD00DE0495 /* BasicTests.swift in Sources */,
 				1F0E284019C1DEA0005EF467 /* Async.swift in Sources */,
 				1F6A8CA319A4E4F200369A5D /* SwiftTaskTests.swift in Sources */,
@@ -462,7 +457,6 @@
 			files = (
 				4822F0DE19D00B2300F5F572 /* SwiftTaskTests.swift in Sources */,
 				4822F0DD19D00B2300F5F572 /* BasicTests.swift in Sources */,
-				4822F0DF19D00B2300F5F572 /* CustomOperatorTests.swift in Sources */,
 				4822F0E319D00B3100F5F572 /* Async.swift in Sources */,
 				4822F0DC19D00B2300F5F572 /* _TestCase.swift in Sources */,
 				4822F0E019D00B2300F5F572 /* RetainCycleTests.swift in Sources */,
