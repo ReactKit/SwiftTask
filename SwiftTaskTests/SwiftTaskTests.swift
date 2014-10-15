@@ -9,6 +9,10 @@
 import SwiftTask
 import XCTest
 
+/// Safe background flag checking delay to not conflict with main-dispatch_after.
+/// (0.3 may be still short for certain environment)
+let SAFE_BG_FLAG_CHECK_DELAY = 0.5
+
 class AsyncSwiftTaskTests: SwiftTaskTests
 {
     override var isAsync: Bool { return true }
@@ -856,7 +860,7 @@ class SwiftTaskTests: _TestCase
                 
                 var isPaused = false
                 
-                Async.background(after: 0.5) {
+                Async.background(after: SAFE_BG_FLAG_CHECK_DELAY) {
                     while isPaused {
                         NSThread.sleepForTimeInterval(0.1)
                     }
@@ -890,7 +894,7 @@ class SwiftTaskTests: _TestCase
         }
         
         // pause & resume
-        Async.main(after: 0.1) {
+        self.perform {
             
             groupedTask.pause()
             XCTAssertEqual(groupedTask.state, TaskState.Paused)
@@ -1014,7 +1018,7 @@ class SwiftTaskTests: _TestCase
                 
                 var isCancelled = false
                 
-                Async.background(after: 0.1) {
+                Async.background(after: SAFE_BG_FLAG_CHECK_DELAY) {
                     if isCancelled {
                         return
                     }
@@ -1046,7 +1050,7 @@ class SwiftTaskTests: _TestCase
         }
         
         // cancel before fulfilled
-        Async.main(after: 0.01) {
+        self.perform {
             groupedTask.cancel(error: "Cancel")
             return
         }
@@ -1071,7 +1075,7 @@ class SwiftTaskTests: _TestCase
                 
                 var isPaused = false
                 
-                Async.background(after: 0.2) {
+                Async.background(after: SAFE_BG_FLAG_CHECK_DELAY) {
                     while isPaused {
                         NSThread.sleepForTimeInterval(0.1)
                     }
@@ -1103,12 +1107,12 @@ class SwiftTaskTests: _TestCase
         }
         
         // pause & resume
-        Async.main(after: 0.01) {
+        self.perform {
             
             groupedTask.pause()
             XCTAssertEqual(groupedTask.state, TaskState.Paused)
             
-            Async.main(after: 0.4) {
+            Async.main(after: SAFE_BG_FLAG_CHECK_DELAY+0.2) {
                 
                 groupedTask.resume()
                 XCTAssertEqual(groupedTask.state, TaskState.Running)

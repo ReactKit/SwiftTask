@@ -42,7 +42,7 @@ class _TestCase: XCTestCase
     func perform(closure: Void -> Void)
     {
         if self.isAsync {
-            Async.main(after: 0.1, block: closure)
+            Async.main(after: 0.01, block: closure)
         }
         else {
             closure()
