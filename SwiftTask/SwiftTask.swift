@@ -199,7 +199,7 @@ public class Task<Progress, Value, Error>
         }
         
         // TODO: how to nest these inside StateMachine's initClosure? (using `self` is not permitted)
-        // NOTE: use order > 100 (default) to let `progressTupleClosure(self.progress, newValue)` be invoked first before updating old `self.progress`
+        // NOTE: use order > 100 (default) to let `progressClosure(self.progress, newValue)` be invoked first before updating old `self.progress`
         self.machine.addEventHandler(.Progress, order: 110) { [weak self] context in
             if let progress = context.userInfo as? Progress {
                 if let self_ = self {
@@ -278,25 +278,13 @@ public class Task<Progress, Value, Error>
         self._cancel(error: nil)
     }
     
-    /// progress + newValue only
-    public func progress(progressClosure: Progress -> Void) -> Task
-    {
-        self.machine.addEventHandler(.Progress) { [weak self] context in
-            if let progress = context.userInfo as? Progress {
-                progressClosure(progress)
-            }
-        }
-        
-        return self
-    }
-    
-    /// progress + (oldValue, newValue)
-    public func progress(progressTupleClosure: (oldValue: Progress?, newValue: Progress) -> Void) -> Task
+    /// task.onProgress
+    public func onProgress(progressClosure: (oldValue: Progress?, newValue: Progress) -> Void) -> Task
     {
         self.machine.addEventHandler(.Progress) { [weak self] context in
             if let progress = context.userInfo as? Progress {
                 if let self_ = self {
-                    progressTupleClosure(oldValue: self_.progress, newValue: progress)
+                    progressClosure(oldValue: self_.progress, newValue: progress)
                 }
             }
         }
@@ -304,23 +292,23 @@ public class Task<Progress, Value, Error>
         return self
     }
     
-    /// then (fulfilled & rejected) + returning value
-    public func then<Value2>(thenClosure: (Value?, ErrorInfo?) -> Value2) -> Task<Progress, Value2, Error>
+    /// onComplete (fulfilled & rejected) + closure returning value
+    public func onComplete<Value2>(completeClosure: (Value?, ErrorInfo?) -> Value2) -> Task<Progress, Value2, Error>
     {
-        return self.then { (value: Value?, errorInfo: ErrorInfo?) -> Task<Progress, Value2, Error> in
-            return Task<Progress, Value2, Error>(value: thenClosure(value, errorInfo))
+        return self.onComplete { (value: Value?, errorInfo: ErrorInfo?) -> Task<Progress, Value2, Error> in
+            return Task<Progress, Value2, Error>(value: completeClosure(value, errorInfo))
         }
     }
     
-    /// then (fulfilled & rejected) + returning task
-    public func then<Progress2, Value2>(thenClosure: (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
+    /// onComplete (fulfilled & rejected) + closure returning task
+    public func onComplete<Progress2, Value2>(completeClosure: (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
     {
         let newTask = Task<Progress2, Value2, Error> { [weak self] (progress, fulfill, _reject: _RejectHandler, configure) in
             
             let bind = { (value: Value?, errorInfo: ErrorInfo?) -> Void in
-                let innerTask = thenClosure(value, errorInfo)
+                let innerTask = completeClosure(value, errorInfo)
                 
-                // NOTE: don't call then/catch for innerTask, or recursive bindings may occur
+                // NOTE: don't call `then` for innerTask, or recursive bindings may occur
                 // Bad example: https://github.com/inamiy/SwiftTask/blob/e6085465c147fb2211fb2255c48929fcc07acd6d/SwiftTask/SwiftTask.swift#L312-L316
                 switch innerTask.machine.state {
                     case .Fulfilled:
@@ -370,23 +358,23 @@ public class Task<Progress, Value, Error>
         return newTask
     }
     
-    /// then (fulfilled only) + returning value
-    public func then<Value2>(fulfilledClosure: Value -> Value2) -> Task<Progress, Value2, Error>
+    /// onSuccess + closure returning value
+    public func onSuccess<Value2>(fulfilledClosure: Value -> Value2) -> Task<Progress, Value2, Error>
     {
-        return self.then { (value: Value) -> Task<Progress, Value2, Error> in
+        return self.onSuccess { (value: Value) -> Task<Progress, Value2, Error> in
             return Task<Progress, Value2, Error>(value: fulfilledClosure(value))
         }
     }
     
-    /// then (fulfilled only) + returning task
-    public func then<Progress2, Value2>(fulfilledClosure: Value -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
+    /// onSuccess + closure returning task
+    public func onSuccess<Progress2, Value2>(fulfilledClosure: Value -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
     {
         let newTask = Task<Progress2, Value2, Error> { [weak self] (progress, fulfill, _reject: _RejectHandler, configure) in
             
             let bind = { (value: Value) -> Void in
                 let innerTask = fulfilledClosure(value)
                 
-                innerTask.then { (value: Value2?, errorInfo: ErrorInfo?) -> Void in
+                innerTask.onComplete { (value: Value2?, errorInfo: ErrorInfo?) -> Void in
                     if let value = value {
                         fulfill(value)
                     }
@@ -425,23 +413,23 @@ public class Task<Progress, Value, Error>
         return newTask
     }
     
-    /// catch + returning value
-    public func catch(catchClosure: ErrorInfo -> Value) -> Task
+    /// onFailure + closure returning value
+    public func onFailure(failureClosure: ErrorInfo -> Value) -> Task
     {
-        return self.catch { (errorInfo: ErrorInfo) -> Task in
-            return Task(value: catchClosure(errorInfo))
+        return self.onFailure { (errorInfo: ErrorInfo) -> Task in
+            return Task(value: failureClosure(errorInfo))
         }
     }
 
-    /// catch + returning task
-    public func catch(catchClosure: ErrorInfo -> Task) -> Task
+    /// onFailure + closure returning task
+    public func onFailure(failureClosure: ErrorInfo -> Task) -> Task
     {
         let newTask = Task { [weak self] (progress, fulfill, _reject: _RejectHandler, configure) in
             
             let bind = { (errorInfo: ErrorInfo) -> Void in
-                let innerTask = catchClosure(errorInfo)
+                let innerTask = failureClosure(errorInfo)
                 
-                innerTask.then { (value: Value?, errorInfo: ErrorInfo?) -> Void in
+                innerTask.onComplete { (value: Value?, errorInfo: ErrorInfo?) -> Void in
                     if let value = value {
                         fulfill(value)
                     }
@@ -512,7 +500,7 @@ extension Task
             let totalCount = tasks.count
             
             for task in tasks {
-                task.then { (value: Value) -> Void in
+                task.onSuccess { (value: Value) -> Void in
                     
                     synchronized(self) {
                         completedCount++
@@ -531,7 +519,7 @@ extension Task
                         }
                     }
                     
-                }.catch { (errorInfo: ErrorInfo) -> Void in
+                }.onFailure { (errorInfo: ErrorInfo) -> Void in
                     
                     synchronized(self) {
                         _reject(errorInfo)
@@ -559,7 +547,7 @@ extension Task
             let totalCount = tasks.count
             
             for task in tasks {
-                task.then { (value: Value) -> Void in
+                task.onSuccess { (value: Value) -> Void in
                     
                     synchronized(self) {
                         completedCount++
@@ -571,7 +559,7 @@ extension Task
                         }
                     }
                     
-                }.catch { (errorInfo: ErrorInfo) -> Void in
+                }.onFailure { (errorInfo: ErrorInfo) -> Void in
                     
                     synchronized(self) {
                         rejectedCount++
@@ -594,7 +582,7 @@ extension Task
     }
     
     /// Returns new task which performs all given tasks and stores only fulfilled values.
-    /// This new task will NEVER be internally rejected (thus uncatchable from outside).
+    /// This new task will NEVER be internally rejected.
     public class func some(tasks: [Task]) -> Task<BulkProgress, [Value], Error>
     {
         return Task<BulkProgress, [Value], Error> { (progress, fulfill, _reject: _RejectHandler, configure) in
@@ -603,7 +591,7 @@ extension Task
             let totalCount = tasks.count
             
             for task in tasks {
-                task.then { (value: Value?, errorInfo: ErrorInfo?) -> Void in
+                task.onComplete { (value: Value?, errorInfo: ErrorInfo?) -> Void in
                     
                     synchronized(self) {
                         completedCount++

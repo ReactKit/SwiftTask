@@ -36,21 +36,21 @@ class BasicTests: _TestCase
             
         }
             
-        task.progress { (progress: Float) in
+        task.onProgress { oldValue, newValue in
             
-            println("progress = \(progress)")
+            println("progress = \(newValue)")
             
-        }.then { (value: String) -> String in  // then(onFulfilled)
+        }.onSuccess { (value: String) -> String in  // `task.onSuccess {...}` = JavaScript's `promise.then(onFulfilled)`
             
             XCTAssertEqual(value, "OK")
             return "Now OK"
                 
-        }.catch { (error: ErrorString?, isCancelled: Bool) -> String in  // catch(onRejected)
+        }.onFailure { (error: ErrorString?, isCancelled: Bool) -> String in  // `task.onFailure {...}` = JavaScript's `promise.catch(onRejected)`
             
             XCTAssertEqual(error!, "ERROR")
             return "Now RECOVERED"
             
-        }.then { (value: String?, errorInfo: Task.ErrorInfo?) -> Task in // then(onFulfilled+onRejected)
+        }.onComplete { (value: String?, errorInfo: Task.ErrorInfo?) -> Task in // `task.onComplete {...}` = JavaScript's `promise.then(onFulfilled, onRejected)`
             
             println("value = \(value)") // either "Now OK" or "Now RECOVERED"
             
@@ -59,7 +59,7 @@ class BasicTests: _TestCase
             
             return Task(error: "ABORT")
             
-        }.then { (value: String?, errorInfo: Task.ErrorInfo?) -> Void in // then(onFulfilled+onRejected)
+        }.onComplete { (value: String?, errorInfo: Task.ErrorInfo?) -> Void in
                 
             println("errorInfo = \(errorInfo)")
             

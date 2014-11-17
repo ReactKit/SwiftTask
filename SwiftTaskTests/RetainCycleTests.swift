@@ -78,9 +78,7 @@ class RetainCycleTests: _TestCase
         XCTAssertNotNil(self.task, "self.task (weak) should NOT be nil because of retain cycle: task <- dispatch_queue.")
         XCTAssertNotNil(self.player, "self.player (weak) should NOT nil because player is not retained by dispatch_queue.")
         
-        println("then")
-            
-        self.task!.then { (value: String) -> Void in
+        self.task!.onSuccess { (value: String) -> Void in
             
             XCTAssertEqual(value, "OK")
             expect.fulfill()
@@ -126,9 +124,7 @@ class RetainCycleTests: _TestCase
         XCTAssertNotNil(self.task, "self.task (weak) should NOT be nil because of retain cycle: task <- dispatch_queue.")
         XCTAssertNotNil(self.player, "self.player (weak) should NOT be nil because of retain cycle: player <- configure <- task.")
         
-        println("then")
-        
-        self.task!.then { (value: String) -> Void in
+        self.task!.onSuccess { (value: String) -> Void in
             
             XCTAssertEqual(value, "OK")
             expect.fulfill()
@@ -170,9 +166,7 @@ class RetainCycleTests: _TestCase
         XCTAssertNotNil(self.task, "self.task (weak) should not be nil because of retain cycle: task <- player <- dispatch_queue.")
         XCTAssertNotNil(self.player, "self.player (weak) should not be nil because of retain cycle: player <- configure <- task.")
         
-        println("then")
-        
-        self.task!.then { (value: String) -> Void in
+        self.task!.onSuccess { (value: String) -> Void in
             
             XCTAssertEqual(value, "OK")
             expect.fulfill()
@@ -216,9 +210,7 @@ class RetainCycleTests: _TestCase
         XCTAssertNotNil(self.task, "self.task (weak) should not be nil because of retain cycle: task <- player <- dispatch_queue.")
         XCTAssertNotNil(self.player, "self.player (weak) should not be nil because of retain cycle: player <- configure <- task.")
         
-        println("then")
-        
-        self.task!.then { (value: String) -> Void in
+        self.task!.onSuccess { (value: String) -> Void in
             
             XCTAssertEqual(value, "OK")
             expect.fulfill()

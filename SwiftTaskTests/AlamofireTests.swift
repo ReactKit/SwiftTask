@@ -39,7 +39,7 @@ class AlamofireTests: _TestCase
             
         }
         
-        task.then { (value: String) -> Void in
+        task.onComplete { (value: String) -> Void in
             XCTAssertEqual(value, "OK")
             
             expect.fulfill()
@@ -74,11 +74,11 @@ class AlamofireTests: _TestCase
             
         }
             
-        task.then { (value: String?) -> Void in
+        task.onComplete { (value: String?) -> Void in
             
             XCTFail("Should never reach here.")
             
-        }.catch { (error: NSError?, isCancelled: Bool) -> Void in
+        }.onFailure { (error: NSError?, isCancelled: Bool) -> Void in
             
 //            println(error)
             
@@ -123,14 +123,14 @@ class AlamofireTests: _TestCase
             
         }
         
-        // set progress & then
-        task.progress { progress in
+        // set onProgress & onComplete
+        task.onProgress { progress in
             
             println("bytesWritten = \(progress.bytesWritten)")
             println("totalBytesWritten = \(progress.totalBytesWritten)")
             println("totalBytesExpectedToWrite = \(progress.totalBytesExpectedToWrite)")
             
-        }.then { (value: String) -> Void in
+        }.onComplete { (value: String) -> Void in
             
             XCTAssertEqual(value, "OK")
             
@@ -173,7 +173,7 @@ class AlamofireTests: _TestCase
         }
         
         // set then
-        task.then { (value: String) -> Void in
+        task.onComplete { (value: String) -> Void in
             
             XCTAssertEqual(value, "OK")
             XCTAssertEqual(nsProgress.completedUnitCount, 50)
@@ -226,13 +226,13 @@ class AlamofireTests: _TestCase
                 }
             }
             
-        } // end of 1st task definition (NOTE: don't chain with `then` or `catch` for 1st task cancellation)
+        } // end of 1st task definition (NOTE: don't chain with `onComplete` or `onFailure` for 1st task cancellation)
             
-        task.then { (value: String?) -> Void in
+        task.onComplete { (value: String?) -> Void in
             
             XCTFail("Should never reach here because task is cancelled.")
             
-        }.catch { (error: NSError?, isCancelled: Bool) -> Void in
+        }.onFailure { (error: NSError?, isCancelled: Bool) -> Void in
             
 //            println(error)
             
