@@ -93,8 +93,13 @@ public class Task<Progress, Value, Error>
     
     internal var machine: Machine!
 
+    /// progress value
     public internal(set) var progress: Progress?
+    
+    /// fulfilled value
     public internal(set) var value: Value?
+    
+    /// rejected/cancelled tuple info
     public internal(set) var errorInfo: ErrorInfo?
     
     public var state: TaskState
@@ -194,7 +199,8 @@ public class Task<Progress, Value, Error>
         }
         
         // TODO: how to nest these inside StateMachine's initClosure? (using `self` is not permitted)
-        self.machine.addEventHandler(.Progress, order: 90) { [weak self] context in
+        // NOTE: use order > 100 (default) to let `progressTupleClosure(self.progress, newValue)` be invoked first before updating old `self.progress`
+        self.machine.addEventHandler(.Progress, order: 110) { [weak self] context in
             if let progress = context.userInfo as? Progress {
                 if let self_ = self {
                     self_.progress = progress
@@ -272,11 +278,26 @@ public class Task<Progress, Value, Error>
         self._cancel(error: nil)
     }
     
+    /// progress + newValue only
     public func progress(progressClosure: Progress -> Void) -> Task
     {
         self.machine.addEventHandler(.Progress) { [weak self] context in
             if let progress = context.userInfo as? Progress {
                 progressClosure(progress)
+            }
+        }
+        
+        return self
+    }
+    
+    /// progress + (oldValue, newValue)
+    public func progress(progressTupleClosure: (oldValue: Progress?, newValue: Progress) -> Void) -> Task
+    {
+        self.machine.addEventHandler(.Progress) { [weak self] context in
+            if let progress = context.userInfo as? Progress {
+                if let self_ = self {
+                    progressTupleClosure(oldValue: self_.progress, newValue: progress)
+                }
             }
         }
         

@@ -478,6 +478,50 @@ class SwiftTaskTests: _TestCase
         self.wait()
     }
     
+    func testProgressTuple()
+    {
+        var expect = self.expectationWithDescription(__FUNCTION__)
+        var progressCount = 0
+        
+        Task<Float, String, ErrorString> { (progress, fulfill, reject, configure) in
+            
+            self.perform {
+                progress(0.5)
+                progress(1.0)
+                fulfill("OK")
+            }
+            
+        }.progress { (oldValue: Float?, newValue: Float) in     // progressTupleClosure
+            
+            progressCount++
+            
+            if self.isAsync {
+                if !((oldValue == nil && newValue == 0.5) || (oldValue! == 0.5 && newValue == 1.0)) {
+                    XCTFail("Invalid progressTuple (\(oldValue), \(newValue)).")
+                }
+            }
+            else {
+                XCTFail("When isAsync=false, 1st task closure is already performed before registering this progress closure, so this closure should not be reached.")
+            }
+            
+        }.then { (value: String) -> Void in
+            
+            XCTAssertEqual(value, "OK")
+            
+            if self.isAsync {
+                XCTAssertEqual(progressCount, 2)
+            }
+            else {
+                XCTAssertLessThanOrEqual(progressCount, 0, "progressCount should be 0 because progress closure should not be invoked when isAsync=false")
+            }
+            
+            expect.fulfill()
+                
+        }
+        
+        self.wait()
+    }
+    
     //--------------------------------------------------
     // MARK: - Cancel
     //--------------------------------------------------
