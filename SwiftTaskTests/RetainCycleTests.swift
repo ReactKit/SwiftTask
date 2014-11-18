@@ -61,7 +61,7 @@ class RetainCycleTests: _TestCase
         // 2. dispatch_queue x-> player
         // dispatch_queue (via player impl) x-> player (via completion capturing)
         //
-        self.task = Task { (progress, fulfill, reject, configure) in
+        self.task = Task { progress, fulfill, reject, configure in
             
             let player = Player()
             self.player = player
@@ -78,9 +78,7 @@ class RetainCycleTests: _TestCase
         XCTAssertNotNil(self.task, "self.task (weak) should NOT be nil because of retain cycle: task <- dispatch_queue.")
         XCTAssertNotNil(self.player, "self.player (weak) should NOT nil because player is not retained by dispatch_queue.")
         
-        println("then")
-            
-        self.task!.then { (value: String) -> Void in
+        self.task!.success { value -> Void in
             
             XCTAssertEqual(value, "OK")
             expect.fulfill()
@@ -110,7 +108,7 @@ class RetainCycleTests: _TestCase
         // 3. task -> player
         // task -> task.machine -> configure (via pause/resume addEventHandler) -> configure.cancel -> player
         //
-        self.task = Task { (progress, fulfill, reject, configure) in
+        self.task = Task { progress, fulfill, reject, configure in
             
             let player = Player()
             self.player = player
@@ -126,9 +124,7 @@ class RetainCycleTests: _TestCase
         XCTAssertNotNil(self.task, "self.task (weak) should NOT be nil because of retain cycle: task <- dispatch_queue.")
         XCTAssertNotNil(self.player, "self.player (weak) should NOT be nil because of retain cycle: player <- configure <- task.")
         
-        println("then")
-        
-        self.task!.then { (value: String) -> Void in
+        self.task!.success { value -> Void in
             
             XCTAssertEqual(value, "OK")
             expect.fulfill()
@@ -152,7 +148,7 @@ class RetainCycleTests: _TestCase
         // 1. dispatch_queue x-> player -> task
         // dispatch_queue (via player impl) x-> player -> player.completionHandler -> fulfill -> task
         //
-        self.task = Task { (progress, fulfill, reject, configure) in
+        self.task = Task { progress, fulfill, reject, configure in
             
             let player = Player()
             self.player = player
@@ -170,9 +166,7 @@ class RetainCycleTests: _TestCase
         XCTAssertNotNil(self.task, "self.task (weak) should not be nil because of retain cycle: task <- player <- dispatch_queue.")
         XCTAssertNotNil(self.player, "self.player (weak) should not be nil because of retain cycle: player <- configure <- task.")
         
-        println("then")
-        
-        self.task!.then { (value: String) -> Void in
+        self.task!.success { value -> Void in
             
             XCTAssertEqual(value, "OK")
             expect.fulfill()
@@ -199,7 +193,7 @@ class RetainCycleTests: _TestCase
         // 2. task x-> player
         // task -> task.machine -> configure (via pause/resume addEventHandler) -> configure.pause/resume/cancel x-> player
         //
-        self.task = Task { (progress, fulfill, reject, configure) in
+        self.task = Task { progress, fulfill, reject, configure in
             
             let player = Player()
             self.player = player
@@ -216,9 +210,7 @@ class RetainCycleTests: _TestCase
         XCTAssertNotNil(self.task, "self.task (weak) should not be nil because of retain cycle: task <- player <- dispatch_queue.")
         XCTAssertNotNil(self.player, "self.player (weak) should not be nil because of retain cycle: player <- configure <- task.")
         
-        println("then")
-        
-        self.task!.then { (value: String) -> Void in
+        self.task!.success { value -> Void in
             
             XCTAssertEqual(value, "OK")
             expect.fulfill()

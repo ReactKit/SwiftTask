@@ -118,11 +118,11 @@ public class Task<Progress, Value, Error>
     
     ///
     /// Creates new task.
-    /// e.g. Task<P, V, E>(weakified: false) { (progress, fulfill, reject, configure) in ... }
+    /// e.g. Task<P, V, E>(weakified: false) { progress, fulfill, reject, configure in ... }
     ///
     /// :param: weakified Weakifies progress/fulfill/reject handlers to let player (inner asynchronous implementation inside initClosure) NOT CAPTURE this created new task. Normally, weakified = false should be set to gain "player -> task" retaining, so that task will be automatically deinited when player is deinited. If weakified = true, task must be manually retained somewhere else, or it will be immediately deinited.
     ///
-    /// :param: initClosure e.g. { (progress, fulfill, reject, configure) in ... }. fulfill(value) and reject(error) handlers must be called inside this closure, where calling progress(progressValue) handler is optional. Also as options, configure.pause/resume/cancel closures can be set to gain control from outside e.g. task.pause()/resume()/cancel(). When using configure, make sure to use weak modifier when appropriate to avoid "task -> player" retaining which often causes retain cycle.
+    /// :param: initClosure e.g. { progress, fulfill, reject, configure in ... }. fulfill(value) and reject(error) handlers must be called inside this closure, where calling progress(progressValue) handler is optional. Also as options, configure.pause/resume/cancel closures can be set to gain control from outside e.g. task.pause()/resume()/cancel(). When using configure, make sure to use weak modifier when appropriate to avoid "task -> player" retaining which often causes retain cycle.
     ///
     /// :returns: New task.
     ///
@@ -144,7 +144,7 @@ public class Task<Progress, Value, Error>
     /// creates fulfilled task
     public convenience init(value: Value)
     {
-        self.init(initClosure: { (progress, fulfill, reject, configure) in
+        self.init(initClosure: { progress, fulfill, reject, configure in
             fulfill(value)
             return
         })
@@ -153,7 +153,7 @@ public class Task<Progress, Value, Error>
     /// creates rejected task
     public convenience init(error: Error)
     {
-        self.init(initClosure: { (progress, fulfill, reject, configure) in
+        self.init(initClosure: { progress, fulfill, reject, configure in
             reject(error)
             return
         })
@@ -162,7 +162,7 @@ public class Task<Progress, Value, Error>
     /// creates promise-like task which only allows fulfill & reject (no progress & configure)
     public convenience init(promiseInitClosure: PromiseInitClosure)
     {
-        self.init(initClosure: { (progress, fulfill, reject, configure) in
+        self.init(initClosure: { progress, fulfill, reject, configure in
             promiseInitClosure(fulfill: fulfill, reject: { (error: Error) in reject(error) })
             return
         })
@@ -199,7 +199,7 @@ public class Task<Progress, Value, Error>
         }
         
         // TODO: how to nest these inside StateMachine's initClosure? (using `self` is not permitted)
-        // NOTE: use order > 100 (default) to let `progressTupleClosure(self.progress, newValue)` be invoked first before updating old `self.progress`
+        // NOTE: use order > 100 (default) to let `progressClosure(self.progress, newProgress)` be invoked first before updating old `self.progress`
         self.machine.addEventHandler(.Progress, order: 110) { [weak self] context in
             if let progress = context.userInfo as? Progress {
                 if let self_ = self {
@@ -278,33 +278,18 @@ public class Task<Progress, Value, Error>
         self._cancel(error: nil)
     }
     
-    /// progress + newValue only
-    public func progress(progressClosure: Progress -> Void) -> Task
+    public func progress(progressClosure: (oldProgress: Progress?, newProgress: Progress) -> Void) -> Task
     {
         self.machine.addEventHandler(.Progress) { [weak self] context in
             if let progress = context.userInfo as? Progress {
-                progressClosure(progress)
+                progressClosure(oldProgress: self?.progress, newProgress: progress)
             }
         }
         
         return self
     }
     
-    /// progress + (oldValue, newValue)
-    public func progress(progressTupleClosure: (oldValue: Progress?, newValue: Progress) -> Void) -> Task
-    {
-        self.machine.addEventHandler(.Progress) { [weak self] context in
-            if let progress = context.userInfo as? Progress {
-                if let self_ = self {
-                    progressTupleClosure(oldValue: self_.progress, newValue: progress)
-                }
-            }
-        }
-        
-        return self
-    }
-    
-    /// then (fulfilled & rejected) + returning value
+    /// then (fulfilled & rejected) + closure returning value
     public func then<Value2>(thenClosure: (Value?, ErrorInfo?) -> Value2) -> Task<Progress, Value2, Error>
     {
         return self.then { (value: Value?, errorInfo: ErrorInfo?) -> Task<Progress, Value2, Error> in
@@ -312,7 +297,7 @@ public class Task<Progress, Value, Error>
         }
     }
     
-    /// then (fulfilled & rejected) + returning task
+    /// then (fulfilled & rejected) + closure returning task
     public func then<Progress2, Value2>(thenClosure: (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
     {
         let newTask = Task<Progress2, Value2, Error> { [weak self] (progress, fulfill, _reject: _RejectHandler, configure) in
@@ -320,7 +305,7 @@ public class Task<Progress, Value, Error>
             let bind = { (value: Value?, errorInfo: ErrorInfo?) -> Void in
                 let innerTask = thenClosure(value, errorInfo)
                 
-                // NOTE: don't call then/catch for innerTask, or recursive bindings may occur
+                // NOTE: don't call `then` for innerTask, or recursive bindings may occur
                 // Bad example: https://github.com/inamiy/SwiftTask/blob/e6085465c147fb2211fb2255c48929fcc07acd6d/SwiftTask/SwiftTask.swift#L312-L316
                 switch innerTask.machine.state {
                     case .Fulfilled:
@@ -370,16 +355,16 @@ public class Task<Progress, Value, Error>
         return newTask
     }
     
-    /// then (fulfilled only) + returning value
-    public func then<Value2>(fulfilledClosure: Value -> Value2) -> Task<Progress, Value2, Error>
+    /// success (fulfilled) + closure returning value
+    public func success<Value2>(fulfilledClosure: Value -> Value2) -> Task<Progress, Value2, Error>
     {
-        return self.then { (value: Value) -> Task<Progress, Value2, Error> in
+        return self.success { (value: Value) -> Task<Progress, Value2, Error> in
             return Task<Progress, Value2, Error>(value: fulfilledClosure(value))
         }
     }
     
-    /// then (fulfilled only) + returning task
-    public func then<Progress2, Value2>(fulfilledClosure: Value -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
+    /// success (fulfilled) + closure returning task
+    public func success<Progress2, Value2>(fulfilledClosure: Value -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
     {
         let newTask = Task<Progress2, Value2, Error> { [weak self] (progress, fulfill, _reject: _RejectHandler, configure) in
             
@@ -425,21 +410,21 @@ public class Task<Progress, Value, Error>
         return newTask
     }
     
-    /// catch + returning value
-    public func catch(catchClosure: ErrorInfo -> Value) -> Task
+    /// failure (rejected) + closure returning value
+    public func failure(failureClosure: ErrorInfo -> Value) -> Task
     {
-        return self.catch { (errorInfo: ErrorInfo) -> Task in
-            return Task(value: catchClosure(errorInfo))
+        return self.failure { (errorInfo: ErrorInfo) -> Task in
+            return Task(value: failureClosure(errorInfo))
         }
     }
 
-    /// catch + returning task
-    public func catch(catchClosure: ErrorInfo -> Task) -> Task
+    /// failure (rejected) + closure returning task
+    public func failure(failureClosure: ErrorInfo -> Task) -> Task
     {
         let newTask = Task { [weak self] (progress, fulfill, _reject: _RejectHandler, configure) in
             
             let bind = { (errorInfo: ErrorInfo) -> Void in
-                let innerTask = catchClosure(errorInfo)
+                let innerTask = failureClosure(errorInfo)
                 
                 innerTask.then { (value: Value?, errorInfo: ErrorInfo?) -> Void in
                     if let value = value {
@@ -512,7 +497,7 @@ extension Task
             let totalCount = tasks.count
             
             for task in tasks {
-                task.then { (value: Value) -> Void in
+                task.success { (value: Value) -> Void in
                     
                     synchronized(self) {
                         completedCount++
@@ -531,7 +516,7 @@ extension Task
                         }
                     }
                     
-                }.catch { (errorInfo: ErrorInfo) -> Void in
+                }.failure { (errorInfo: ErrorInfo) -> Void in
                     
                     synchronized(self) {
                         _reject(errorInfo)
@@ -559,7 +544,7 @@ extension Task
             let totalCount = tasks.count
             
             for task in tasks {
-                task.then { (value: Value) -> Void in
+                task.success { (value: Value) -> Void in
                     
                     synchronized(self) {
                         completedCount++
@@ -571,7 +556,7 @@ extension Task
                         }
                     }
                     
-                }.catch { (errorInfo: ErrorInfo) -> Void in
+                }.failure { (errorInfo: ErrorInfo) -> Void in
                     
                     synchronized(self) {
                         rejectedCount++
@@ -594,7 +579,7 @@ extension Task
     }
     
     /// Returns new task which performs all given tasks and stores only fulfilled values.
-    /// This new task will NEVER be internally rejected (thus uncatchable from outside).
+    /// This new task will NEVER be internally rejected.
     public class func some(tasks: [Task]) -> Task<BulkProgress, [Value], Error>
     {
         return Task<BulkProgress, [Value], Error> { (progress, fulfill, _reject: _RejectHandler, configure) in

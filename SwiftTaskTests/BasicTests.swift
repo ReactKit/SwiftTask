@@ -19,7 +19,7 @@ class BasicTests: _TestCase
         var progressCount = 0
         
         // define task
-        let task = Task { (progress, fulfill, reject, configure) in
+        let task = Task { progress, fulfill, reject, configure in
             
             Async.main(after: 0.1) {
                 progress(0.0)
@@ -35,22 +35,22 @@ class BasicTests: _TestCase
             return
             
         }
+        
+        task.progress { oldProgress, newProgress in
             
-        task.progress { (progress: Float) in
+            println("progress = \(newProgress)")
             
-            println("progress = \(progress)")
-            
-        }.then { (value: String) -> String in  // then(onFulfilled)
+        }.success { value -> String in  // `task.success {...}` = JavaScript's `promise.then(onFulfilled)`
             
             XCTAssertEqual(value, "OK")
             return "Now OK"
-                
-        }.catch { (error: ErrorString?, isCancelled: Bool) -> String in  // catch(onRejected)
+            
+        }.failure { error, isCancelled -> String in  // `task.failure {...}` = JavaScript's `promise.catch(onRejected)`
             
             XCTAssertEqual(error!, "ERROR")
             return "Now RECOVERED"
             
-        }.then { (value: String?, errorInfo: Task.ErrorInfo?) -> Task in // then(onFulfilled+onRejected)
+        }.then { value, errorInfo -> Task in // `task.then {...}` = JavaScript's `promise.then(onFulfilled, onRejected)`
             
             println("value = \(value)") // either "Now OK" or "Now RECOVERED"
             
@@ -59,7 +59,7 @@ class BasicTests: _TestCase
             
             return Task(error: "ABORT")
             
-        }.then { (value: String?, errorInfo: Task.ErrorInfo?) -> Void in // then(onFulfilled+onRejected)
+        }.then { value, errorInfo -> Void in
                 
             println("errorInfo = \(errorInfo)")
             

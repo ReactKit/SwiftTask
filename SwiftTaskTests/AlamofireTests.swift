@@ -17,7 +17,7 @@ class AlamofireTests: _TestCase
     {
         var expect = self.expectationWithDescription(__FUNCTION__)
         
-        let task = Task<Progress, String, NSError> { (progress, fulfill, reject, configure) in
+        let task = Task<Progress, String, NSError> { progress, fulfill, reject, configure in
             
             request(.GET, "http://httpbin.org/get", parameters: ["foo": "bar"])
             .response { (request, response, data, error) in
@@ -52,7 +52,7 @@ class AlamofireTests: _TestCase
     {
         var expect = self.expectationWithDescription(__FUNCTION__)
         
-        let task = Task<Progress, String?, NSError> { (progress, fulfill, reject, configure) in
+        let task = Task<Progress, String?, NSError> { progress, fulfill, reject, configure in
             
             let dummyURLString = "http://xxx-swift-task.org/get"
             
@@ -78,7 +78,7 @@ class AlamofireTests: _TestCase
             
             XCTFail("Should never reach here.")
             
-        }.catch { (error: NSError?, isCancelled: Bool) -> Void in
+        }.failure { (error: NSError?, isCancelled: Bool) -> Void in
             
 //            println(error)
             
@@ -96,7 +96,7 @@ class AlamofireTests: _TestCase
         var expect = self.expectationWithDescription(__FUNCTION__)
         
         // define task
-        let task = Task<Progress, String, NSError> { (progress, fulfill, reject, configure) in
+        let task = Task<Progress, String, NSError> { progress, fulfill, reject, configure in
             
             download(.GET, "http://httpbin.org/stream/100", Request.suggestedDownloadDestination(directory: .DocumentDirectory, domain: .UserDomainMask))
                 
@@ -146,7 +146,7 @@ class AlamofireTests: _TestCase
         var nsProgress = NSProgress(totalUnitCount: 100)
         
         // define task
-        let task = Task<Progress, String, NSError> { (progress, fulfill, reject, configure) in
+        let task = Task<Progress, String, NSError> { progress, fulfill, reject, configure in
             
             nsProgress.becomeCurrentWithPendingUnitCount(50)
             
@@ -199,7 +199,7 @@ class AlamofireTests: _TestCase
     {
         var expect = self.expectationWithDescription(__FUNCTION__)
         
-        let task = Task<Progress, String?, NSError> { (progress, fulfill, reject, configure) in
+        let task = Task<Progress, String?, NSError> { progress, fulfill, reject, configure in
             
             let downloadRequst = download(.GET, "http://httpbin.org/stream/100", Request.suggestedDownloadDestination(directory: .DocumentDirectory, domain: .UserDomainMask))
 
@@ -226,13 +226,13 @@ class AlamofireTests: _TestCase
                 }
             }
             
-        } // end of 1st task definition (NOTE: don't chain with `then` or `catch` for 1st task cancellation)
+        } // end of 1st task definition (NOTE: don't chain with `then` or `failure` for 1st task cancellation)
             
         task.then { (value: String?) -> Void in
             
             XCTFail("Should never reach here because task is cancelled.")
             
-        }.catch { (error: NSError?, isCancelled: Bool) -> Void in
+        }.failure { (error: NSError?, isCancelled: Bool) -> Void in
             
 //            println(error)
             
