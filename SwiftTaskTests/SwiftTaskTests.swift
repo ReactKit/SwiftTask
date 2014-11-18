@@ -29,7 +29,7 @@ class SwiftTaskTests: _TestCase
         // NOTE: this is non-async test
         if self.isAsync { return }
         
-        Task<Float, String, ErrorString>(value: "OK").onSuccess { value -> Void in
+        Task<Float, String, ErrorString>(value: "OK").success { value -> Void in
             XCTAssertEqual(value, "OK")
         }
     }
@@ -39,7 +39,7 @@ class SwiftTaskTests: _TestCase
         // NOTE: this is non-async test
         if self.isAsync { return }
         
-        Task<Float, String, ErrorString>(error: "ERROR").onFailure { error, isCancelled -> String in
+        Task<Float, String, ErrorString>(error: "ERROR").failure { error, isCancelled -> String in
             
             XCTAssertEqual(error!, "ERROR")
             return "RECOVERY"
@@ -58,7 +58,7 @@ class SwiftTaskTests: _TestCase
             fulfill("OK")
             return
             
-        }.onSuccess { value -> Void in
+        }.success { value -> Void in
             XCTAssertEqual(value, "OK")
         }
     }
@@ -67,7 +67,7 @@ class SwiftTaskTests: _TestCase
     // MARK: - Fulfill
     //--------------------------------------------------
     
-    func testFulfill_onSuccess()
+    func testFulfill_success()
     {
         var expect = self.expectationWithDescription(__FUNCTION__)
         
@@ -77,7 +77,7 @@ class SwiftTaskTests: _TestCase
                 fulfill("OK")
             }
             
-        }.onSuccess { value -> Void in
+        }.success { value -> Void in
                 
             XCTAssertEqual(value, "OK")
             expect.fulfill()
@@ -87,7 +87,7 @@ class SwiftTaskTests: _TestCase
         self.wait()
     }
     
-    func testFulfill_onSuccess_onFailure()
+    func testFulfill_success_failure()
     {
         var expect = self.expectationWithDescription(__FUNCTION__)
         
@@ -97,12 +97,12 @@ class SwiftTaskTests: _TestCase
                 fulfill("OK")
             }
          
-        }.onSuccess { value -> Void in
+        }.success { value -> Void in
             
             XCTAssertEqual(value, "OK")
             expect.fulfill()
             
-        }.onFailure { error, isCancelled -> Void in
+        }.failure { error, isCancelled -> Void in
             
             XCTFail("Should never reach here.")
             
@@ -111,7 +111,7 @@ class SwiftTaskTests: _TestCase
         self.wait()
     }
     
-    func testFulfill_onFailure_onSuccess()
+    func testFulfill_failure_success()
     {
         var expect = self.expectationWithDescription(__FUNCTION__)
         
@@ -121,13 +121,13 @@ class SwiftTaskTests: _TestCase
                 fulfill("OK")
             }
             
-        }.onFailure { error, isCancelled -> String in
+        }.failure { error, isCancelled -> String in
             
             XCTFail("Should never reach here.")
             
             return "RECOVERY"
             
-        }.onSuccess { value -> Void in
+        }.success { value -> Void in
             
             XCTAssertEqual(value, "OK", "value should be derived from 1st task, passing through 2nd failure task.")
             expect.fulfill()
@@ -137,7 +137,7 @@ class SwiftTaskTests: _TestCase
         self.wait()
     }
     
-    func testFulfill_onSuccessTaskFulfill()
+    func testFulfill_successTaskFulfill()
     {
         var expect = self.expectationWithDescription(__FUNCTION__)
         
@@ -147,7 +147,7 @@ class SwiftTaskTests: _TestCase
                 fulfill("OK")
             }
             
-        }.onSuccess { value -> Task<Float, String, ErrorString> in
+        }.success { value -> Task<Float, String, ErrorString> in
             
             XCTAssertEqual(value, "OK")
             
@@ -159,7 +159,7 @@ class SwiftTaskTests: _TestCase
                 
             }
             
-        }.onSuccess { value -> Void in
+        }.success { value -> Void in
             
             XCTAssertEqual(value, "OK2")
             
@@ -169,7 +169,7 @@ class SwiftTaskTests: _TestCase
         self.wait()
     }
     
-    func testFulfill_onSuccessTaskReject()
+    func testFulfill_successTaskReject()
     {
         var expect = self.expectationWithDescription(__FUNCTION__)
         
@@ -179,7 +179,7 @@ class SwiftTaskTests: _TestCase
                 fulfill("OK")
             }
             
-        }.onSuccess { value -> Task<Float, String, ErrorString> in
+        }.success { value -> Task<Float, String, ErrorString> in
             
             XCTAssertEqual(value, "OK")
             
@@ -191,11 +191,11 @@ class SwiftTaskTests: _TestCase
                 
             }
             
-        }.onSuccess { value -> Void in
+        }.success { value -> Void in
             
             XCTFail("Should never reach here.")
             
-        }.onFailure { error, isCancelled -> Void in
+        }.failure { error, isCancelled -> Void in
             
             XCTAssertEqual(error!, "ERROR")
             XCTAssertFalse(isCancelled)
@@ -207,7 +207,7 @@ class SwiftTaskTests: _TestCase
         self.wait()
     }
     
-    func testFulfill_onComplete()
+    func testFulfill_then()
     {
         typealias Task = SwiftTask.Task<Float, String, ErrorString>
         
@@ -219,14 +219,14 @@ class SwiftTaskTests: _TestCase
                 fulfill("OK")
             }
             
-        }.onComplete { value, errorInfo -> String in
-            // completeClosure can handle both fulfilled & rejected
+        }.then { value, errorInfo -> String in
+            // thenClosure can handle both fulfilled & rejected
                 
             XCTAssertEqual(value!, "OK")
             XCTAssertTrue(errorInfo == nil)
             return "OK2"
             
-        }.onComplete { value, errorInfo -> Void in
+        }.then { value, errorInfo -> Void in
                 
             XCTAssertEqual(value!, "OK2")
             XCTAssertTrue(errorInfo == nil)
@@ -241,7 +241,7 @@ class SwiftTaskTests: _TestCase
     // MARK: - Reject
     //--------------------------------------------------
     
-    func testReject_onFailure()
+    func testReject_failure()
     {
         var expect = self.expectationWithDescription(__FUNCTION__)
         
@@ -251,7 +251,7 @@ class SwiftTaskTests: _TestCase
                 reject("ERROR")
             }
             
-        }.onFailure { error, isCancelled -> Void in
+        }.failure { error, isCancelled -> Void in
                 
             XCTAssertEqual(error!, "ERROR")
             XCTAssertFalse(isCancelled)
@@ -263,7 +263,7 @@ class SwiftTaskTests: _TestCase
         self.wait()
     }
     
-    func testReject_onSuccess_onFailure()
+    func testReject_success_failure()
     {
         var expect = self.expectationWithDescription(__FUNCTION__)
         
@@ -273,11 +273,11 @@ class SwiftTaskTests: _TestCase
                 reject("ERROR")
             }
             
-        }.onSuccess { value -> Void in
+        }.success { value -> Void in
             
             XCTFail("Should never reach here.")
                 
-        }.onFailure { error, isCancelled -> Void in
+        }.failure { error, isCancelled -> Void in
             
             XCTAssertEqual(error!, "ERROR")
             XCTAssertFalse(isCancelled)
@@ -289,7 +289,7 @@ class SwiftTaskTests: _TestCase
         self.wait()
     }
     
-    func testReject_onFailure_onSuccess()
+    func testReject_failure_success()
     {
         var expect = self.expectationWithDescription(__FUNCTION__)
         
@@ -299,14 +299,14 @@ class SwiftTaskTests: _TestCase
                 reject("ERROR")
             }
         
-        }.onFailure { error, isCancelled -> String in
+        }.failure { error, isCancelled -> String in
             
             XCTAssertEqual(error!, "ERROR")
             XCTAssertFalse(isCancelled)
             
             return "RECOVERY"
             
-        }.onSuccess { value -> Void in
+        }.success { value -> Void in
             
             XCTAssertEqual(value, "RECOVERY", "value should be derived from 2nd failure task.")
             
@@ -317,7 +317,7 @@ class SwiftTaskTests: _TestCase
         self.wait()
     }
     
-    func testReject_onFailureTaskFulfill()
+    func testReject_failureTaskFulfill()
     {
         var expect = self.expectationWithDescription(__FUNCTION__)
         
@@ -327,7 +327,7 @@ class SwiftTaskTests: _TestCase
                 reject("ERROR")
             }
             
-        }.onFailure { error, isCancelled -> Task<Float, String, ErrorString> in
+        }.failure { error, isCancelled -> Task<Float, String, ErrorString> in
             
             XCTAssertEqual(error!, "ERROR")
             XCTAssertFalse(isCancelled)
@@ -340,7 +340,7 @@ class SwiftTaskTests: _TestCase
                 
             }
             
-        }.onSuccess { value -> Void in
+        }.success { value -> Void in
             
             XCTAssertEqual(value, "RECOVERY")
             
@@ -350,7 +350,7 @@ class SwiftTaskTests: _TestCase
         self.wait()
     }
     
-    func testReject_onFailureTaskReject()
+    func testReject_failureTaskReject()
     {
         var expect = self.expectationWithDescription(__FUNCTION__)
         
@@ -360,7 +360,7 @@ class SwiftTaskTests: _TestCase
                 reject("ERROR")
             }
             
-        }.onFailure { error, isCancelled -> Task<Float, String, ErrorString> in
+        }.failure { error, isCancelled -> Task<Float, String, ErrorString> in
             
             XCTAssertEqual(error!, "ERROR")
             XCTAssertFalse(isCancelled)
@@ -373,11 +373,11 @@ class SwiftTaskTests: _TestCase
                 
             }
             
-        }.onSuccess { value -> Void in
+        }.success { value -> Void in
             
             XCTFail("Should never reach here.")
             
-        }.onFailure { error, isCancelled -> Void in
+        }.failure { error, isCancelled -> Void in
             
             XCTAssertEqual(error!, "ERROR2")
             XCTAssertFalse(isCancelled)
@@ -389,7 +389,7 @@ class SwiftTaskTests: _TestCase
         self.wait()
     }
     
-    func testReject_onComplete()
+    func testReject_then()
     {
         typealias Task = SwiftTask.Task<Float, String, ErrorString>
         
@@ -401,8 +401,8 @@ class SwiftTaskTests: _TestCase
                 reject("ERROR")
             }
             
-        }.onComplete { value, errorInfo -> String in
-            // completeClosure can handle both fulfilled & rejected
+        }.then { value, errorInfo -> String in
+            // thenClosure can handle both fulfilled & rejected
             
             XCTAssertTrue(value == nil)
             XCTAssertEqual(errorInfo!.error!, "ERROR")
@@ -410,7 +410,7 @@ class SwiftTaskTests: _TestCase
             
             return "OK"
             
-        }.onComplete { value, errorInfo -> Void in
+        }.then { value, errorInfo -> Void in
             
             XCTAssertEqual(value!, "OK")
             XCTAssertTrue(errorInfo == nil)
@@ -438,16 +438,16 @@ class SwiftTaskTests: _TestCase
                 fulfill("OK")
             }
             
-        }.onProgress { oldValue, newValue in
+        }.progress { oldProgress, newProgress in
             
             progressCount++
             
             if self.isAsync {
                 // 0.0 <= progress <= 1.0
-//                XCTAssertGreaterThanOrEqual(newValue, 0)  // TODO: Xcode6.1-GM bug
-//                XCTAssertLessThanOrEqual(newValue, 1)     // TODO: Xcode6.1-GM bug
-                XCTAssertTrue(newValue >= 0)
-                XCTAssertTrue(newValue <= 1)
+//                XCTAssertGreaterThanOrEqual(newProgress, 0)  // TODO: Xcode6.1-GM bug
+//                XCTAssertLessThanOrEqual(newProgress, 1)     // TODO: Xcode6.1-GM bug
+                XCTAssertTrue(newProgress >= 0)
+                XCTAssertTrue(newProgress <= 1)
                 
                 // 1 <= progressCount <= 5
                 XCTAssertGreaterThanOrEqual(progressCount, 1)
@@ -457,7 +457,7 @@ class SwiftTaskTests: _TestCase
                 XCTFail("When isAsync=false, 1st task closure is already performed before registering this progress closure, so this closure should not be reached.")
             }
             
-        }.onSuccess { (value: String) -> Void in
+        }.success { (value: String) -> Void in
             
             XCTAssertEqual(value, "OK")
             
@@ -539,25 +539,25 @@ class SwiftTaskTests: _TestCase
         
         let task = self._interruptableTask()
         
-        task.onProgress { oldValue, newValue in
+        task.progress { oldProgress, newProgress in
             
             progressCount++
             
             // 0.0 <= progress <= 0.5 (not 1.0)
-//            XCTAssertGreaterThanOrEqual(newValue, 0)  // TODO: Xcode6.1-GM bug
-//            XCTAssertLessThanOrEqual(newValue, 0.5)   // TODO: Xcode6.1-GM bug
-            XCTAssertTrue(newValue >= 0)
-            XCTAssertTrue(newValue <= 0.5)
+//            XCTAssertGreaterThanOrEqual(newProgress, 0)  // TODO: Xcode6.1-GM bug
+//            XCTAssertLessThanOrEqual(newProgress, 0.5)   // TODO: Xcode6.1-GM bug
+            XCTAssertTrue(newProgress >= 0)
+            XCTAssertTrue(newProgress <= 0.5)
             
             // 1 <= progressCount <= 3 (not 5)
             XCTAssertGreaterThanOrEqual(progressCount, 1)
             XCTAssertLessThanOrEqual(progressCount, 3, "progressCount should be stopped to 3 instead of 5 because of cancellation.")
             
-        }.onSuccess { value -> Void in
+        }.success { value -> Void in
             
             XCTFail("Should never reach here because of cancellation.")
             
-        }.onFailure { error, isCancelled -> Void in
+        }.failure { error, isCancelled -> Void in
             
             XCTAssertEqual(error!, "I get bored.")
             XCTAssertTrue(isCancelled)
@@ -580,7 +580,7 @@ class SwiftTaskTests: _TestCase
         self.wait()
     }
     
-    func testCancel_onCompleteTask()
+    func testCancel_thenTask()
     {
         var expect = self.expectationWithDescription(__FUNCTION__)
         
@@ -588,14 +588,14 @@ class SwiftTaskTests: _TestCase
         
         var task2: _InterruptableTask? = nil
         
-        let task3 = task1.onComplete { value, errorInfo -> _InterruptableTask in
+        let task3 = task1.then { value, errorInfo -> _InterruptableTask in
             
             task2 = self._interruptableTask()
             return task2!
             
         }
         
-        task3.onFailure { error, isCancelled -> String in
+        task3.failure { error, isCancelled -> String in
             
             XCTAssertEqual(error!, "I get bored.")
             XCTAssertTrue(isCancelled)
@@ -634,12 +634,12 @@ class SwiftTaskTests: _TestCase
         
         let task = self._interruptableTask()
         
-        task.onProgress { _ in
+        task.progress { _ in
             
             progressCount++
             return
             
-        }.onSuccess { value -> Void in
+        }.success { value -> Void in
             
             XCTAssertEqual(value, "OK")
             XCTAssertEqual(progressCount, 5)
@@ -653,14 +653,14 @@ class SwiftTaskTests: _TestCase
             task.pause()
             
             XCTAssertEqual(task.state, TaskState.Paused)
-//            XCTAssertEqual(task.onProgress!, 0.5)   // TODO: Xcode6.1-GM bug
+//            XCTAssertEqual(task.progress!, 0.5)   // TODO: Xcode6.1-GM bug
             XCTAssertTrue(task.progress! == 0.5)
             
             // resume after 300ms (t=600ms)
             Async.main(after: 0.3) {
                 
                 XCTAssertEqual(task.state, TaskState.Paused)
-//                XCTAssertEqual(task.onProgress!, 0.5)   // TODO: Xcode6.1-GM bug
+//                XCTAssertEqual(task.progress!, 0.5)   // TODO: Xcode6.1-GM bug
                 XCTAssertTrue(task.progress! == 0.5)
                 
                 task.resume()
@@ -677,7 +677,7 @@ class SwiftTaskTests: _TestCase
     //--------------------------------------------------
     
     /// all fulfilled test
-    func testAll_onSuccess()
+    func testAll_success()
     {
         // NOTE: this is async test
         if !self.isAsync { return }
@@ -706,22 +706,22 @@ class SwiftTaskTests: _TestCase
             
             //
             // NOTE: 
-            // For tracking each task's progress, you simply call `task.onProgress`
-            // instead of `Task.all(tasks).onProgress`.
+            // For tracking each task's progress, you simply call `task.progress`
+            // instead of `Task.all(tasks).progress`.
             //
-            task.onProgress { oldValue, newValue in
-                println("each progress = \(newValue)")
+            task.progress { oldProgress, newProgress in
+                println("each progress = \(newProgress)")
                 return
             }
             
             tasks.append(task)
         }
         
-        Task.all(tasks).onProgress { (oldValue: Task.BulkProgress?, newValue: Task.BulkProgress) in
+        Task.all(tasks).progress { (oldProgress: Task.BulkProgress?, newProgress: Task.BulkProgress) in
             
-            println("all progress = \(newValue.completedCount) / \(newValue.totalCount)")
+            println("all progress = \(newProgress.completedCount) / \(newProgress.totalCount)")
         
-        }.onSuccess { values -> Void in
+        }.success { values -> Void in
             
             for i in 0..<values.count {
                 XCTAssertEqual(values[i], "OK \(i)")
@@ -735,7 +735,7 @@ class SwiftTaskTests: _TestCase
     }
     
     /// any rejected test
-    func testAll_onFailure()
+    func testAll_failure()
     {
         // NOTE: this is async test
         if !self.isAsync { return }
@@ -769,11 +769,11 @@ class SwiftTaskTests: _TestCase
             tasks.append(task)
         }
         
-        Task.all(tasks).onSuccess { values -> Void in
+        Task.all(tasks).success { values -> Void in
             
             XCTFail("Should never reach here because of Task.all failure.")
             
-        }.onFailure { error, isCancelled -> Void in
+        }.failure { error, isCancelled -> Void in
             
             XCTAssertEqual(error!, "ERROR", "Task.all non-cancelled error returns 1st-errored object (spec).")
             expect.fulfill()
@@ -819,11 +819,11 @@ class SwiftTaskTests: _TestCase
         
         let groupedTask = Task.all(tasks)
         
-        groupedTask.onSuccess { values -> Void in
+        groupedTask.success { values -> Void in
             
             XCTFail("Should never reach here.")
             
-        }.onFailure { error, isCancelled -> Void in
+        }.failure { error, isCancelled -> Void in
             
             XCTAssertEqual(error!, "Cancel")
             XCTAssertTrue(isCancelled)
@@ -880,7 +880,7 @@ class SwiftTaskTests: _TestCase
         
         let groupedTask = Task.all(tasks)
         
-        groupedTask.onSuccess { values -> Void in
+        groupedTask.success { values -> Void in
             
             for i in 0..<values.count {
                 XCTAssertEqual(values[i], "OK \(i)")
@@ -912,7 +912,7 @@ class SwiftTaskTests: _TestCase
     //--------------------------------------------------
     
     /// any fulfilled test
-    func testAny_onSuccess()
+    func testAny_success()
     {
         // NOTE: this is async test
         if !self.isAsync { return }
@@ -945,7 +945,7 @@ class SwiftTaskTests: _TestCase
             tasks.append(task)
         }
         
-        Task.any(tasks).onSuccess { value -> Void in
+        Task.any(tasks).success { value -> Void in
                 
             XCTAssertEqual(value, "OK 5")
             
@@ -957,7 +957,7 @@ class SwiftTaskTests: _TestCase
     }
     
     /// all rejected test
-    func testAny_onFailure()
+    func testAny_failure()
     {
         // NOTE: this is async test
         if !self.isAsync { return }
@@ -983,11 +983,11 @@ class SwiftTaskTests: _TestCase
             tasks.append(task)
         }
         
-        Task.any(tasks).onSuccess { value -> Void in
+        Task.any(tasks).success { value -> Void in
             
             XCTFail("Should never reach here.")
             
-        }.onFailure { error, isCancelled -> Void in
+        }.failure { error, isCancelled -> Void in
             
             XCTAssertTrue(error == nil, "Task.any non-cancelled error returns nil (spec).")
             XCTAssertFalse(isCancelled)
@@ -1034,11 +1034,11 @@ class SwiftTaskTests: _TestCase
         
         let groupedTask = Task.any(tasks)
         
-        groupedTask.onSuccess { value -> Void in
+        groupedTask.success { value -> Void in
             
             XCTFail("Should never reach here.")
             
-        }.onFailure { error, isCancelled -> Void in
+        }.failure { error, isCancelled -> Void in
             
             XCTAssertEqual(error!, "Cancel")
             XCTAssertTrue(isCancelled)
@@ -1096,7 +1096,7 @@ class SwiftTaskTests: _TestCase
         
         let groupedTask = Task.any(tasks)
         
-        groupedTask.onSuccess { value -> Void in
+        groupedTask.success { value -> Void in
             
             XCTAssertTrue(value.hasPrefix("OK"))
             expect.fulfill()
@@ -1125,7 +1125,7 @@ class SwiftTaskTests: _TestCase
     //--------------------------------------------------
     
     /// some fulfilled test
-    func testSome_onSuccess()
+    func testSome_success()
     {
         // NOTE: this is async test
         if !self.isAsync { return }
@@ -1156,7 +1156,7 @@ class SwiftTaskTests: _TestCase
             tasks.append(task)
         }
         
-        Task.some(tasks).onSuccess { values -> Void in
+        Task.some(tasks).success { values -> Void in
             
             XCTAssertEqual(values.count, 2)
             XCTAssertEqual(values[0], "OK 3")
@@ -1164,7 +1164,7 @@ class SwiftTaskTests: _TestCase
             
             expect.fulfill()
             
-        }.onFailure { error, isCancelled -> Void in
+        }.failure { error, isCancelled -> Void in
             
             XCTFail("Should never reach here because Task.some() will never reject internally.")
             

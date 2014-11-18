@@ -36,21 +36,21 @@ class BasicTests: _TestCase
             
         }
         
-        task.onProgress { oldValue, newValue in
+        task.progress { oldProgress, newProgress in
             
-            println("progress = \(newValue)")
+            println("progress = \(newProgress)")
             
-        }.onSuccess { value -> String in  // `task.onSuccess {...}` = JavaScript's `promise.then(onFulfilled)`
+        }.success { value -> String in  // `task.success {...}` = JavaScript's `promise.then(onFulfilled)`
             
             XCTAssertEqual(value, "OK")
             return "Now OK"
             
-        }.onFailure { error, isCancelled -> String in  // `task.onFailure {...}` = JavaScript's `promise.catch(onRejected)`
+        }.failure { error, isCancelled -> String in  // `task.failure {...}` = JavaScript's `promise.catch(onRejected)`
             
             XCTAssertEqual(error!, "ERROR")
             return "Now RECOVERED"
             
-        }.onComplete { (value: String?, errorInfo: Task.ErrorInfo?) -> Task in // `task.onComplete {...}` = JavaScript's `promise.then(onFulfilled, onRejected)`
+        }.then { value, errorInfo -> Task in // `task.then {...}` = JavaScript's `promise.then(onFulfilled, onRejected)`
             
             println("value = \(value)") // either "Now OK" or "Now RECOVERED"
             
@@ -59,7 +59,7 @@ class BasicTests: _TestCase
             
             return Task(error: "ABORT")
             
-        }.onComplete { (value: String?, errorInfo: Task.ErrorInfo?) -> Void in
+        }.then { value, errorInfo -> Void in
                 
             println("errorInfo = \(errorInfo)")
             

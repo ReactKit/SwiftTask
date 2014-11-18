@@ -78,7 +78,7 @@ class RetainCycleTests: _TestCase
         XCTAssertNotNil(self.task, "self.task (weak) should NOT be nil because of retain cycle: task <- dispatch_queue.")
         XCTAssertNotNil(self.player, "self.player (weak) should NOT nil because player is not retained by dispatch_queue.")
         
-        self.task!.onSuccess { value -> Void in
+        self.task!.success { value -> Void in
             
             XCTAssertEqual(value, "OK")
             expect.fulfill()
@@ -124,7 +124,7 @@ class RetainCycleTests: _TestCase
         XCTAssertNotNil(self.task, "self.task (weak) should NOT be nil because of retain cycle: task <- dispatch_queue.")
         XCTAssertNotNil(self.player, "self.player (weak) should NOT be nil because of retain cycle: player <- configure <- task.")
         
-        self.task!.onSuccess { value -> Void in
+        self.task!.success { value -> Void in
             
             XCTAssertEqual(value, "OK")
             expect.fulfill()
@@ -166,7 +166,7 @@ class RetainCycleTests: _TestCase
         XCTAssertNotNil(self.task, "self.task (weak) should not be nil because of retain cycle: task <- player <- dispatch_queue.")
         XCTAssertNotNil(self.player, "self.player (weak) should not be nil because of retain cycle: player <- configure <- task.")
         
-        self.task!.onSuccess { value -> Void in
+        self.task!.success { value -> Void in
             
             XCTAssertEqual(value, "OK")
             expect.fulfill()
@@ -210,7 +210,7 @@ class RetainCycleTests: _TestCase
         XCTAssertNotNil(self.task, "self.task (weak) should not be nil because of retain cycle: task <- player <- dispatch_queue.")
         XCTAssertNotNil(self.player, "self.player (weak) should not be nil because of retain cycle: player <- configure <- task.")
         
-        self.task!.onSuccess { value -> Void in
+        self.task!.success { value -> Void in
             
             XCTAssertEqual(value, "OK")
             expect.fulfill()

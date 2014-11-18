@@ -5,13 +5,12 @@ SwiftTask
 
 ![SwiftTask](Screenshots/diagram.png)
 
-### Ver 2.0.0 Changelog
+### Ver 2.0.0 Changelog (2014/11/18)
 
-- `task.progress()` is renamed to `task.onProgress()`
-    - `progressClosure`'s closure type changed from `Progress -> Void` to `(oldProgress: Progress?, newProgress: Progress) -> Void`
-- `task.then(thenClosure)` is renamed to `task.onComplete()`
-- `task.then(fulfilledClosure)` is renamed to `task.onSuccess()`
-- `task.catch(catchClosure)` is renamed to `task.onFailure()`
+- `task.progress()`'s `progressClosure` type changed from `Progress -> Void` to `(oldProgress: Progress?, newProgress: Progress) -> Void`
+- `task.then(fulfilledClosure)` is renamed to `task.success()`
+- `task.catch(catchClosure)` is renamed to `task.failure()`
+- `task.then()` is no longer used for fulfilled-only handling (this will improve Swift type-inference)
 
 
 ## Example
