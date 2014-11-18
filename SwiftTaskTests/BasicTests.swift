@@ -19,7 +19,7 @@ class BasicTests: _TestCase
         var progressCount = 0
         
         // define task
-        let task = Task { (progress, fulfill, reject, configure) in
+        let task = Task { progress, fulfill, reject, configure in
             
             Async.main(after: 0.1) {
                 progress(0.0)
@@ -35,17 +35,17 @@ class BasicTests: _TestCase
             return
             
         }
-            
+        
         task.onProgress { oldValue, newValue in
             
             println("progress = \(newValue)")
             
-        }.onSuccess { (value: String) -> String in  // `task.onSuccess {...}` = JavaScript's `promise.then(onFulfilled)`
+        }.onSuccess { value -> String in  // `task.onSuccess {...}` = JavaScript's `promise.then(onFulfilled)`
             
             XCTAssertEqual(value, "OK")
             return "Now OK"
-                
-        }.onFailure { (error: ErrorString?, isCancelled: Bool) -> String in  // `task.onFailure {...}` = JavaScript's `promise.catch(onRejected)`
+            
+        }.onFailure { error, isCancelled -> String in  // `task.onFailure {...}` = JavaScript's `promise.catch(onRejected)`
             
             XCTAssertEqual(error!, "ERROR")
             return "Now RECOVERED"

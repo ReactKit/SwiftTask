@@ -118,11 +118,11 @@ public class Task<Progress, Value, Error>
     
     ///
     /// Creates new task.
-    /// e.g. Task<P, V, E>(weakified: false) { (progress, fulfill, reject, configure) in ... }
+    /// e.g. Task<P, V, E>(weakified: false) { progress, fulfill, reject, configure in ... }
     ///
     /// :param: weakified Weakifies progress/fulfill/reject handlers to let player (inner asynchronous implementation inside initClosure) NOT CAPTURE this created new task. Normally, weakified = false should be set to gain "player -> task" retaining, so that task will be automatically deinited when player is deinited. If weakified = true, task must be manually retained somewhere else, or it will be immediately deinited.
     ///
-    /// :param: initClosure e.g. { (progress, fulfill, reject, configure) in ... }. fulfill(value) and reject(error) handlers must be called inside this closure, where calling progress(progressValue) handler is optional. Also as options, configure.pause/resume/cancel closures can be set to gain control from outside e.g. task.pause()/resume()/cancel(). When using configure, make sure to use weak modifier when appropriate to avoid "task -> player" retaining which often causes retain cycle.
+    /// :param: initClosure e.g. { progress, fulfill, reject, configure in ... }. fulfill(value) and reject(error) handlers must be called inside this closure, where calling progress(progressValue) handler is optional. Also as options, configure.pause/resume/cancel closures can be set to gain control from outside e.g. task.pause()/resume()/cancel(). When using configure, make sure to use weak modifier when appropriate to avoid "task -> player" retaining which often causes retain cycle.
     ///
     /// :returns: New task.
     ///
@@ -144,7 +144,7 @@ public class Task<Progress, Value, Error>
     /// creates fulfilled task
     public convenience init(value: Value)
     {
-        self.init(initClosure: { (progress, fulfill, reject, configure) in
+        self.init(initClosure: { progress, fulfill, reject, configure in
             fulfill(value)
             return
         })
@@ -153,7 +153,7 @@ public class Task<Progress, Value, Error>
     /// creates rejected task
     public convenience init(error: Error)
     {
-        self.init(initClosure: { (progress, fulfill, reject, configure) in
+        self.init(initClosure: { progress, fulfill, reject, configure in
             reject(error)
             return
         })
@@ -162,7 +162,7 @@ public class Task<Progress, Value, Error>
     /// creates promise-like task which only allows fulfill & reject (no progress & configure)
     public convenience init(promiseInitClosure: PromiseInitClosure)
     {
-        self.init(initClosure: { (progress, fulfill, reject, configure) in
+        self.init(initClosure: { progress, fulfill, reject, configure in
             promiseInitClosure(fulfill: fulfill, reject: { (error: Error) in reject(error) })
             return
         })
@@ -283,9 +283,7 @@ public class Task<Progress, Value, Error>
     {
         self.machine.addEventHandler(.Progress) { [weak self] context in
             if let progress = context.userInfo as? Progress {
-                if let self_ = self {
-                    progressClosure(oldValue: self_.progress, newValue: progress)
-                }
+                progressClosure(oldValue: self?.progress, newValue: progress)
             }
         }
         
