@@ -81,6 +81,7 @@ public class Task<Progress, Value, Error>
     public typealias RejectHandler = (Error) -> Void
     public typealias Configuration = TaskConfiguration
     
+    public typealias ProgressTuple = (oldProgress: Progress?, newProgress: Progress)
     public typealias BulkProgress = (completedCount: Int, totalCount: Int)
     
     public typealias PromiseInitClosure = (fulfill: FulFillHandler, reject: RejectHandler) -> Void
@@ -199,11 +200,10 @@ public class Task<Progress, Value, Error>
         }
         
         // TODO: how to nest these inside StateMachine's initClosure? (using `self` is not permitted)
-        // NOTE: use order > 100 (default) to let `progressClosure(self.progress, newProgress)` be invoked first before updating old `self.progress`
-        self.machine.addEventHandler(.Progress, order: 110) { [weak self] context in
-            if let progress = context.userInfo as? Progress {
+        self.machine.addEventHandler(.Progress, order: 90) { [weak self] context in
+            if let progressTuple = context.userInfo as? ProgressTuple {
                 if let self_ = self {
-                    self_.progress = progress
+                    self_.progress = progressTuple.newProgress
                 }
             }
         }
@@ -233,7 +233,8 @@ public class Task<Progress, Value, Error>
         if weakified {
             progressHandler = { [weak self] (progress: Progress) in
                 if let self_ = self {
-                    self_.machine <-! (.Progress, progress)
+                    let oldProgress = self_.progress
+                    self_.machine <-! (.Progress, (oldProgress, progress))
                 }
             }
             
@@ -251,7 +252,8 @@ public class Task<Progress, Value, Error>
         }
         else {
             progressHandler = { (progress: Progress) in
-                self.machine <-! (.Progress, progress)
+                let oldProgress = self.progress
+                self.machine <-! (.Progress, (oldProgress, progress))
                 return
             }
             
@@ -278,11 +280,11 @@ public class Task<Progress, Value, Error>
         self._cancel(error: nil)
     }
     
-    public func progress(progressClosure: (oldProgress: Progress?, newProgress: Progress) -> Void) -> Task
+    public func progress(progressClosure: ProgressTuple -> Void) -> Task
     {
         self.machine.addEventHandler(.Progress) { [weak self] context in
-            if let progress = context.userInfo as? Progress {
-                progressClosure(oldProgress: self?.progress, newProgress: progress)
+            if let progressTuple = context.userInfo as? ProgressTuple {
+                progressClosure(progressTuple)
             }
         }
         
