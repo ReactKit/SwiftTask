@@ -10,7 +10,7 @@ SwiftTask
 - `task.progress()`'s `progressClosure` type changed from `Progress -> Void` to `(oldProgress: Progress?, newProgress: Progress) -> Void`
 - `task.then(fulfilledClosure)` is renamed to `task.success()`
 - `task.catch(catchClosure)` is renamed to `task.failure()`
-- `task.then()` is no longer used for fulfilled-only handling (this will improve Swift type-inference)
+- `task.then()` is now used for completed (either fulfilled or rejected) case only, and **no longer used for fulfilled-only handling** (this will improve Swift type-inference)
 
 
 ## Example
@@ -45,10 +45,10 @@ let task = Task<Float, String, NSError> { progress, fulfill, reject, configure i
 
 }
 
-// set onSuccess & onFailure
-task.onSuccess { (value: String) -> Void in
+// set success & failure
+task.success { (value: String) -> Void in
     // do something with fulfilled value
-}.onFailure { (error: NSError?, isCancelled: Bool) -> Void in
+}.failure { (error: NSError?, isCancelled: Bool) -> Void in
     // do something with rejected error
 }
 
@@ -96,14 +96,14 @@ let task = AlamoFireTask { progress, fulfill, reject, configure in
     return
 }
 
-// set onProgress & onComplete
-task.onProgress { (oldProgress: Progress?, newProgress: Progress) in
+// set progress & then
+task.progress { (oldProgress: Progress?, newProgress: Progress) in
 
     println("\(newProgress.bytesWritten)")
     println("\(newProgress.totalBytesWritten)")
     println("\(newProgress.totalBytesExpectedToWrite)")
 
-}.onComplete { (value: String?, errorInfo: AlamoFireTask.ErrorInfo?) -> Void in
+}.then { (value: String?, errorInfo: AlamoFireTask.ErrorInfo?) -> Void in
     // do something with fulfilled value or rejected errorInfo
 }
 ```
@@ -131,7 +131,7 @@ let task = Task<Float, NSString?, NSError> { progress, fulfill, reject, configur
 }
 ```
 
-In order to pipeline future `task.value` or `task.errorInfo` (tuple of `(error: Error?, isCancelled: Bool)`) via `onComplete()`/`onSuccess()`/`onFailure()`, you have to call `fulfill(value)` and/or `reject(error)` inside `initClosure`.
+In order to pipeline future `task.value` or `task.errorInfo` (tuple of `(error: Error?, isCancelled: Bool)`) via `then()`/`success()`/`failure()`, you have to call `fulfill(value)` and/or `reject(error)` inside `initClosure`.
 
 Optionally, you can call `progress(progressValue)` multiple times before calling `fulfill`/`reject` to transfer `progressValue` outside of the `initClosure`, notifying it to `task` itself.
 
@@ -150,31 +150,31 @@ configure.cancel = { [weak player] in
 }
 ```
 
-### task.onProgress(_ progressClosure:) -> task
+### task.progress(_ progressClosure:) -> task
 
 ```swift
-task.onProgress { (oldValue: Progress?, newValue: Progress) in
-    println(newValue)
+task.progress { (oldProgress: Progress?, newProgress: Progress) in
+    println(newProgress)
     return
-}.onSuccess { ... }
+}.success { ... }
 ```
 
-`task.onProgress(progressClosure)` will add `progressClosure` to observe `progressValue` which is notified from inside previous `initClosure`. This method will return **same task**, so it is useful to chain with forthcoming `onComplete`/`onSuccess`/`onFailure`.
+`task.progress(progressClosure)` will add `progressClosure` to observe old/new `progressValue` which is notified from inside previous `initClosure`. This method will return **same task**, so it is useful to chain with forthcoming `then`/`success`/`failure`.
 
-### task.onComplete(_ completeClosure:) -> newTask
+### task.then(_ thenClosure:) -> newTask
 
-`task.onComplete(completeClosure)` will return a new task where `completeClosure` will be invoked when `task` is either **fulfilled** or **rejected**.
+`task.then(thenClosure)` will return a new task where `thenClosure` will be invoked when `task` is either **fulfilled** or **rejected**.
 
 This case is similar to JavaScript's `promise.then(onFulfilled, onRejected)`.
 
-`completeClosure` can be two types of closure form:
+`thenClosure` can be two types of closure form:
 
-1. `completeClosure: (Value?, ErrorInfo?) -> Value2` (flow: *task => newTask*)
+1. `thenClosure: (Value?, ErrorInfo?) -> Value2` (flow: *task => newTask*)
 
   ```swift
   // let task will be fulfilled with value "Hello"
 
-  task.onComplete { (value: String?, errorInfo: ErrorInfo?) -> String in
+  task.then { (value: String?, errorInfo: ErrorInfo?) -> String in
       // nil-check to find out whether task is fulfilled or rejected
       if errorInfo == nil {
           return "\(value!) World"
@@ -182,18 +182,18 @@ This case is similar to JavaScript's `promise.then(onFulfilled, onRejected)`.
       else {
           return "\(value!) Error"
       }
-  }.onSuccess { (value: String) -> Void in
+  }.success { (value: String) -> Void in
       println("\(value)")  // Hello World
       return"
   }
   ```
 
-2. `completeClosure: (Value?, ErrorInfo?) -> Task` (flow: *task => task2 => newTask*)
+2. `thenClosure: (Value?, ErrorInfo?) -> Task` (flow: *task => task2 => newTask*)
 
   ```swift
   // let task will be fulfilled with value "Hello"
 
-  task.onComplete { (value: String?, errorInfo: ErrorInfo?) -> Task<Float, String, NSError> in
+  task.then { (value: String?, errorInfo: ErrorInfo?) -> Task<Float, String, NSError> in
       if errorInfo == nil {
           // let task2 will be fulfilled with value "\(value!) Swift"
           let task2 = ...
@@ -202,42 +202,42 @@ This case is similar to JavaScript's `promise.then(onFulfilled, onRejected)`.
       else {
           return someOtherTask
       }
-  }.onSuccess { (value: String) -> Void in
+  }.success { (value: String) -> Void in
       println("\(value)")  // Hello Swift
       return"
   }
   ```
 
-### task.onSuccess(_ successClosure:) -> newTask
+### task.success(_ successClosure:) -> newTask
 
-Similar to `onComplete()` method, `task.onSuccess(successClosure)` will return a new task, but this time, `successClosure` will be invoked when task is **only fulfilled**.
+Similar to `then()` method, `task.success(successClosure)` will return a new task, but this time, `successClosure` will be invoked when task is **only fulfilled**.
 
 This case is similar to JavaScript's `promise.then(onFulfilled)`.
 
 ```swift
 // let task will be fulfilled with value "Hello"
 
-task.onSuccess { (value: String) -> String in
+task.success { (value: String) -> String in
   return "\(value) World"
-}.onSuccess { (value: String) -> Void in
+}.success { (value: String) -> Void in
   println("\(value)")  // Hello World
   return"
 }
 ```
 
-### task.onFailure(_ failureClosure:) -> newTask
+### task.failure(_ failureClosure:) -> newTask
 
-Just the opposite of `onSuccess()`, `task.onFailure(failureClosure)` will return a new task where `failureClosure` will be invoked when task is **only rejected/cancelled**.
+Just the opposite of `success()`, `task.failure(failureClosure)` will return a new task where `failureClosure` will be invoked when task is **only rejected/cancelled**.
 
 This case is similar to JavaScript's `promise.then(undefined, onRejected)` or `promise.catch(onRejected)`.
 
 ```swift
 // let task will be rejected with error "Oh My God"
 
-task.onSuccess { (value: String) -> Void in
+task.success { (value: String) -> Void in
     println("\(value)") // never reaches here
     return
-}.onFailure { (error: NSError?, isCancelled: Bool) -> Void in
+}.failure { (error: NSError?, isCancelled: Bool) -> Void in
     println("\(error!)")  // Oh My God
     return
 }
