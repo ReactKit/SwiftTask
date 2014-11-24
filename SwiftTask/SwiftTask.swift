@@ -358,20 +358,20 @@ public class Task<Progress, Value, Error>
     }
     
     /// success (fulfilled) + closure returning value
-    public func success<Value2>(fulfilledClosure: Value -> Value2) -> Task<Progress, Value2, Error>
+    public func success<Value2>(successClosure: Value -> Value2) -> Task<Progress, Value2, Error>
     {
         return self.success { (value: Value) -> Task<Progress, Value2, Error> in
-            return Task<Progress, Value2, Error>(value: fulfilledClosure(value))
+            return Task<Progress, Value2, Error>(value: successClosure(value))
         }
     }
     
     /// success (fulfilled) + closure returning task
-    public func success<Progress2, Value2>(fulfilledClosure: Value -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
+    public func success<Progress2, Value2>(successClosure: Value -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
     {
         let newTask = Task<Progress2, Value2, Error> { [weak self] (progress, fulfill, _reject: _RejectHandler, configure) in
             
             let bind = { (value: Value) -> Void in
-                let innerTask = fulfilledClosure(value)
+                let innerTask = successClosure(value)
                 
                 innerTask.then { (value: Value2?, errorInfo: ErrorInfo?) -> Void in
                     if let value = value {
