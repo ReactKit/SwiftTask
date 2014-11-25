@@ -8,7 +8,7 @@
 
 import SwiftState
 
-// TODO: nest inside Task class
+// NOTE: nested type inside generic Task class is not allowed in Swift 1.1
 public enum TaskState: String, StateType, Printable
 {
     case Paused = "Paused"
@@ -30,7 +30,6 @@ public enum TaskState: String, StateType, Printable
     }
 }
 
-// TODO: nest inside Task class
 public enum TaskEvent: String, StateEventType, Printable
 {
     case Pause = "Pause"
@@ -52,17 +51,11 @@ public enum TaskEvent: String, StateEventType, Printable
 }
 
 // NOTE: use class instead of struct to pass reference to closures so that future values can be stored
-// TODO: nest inside Task class
 public class TaskConfiguration
 {
     public var pause: (Void -> Void)?
     public var resume: (Void -> Void)?
     public var cancel: (Void -> Void)?
-    
-//    deinit
-//    {
-//        println("deinit: TaskConfiguration")
-//    }
     
     internal func clear()
     {
