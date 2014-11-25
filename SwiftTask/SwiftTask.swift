@@ -171,6 +171,8 @@ public class Task<Progress, Value, Error>
     {
         let configuration = Configuration()
         
+        weak var weakSelf = self
+        
         // setup state machine
         self.machine = Machine(state: .Running) {
             
@@ -190,33 +192,32 @@ public class Task<Progress, Value, Error>
                 return
             }
             
-        }
-        
-        // TODO: how to nest these inside StateMachine's initClosure? (using `self` is not permitted)
-        self.machine.addEventHandler(.Progress, order: 90) { [weak self] context in
-            if let progressTuple = context.userInfo as? ProgressTuple {
-                if let self_ = self {
-                    self_.progress = progressTuple.newProgress
+            $0.addEventHandler(.Progress, order: 90) { context in
+                if let progressTuple = context.userInfo as? ProgressTuple {
+                    if let self_ = weakSelf {
+                        self_.progress = progressTuple.newProgress
+                    }
                 }
             }
-        }
-        // NOTE: use order < 100 (default) to let fulfillHandler be invoked after setting value
-        self.machine.addEventHandler(.Fulfill, order: 90) { [weak self] context in
-            if let value = context.userInfo as? Value {
-                if let self_ = self {
-                    self_.value = value
+            
+            $0.addEventHandler(.Fulfill, order: 90) { context in
+                if let value = context.userInfo as? Value {
+                    if let self_ = weakSelf {
+                        self_.value = value
+                    }
                 }
+                configuration.clear()
             }
-            configuration.clear()
-        }
-        self.machine.addEventHandler(.Reject, order: 90) { [weak self] context in
-            if let errorInfo = context.userInfo as? ErrorInfo {
-                if let self_ = self {
-                    self_.errorInfo = errorInfo
+            $0.addEventHandler(.Reject, order: 90) { context in
+                if let errorInfo = context.userInfo as? ErrorInfo {
+                    if let self_ = weakSelf {
+                        self_.errorInfo = errorInfo
+                    }
+                    configuration.cancel?() // NOTE: call configured cancellation on reject as well
                 }
-                configuration.cancel?() // NOTE: call configured cancellation on reject as well
+                configuration.clear()
             }
-            configuration.clear()
+            
         }
         
         var progressHandler: ProgressHandler
