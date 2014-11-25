@@ -66,7 +66,7 @@
 		1F46DED4199EDF1000F97868 /* SwiftTask.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftTask.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F46DED8199EDF1000F97868 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1F46DED9199EDF1000F97868 /* SwiftTask.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftTask.h; sourceTree = "<group>"; };
-		1F46DEDF199EDF1000F97868 /* SwiftTaskTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftTaskTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1F46DEDF199EDF1000F97868 /* SwiftTask-OSXTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SwiftTask-OSXTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F46DEE2199EDF1000F97868 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1F46DEE3199EDF1000F97868 /* SwiftTaskTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftTaskTests.swift; sourceTree = "<group>"; };
 		1F46DEFA199EDF8100F97868 /* SwiftTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftTask.swift; sourceTree = "<group>"; };
@@ -138,7 +138,7 @@
 			isa = PBXGroup;
 			children = (
 				1F46DED4199EDF1000F97868 /* SwiftTask.framework */,
-				1F46DEDF199EDF1000F97868 /* SwiftTaskTests.xctest */,
+				1F46DEDF199EDF1000F97868 /* SwiftTask-OSXTests.xctest */,
 				48CD5A0C19AEE3570042B9F1 /* SwiftTask.framework */,
 				4822F0D019D00ABF00F5F572 /* SwiftTask-iOSTests.xctest */,
 			);
@@ -252,9 +252,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		1F46DED3199EDF1000F97868 /* SwiftTask */ = {
+		1F46DED3199EDF1000F97868 /* SwiftTask-OSX */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1F46DEE7199EDF1000F97868 /* Build configuration list for PBXNativeTarget "SwiftTask" */;
+			buildConfigurationList = 1F46DEE7199EDF1000F97868 /* Build configuration list for PBXNativeTarget "SwiftTask-OSX" */;
 			buildPhases = (
 				1F46DECF199EDF1000F97868 /* Sources */,
 				1F46DED0199EDF1000F97868 /* Frameworks */,
@@ -265,14 +265,14 @@
 			);
 			dependencies = (
 			);
-			name = SwiftTask;
+			name = "SwiftTask-OSX";
 			productName = SwiftTask;
 			productReference = 1F46DED4199EDF1000F97868 /* SwiftTask.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		1F46DEDE199EDF1000F97868 /* SwiftTaskTests */ = {
+		1F46DEDE199EDF1000F97868 /* SwiftTask-OSXTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1F46DEEA199EDF1000F97868 /* Build configuration list for PBXNativeTarget "SwiftTaskTests" */;
+			buildConfigurationList = 1F46DEEA199EDF1000F97868 /* Build configuration list for PBXNativeTarget "SwiftTask-OSXTests" */;
 			buildPhases = (
 				1F46DEDB199EDF1000F97868 /* Sources */,
 				1F46DEDC199EDF1000F97868 /* Frameworks */,
@@ -282,9 +282,9 @@
 			);
 			dependencies = (
 			);
-			name = SwiftTaskTests;
+			name = "SwiftTask-OSXTests";
 			productName = SwiftTaskTests;
-			productReference = 1F46DEDF199EDF1000F97868 /* SwiftTaskTests.xctest */;
+			productReference = 1F46DEDF199EDF1000F97868 /* SwiftTask-OSXTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		4822F0CF19D00ABF00F5F572 /* SwiftTask-iOSTests */ = {
@@ -364,8 +364,8 @@
 			);
 			projectRoot = "";
 			targets = (
-				1F46DED3199EDF1000F97868 /* SwiftTask */,
-				1F46DEDE199EDF1000F97868 /* SwiftTaskTests */,
+				1F46DED3199EDF1000F97868 /* SwiftTask-OSX */,
+				1F46DEDE199EDF1000F97868 /* SwiftTask-OSXTests */,
 				48CD5A0B19AEE3570042B9F1 /* SwiftTask-iOS */,
 				4822F0CF19D00ABF00F5F572 /* SwiftTask-iOSTests */,
 			);
@@ -383,7 +383,7 @@
 		1FA4634519A8D70A00DD8729 /* SwiftStateTests.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
-			path = SwiftStateTests.xctest;
+			path = "SwiftState-OSXTests.xctest";
 			remoteRef = 1FA4634419A8D70A00DD8729 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -573,7 +573,8 @@
 				INFOPLIST_FILE = SwiftTask/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				PRODUCT_NAME = "$(PROJECT_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -592,7 +593,8 @@
 				INFOPLIST_FILE = SwiftTask/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				PRODUCT_NAME = "$(PROJECT_NAME)";
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
@@ -679,7 +681,7 @@
 				INFOPLIST_FILE = SwiftTask/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_NAME = SwiftTask;
+				PRODUCT_NAME = "$(PROJECT_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -697,7 +699,7 @@
 				INFOPLIST_FILE = SwiftTask/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_NAME = SwiftTask;
+				PRODUCT_NAME = "$(PROJECT_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -717,7 +719,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1F46DEE7199EDF1000F97868 /* Build configuration list for PBXNativeTarget "SwiftTask" */ = {
+		1F46DEE7199EDF1000F97868 /* Build configuration list for PBXNativeTarget "SwiftTask-OSX" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1F46DEE8199EDF1000F97868 /* Debug */,
@@ -726,7 +728,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1F46DEEA199EDF1000F97868 /* Build configuration list for PBXNativeTarget "SwiftTaskTests" */ = {
+		1F46DEEA199EDF1000F97868 /* Build configuration list for PBXNativeTarget "SwiftTask-OSXTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1F46DEEB199EDF1000F97868 /* Debug */,
