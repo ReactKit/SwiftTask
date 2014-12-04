@@ -86,6 +86,10 @@ public class Task<Progress, Value, Error>
     internal typealias Machine = StateMachine<TaskState, TaskEvent>
     
     internal var machine: Machine!
+    
+    // store initial parameters for cloning task when using `try()`
+    internal let _weakified: Bool
+    internal var _initClosure: _InitClosure?    // will be nil on fulfilled/rejected
 
     /// progress value
     public internal(set) var progress: Progress?
@@ -122,11 +126,14 @@ public class Task<Progress, Value, Error>
     ///
     public init(weakified: Bool, initClosure: InitClosure)
     {
-        self.setup(weakified) { (progress, fulfill, _reject: ErrorInfo -> Void, configure) in
+        self._weakified = weakified
+        self._initClosure = { (progress, fulfill, _reject: _RejectHandler, configure) in
             // NOTE: don't expose rejectHandler with ErrorInfo (isCancelled) for public init
             initClosure(progress: progress, fulfill: fulfill, reject: { (error: Error?) in _reject(ErrorInfo(error: error, isCancelled: false)) }, configure: configure)
             return
         }
+        
+        self.setup(weakified, self._initClosure!)
     }
     
     /// creates task without weakifying progress/fulfill/reject handlers
@@ -162,13 +169,21 @@ public class Task<Progress, Value, Error>
         })
     }
     
-    internal init(_initClosure: _InitClosure)
+    /// NOTE: _initClosure has _RejectHandler as argument
+    internal init(weakified: Bool = false, _initClosure: _InitClosure)
     {
-        self.setup(false, _initClosure)
+        self._weakified = weakified
+        self._initClosure = _initClosure
+        
+        self.setup(weakified, _initClosure)
     }
     
     internal func setup(weakified: Bool, _initClosure: _InitClosure)
     {
+        #if DEBUG
+            println("[init] \(self)")
+        #endif
+        
         let configuration = Configuration()
         
         weak var weakSelf = self
@@ -192,30 +207,34 @@ public class Task<Progress, Value, Error>
                 return
             }
             
+            // NOTE: use order = 90 (< default = 100) to prepare setting value before handling progress/fulfill/reject
             $0.addEventHandler(.Progress, order: 90) { context in
                 if let progressTuple = context.userInfo as? ProgressTuple {
-                    if let self_ = weakSelf {
-                        self_.progress = progressTuple.newProgress
-                    }
+                    weakSelf?.progress = progressTuple.newProgress
                 }
             }
-            
             $0.addEventHandler(.Fulfill, order: 90) { context in
                 if let value = context.userInfo as? Value {
-                    if let self_ = weakSelf {
-                        self_.value = value
-                    }
+                    weakSelf?.value = value
                 }
                 configuration.clear()
             }
             $0.addEventHandler(.Reject, order: 90) { context in
                 if let errorInfo = context.userInfo as? ErrorInfo {
-                    if let self_ = weakSelf {
-                        self_.errorInfo = errorInfo
-                    }
+                    weakSelf?.errorInfo = errorInfo
                     configuration.cancel?() // NOTE: call configured cancellation on reject as well
                 }
                 configuration.clear()
+            }
+            
+            // clear `_initClosure` after fulfilled/rejected to prevent retain cycle
+            $0.addEventHandler(.Fulfill, order: 255) { context in
+                weakSelf?._initClosure = nil
+                return
+            }
+            $0.addEventHandler(.Reject, order: 255) { context in
+                weakSelf?._initClosure = nil
+                return
             }
             
         }
@@ -268,10 +287,34 @@ public class Task<Progress, Value, Error>
     
     deinit
     {
-//        println("deinit: \(self)")
+//        #if DEBUG
+//            println("[deinit] \(self)")
+//        #endif
         
         // cancel in case machine is still running
         self._cancel(error: nil)
+    }
+    
+    /// Returns new task that is retryable for `tryCount-1` times.
+    /// `task.try(n)` is conceptually equal to `task.failure(clonedTask1).failure(clonedTask2)...` with n-1 failure-able.
+    public func try(tryCount: Int) -> Task
+    {
+        if tryCount < 2 { return self }
+        
+        let weakified = self._weakified
+        let initClosure = self._initClosure
+        
+        if initClosure == nil { return self }
+        
+        var nextTask: Task? = self
+        
+        for i in 1...tryCount-1 {
+            nextTask = nextTask!.failure { _ -> Task in
+                return Task(weakified: weakified, _initClosure: initClosure!)   // create a clone-task when rejected
+            }
+        }
+        
+        return nextTask!
     }
     
     public func progress(progressClosure: ProgressTuple -> Void) -> Task
@@ -629,6 +672,20 @@ extension Task
             task.resume()
         }
     }
+}
+
+//--------------------------------------------------
+// MARK: - Custom Operators
+// + - * / % = < > ! & | ^ ~ .
+//--------------------------------------------------
+
+infix operator ~ { associativity left }
+
+/// abbreviation for `try()`
+/// e.g. (task ~ 3).then { ... }
+public func ~ <P, V, E>(task: Task<P, V, E>, tryCount: Int) -> Task<P, V, E>
+{
+    return task.try(tryCount)
 }
 
 //--------------------------------------------------

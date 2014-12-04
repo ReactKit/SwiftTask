@@ -673,6 +673,75 @@ class SwiftTaskTests: _TestCase
     }
     
     //--------------------------------------------------
+    // MARK: - Try
+    //--------------------------------------------------
+    
+    func testTry_success()
+    {
+        // NOTE: async only
+        if !self.isAsync { return }
+        
+        var expect = self.expectationWithDescription(__FUNCTION__)
+        var tryCount = 3
+        var completeCount = 0
+        
+        Task<Float, String, ErrorString> { progress, fulfill, reject, configure in
+            
+            self.perform {
+                completeCount++
+                
+                if completeCount < tryCount {
+                    reject("ERROR \(completeCount)")
+                }
+                else {
+                    fulfill("OK")
+                }
+            }
+            
+        }.try(tryCount).failure { errorInfo -> String in
+            
+            XCTFail("Should never reach here because `task.try(\(tryCount))` will be fulfilled on try[\(tryCount)] even though try[1...\(tryCount-1)] will be rejected.")
+            
+            return "DUMMY"
+            
+        }.success { value -> Void in
+            
+            XCTAssertEqual(value, "OK")
+            expect.fulfill()
+                
+        }
+        
+        self.wait()
+    }
+    
+    func testTry_failure()
+    {
+        var expect = self.expectationWithDescription(__FUNCTION__)
+        var tryCount = 3
+        var completeCount = 0
+        
+        let t = Task<Float, String, ErrorString> { progress, fulfill, reject, configure in
+            
+            self.perform {
+                completeCount++
+                reject("ERROR \(completeCount)")
+            }
+            
+        }.try(tryCount).failure { error, isCancelled -> String in
+            
+            XCTAssertEqual(error!, "ERROR \(completeCount)")
+            XCTAssertFalse(isCancelled)
+            
+            expect.fulfill()
+            
+            return "DUMMY"
+            
+        }
+        
+        self.wait()
+    }
+    
+    //--------------------------------------------------
     // MARK: - All
     //--------------------------------------------------
     

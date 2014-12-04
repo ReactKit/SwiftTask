@@ -13,9 +13,14 @@ class Player
 {
     var completionHandler: (Void -> Void)?
     
+    init()
+    {
+        println("[init] \(self)")
+    }
+    
     deinit
     {
-        println("deinit: Player")
+        println("[deinit] \(self)")
     }
     
     func doSomething(completion: (Void -> Void)? = nil)
