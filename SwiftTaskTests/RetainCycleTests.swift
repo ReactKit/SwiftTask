@@ -13,9 +13,14 @@ class Player
 {
     var completionHandler: (Void -> Void)?
     
+    init()
+    {
+        println("[init] \(self)")
+    }
+    
     deinit
     {
-        println("deinit: Player")
+        println("[deinit] \(self)")
     }
     
     func doSomething(completion: (Void -> Void)? = nil)
@@ -85,10 +90,10 @@ class RetainCycleTests: _TestCase
             
         }
         
-        self.wait {
-            XCTAssertNil(self.task)
-            XCTAssertNil(self.player)
-        }
+        self.wait()
+        
+        XCTAssertNil(self.task)
+        XCTAssertNil(self.player)
     }
     
     func testPlayer_completionAsArgument_configured()
@@ -131,10 +136,10 @@ class RetainCycleTests: _TestCase
             
         }
         
-        self.wait {
-            XCTAssertNil(self.task)
-            XCTAssertNil(self.player)
-        }
+        self.wait()
+        
+        XCTAssertNil(self.task)
+        XCTAssertNil(self.player)
     }
     
     func testPlayer_completionAsStoredProperty_notConfigured()
@@ -173,10 +178,10 @@ class RetainCycleTests: _TestCase
             
         }
         
-        self.wait {
-            XCTAssertNil(self.task)
-            XCTAssertNil(self.player)
-        }
+        self.wait()
+        
+        XCTAssertNil(self.task)
+        XCTAssertNil(self.player)
     }
     
     func testPlayer_completionAsStoredProperty_configured()
@@ -217,9 +222,9 @@ class RetainCycleTests: _TestCase
             
         }
         
-        self.wait {
-            XCTAssertNil(self.task)
-            XCTAssertNil(self.player)
-        }
+        self.wait()
+    
+        XCTAssertNil(self.task)
+        XCTAssertNil(self.player)
     }
 }

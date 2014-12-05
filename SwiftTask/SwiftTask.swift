@@ -65,7 +65,18 @@ public class TaskConfiguration
     }
 }
 
-public class Task<Progress, Value, Error>
+// abstract class for `weak _parentTask`
+public class _Task<Error>
+{
+    internal weak var _parentTask: _Task?
+    
+    public init() {}
+    public func pause() -> Bool { return true }
+    public func resume() -> Bool { return true }
+    public func cancel(error: Error? = nil) -> Bool { return true }
+}
+
+public class Task<Progress, Value, Error>: _Task<Error>
 {
     public typealias ErrorInfo = (error: Error?, isCancelled: Bool)
     
@@ -81,12 +92,16 @@ public class Task<Progress, Value, Error>
     public typealias InitClosure = (progress: ProgressHandler, fulfill: FulFillHandler, reject: RejectHandler, configure: TaskConfiguration) -> Void
     
     internal typealias _RejectHandler = (ErrorInfo) -> Void
-    internal typealias _InitClosure = (progress: ProgressHandler, fulfill: FulFillHandler, _reject: _RejectHandler, configure: TaskConfiguration) -> Void
+    internal typealias _InitClosure = (machine: Machine, progress: ProgressHandler, fulfill: FulFillHandler, _reject: _RejectHandler, configure: TaskConfiguration) -> Void
     
     internal typealias Machine = StateMachine<TaskState, TaskEvent>
     
     internal var machine: Machine!
-
+    
+    // store initial parameters for cloning task when using `try()`
+    internal let _weakified: Bool
+    internal var _initClosure: _InitClosure?    // will be nil on fulfilled/rejected
+    
     /// progress value
     public internal(set) var progress: Progress?
     
@@ -122,11 +137,15 @@ public class Task<Progress, Value, Error>
     ///
     public init(weakified: Bool, initClosure: InitClosure)
     {
-        self.setup(weakified) { (progress, fulfill, _reject: ErrorInfo -> Void, configure) in
+        self._weakified = weakified
+        self._initClosure = { machine, progress, fulfill, _reject, configure in
             // NOTE: don't expose rejectHandler with ErrorInfo (isCancelled) for public init
             initClosure(progress: progress, fulfill: fulfill, reject: { (error: Error?) in _reject(ErrorInfo(error: error, isCancelled: false)) }, configure: configure)
             return
         }
+        
+        super.init()
+        self.setup(weakified, self._initClosure!)
     }
     
     /// creates task without weakifying progress/fulfill/reject handlers
@@ -162,13 +181,22 @@ public class Task<Progress, Value, Error>
         })
     }
     
-    internal init(_initClosure: _InitClosure)
+    /// NOTE: _initClosure has _RejectHandler as argument
+    internal init(weakified: Bool = false, _initClosure: _InitClosure)
     {
-        self.setup(false, _initClosure)
+        self._weakified = weakified
+        self._initClosure = _initClosure
+        
+        super.init()
+        self.setup(weakified, _initClosure)
     }
     
     internal func setup(weakified: Bool, _initClosure: _InitClosure)
     {
+//        #if DEBUG
+//            println("[init] \(self)")
+//        #endif
+        
         let configuration = Configuration()
         
         weak var weakSelf = self
@@ -192,30 +220,34 @@ public class Task<Progress, Value, Error>
                 return
             }
             
+            // NOTE: use order = 90 (< default = 100) to prepare setting value before handling progress/fulfill/reject
             $0.addEventHandler(.Progress, order: 90) { context in
                 if let progressTuple = context.userInfo as? ProgressTuple {
-                    if let self_ = weakSelf {
-                        self_.progress = progressTuple.newProgress
-                    }
+                    weakSelf?.progress = progressTuple.newProgress
                 }
             }
-            
             $0.addEventHandler(.Fulfill, order: 90) { context in
                 if let value = context.userInfo as? Value {
-                    if let self_ = weakSelf {
-                        self_.value = value
-                    }
+                    weakSelf?.value = value
                 }
                 configuration.clear()
             }
             $0.addEventHandler(.Reject, order: 90) { context in
                 if let errorInfo = context.userInfo as? ErrorInfo {
-                    if let self_ = weakSelf {
-                        self_.errorInfo = errorInfo
-                    }
+                    weakSelf?.errorInfo = errorInfo
                     configuration.cancel?() // NOTE: call configured cancellation on reject as well
                 }
                 configuration.clear()
+            }
+            
+            // clear `_initClosure` & all StateMachine's handlers to prevent retain cycle
+            $0.addEventHandler(.Fulfill, order: 255) { context in
+                weakSelf?._initClosure = nil
+                weakSelf?.machine?.removeAllHandlers()
+            }
+            $0.addEventHandler(.Reject, order: 255) { context in
+                weakSelf?._initClosure = nil
+                weakSelf?.machine?.removeAllHandlers()
             }
             
         }
@@ -262,16 +294,74 @@ public class Task<Progress, Value, Error>
             }
         }
         
-        _initClosure(progress: progressHandler, fulfill: fulfillHandler, _reject: rejectHandler, configure: configuration)
+        _initClosure(machine: self.machine, progress: progressHandler, fulfill: fulfillHandler, _reject: rejectHandler, configure: configuration)
+        
+        let userPauseClosure = configuration.pause
+        let userResumeClosure = configuration.resume
+        let userCancelClosure = configuration.cancel
+        
+        // add parentTask-pause/resume/cancel functionalities after retrieving user-defined configuration
+        configuration.pause = { [weak self] in
+            userPauseClosure?()
+            
+            var task: _Task? = self
+            while let parentTask = task?._parentTask {
+                parentTask.pause()
+                task = parentTask
+            }
+            
+        }
+        configuration.resume = { [weak self] in
+            userResumeClosure?()
+            
+            var task: _Task? = self
+            while let parentTask = task?._parentTask {
+                parentTask.resume()
+                task = parentTask
+            }
+        }
+        configuration.cancel = { [weak self] in
+            userCancelClosure?()
+            
+            var task: _Task? = self
+            while let parentTask = task?._parentTask {
+                parentTask.cancel()
+                task = parentTask
+            }
+        }
         
     }
     
     deinit
     {
-//        println("deinit: \(self)")
+//        #if DEBUG
+//            println("[deinit] \(self)")
+//        #endif
         
         // cancel in case machine is still running
         self._cancel(error: nil)
+    }
+    
+    /// Returns new task that is retryable for `tryCount-1` times.
+    /// `task.try(n)` is conceptually equal to `task.failure(clonedTask1).failure(clonedTask2)...` with n-1 failure-able.
+    public func try(tryCount: Int) -> Task
+    {
+        if tryCount < 2 { return self }
+        
+        let weakified = self._weakified
+        let initClosure = self._initClosure
+        
+        if initClosure == nil { return self }
+        
+        var nextTask: Task? = self
+        
+        for i in 1...tryCount-1 {
+            nextTask = nextTask!.failure { _ -> Task in
+                return Task(weakified: weakified, _initClosure: initClosure!)   // create a clone-task when rejected
+            }
+        }
+        
+        return nextTask!
     }
     
     public func progress(progressClosure: ProgressTuple -> Void) -> Task
@@ -296,9 +386,9 @@ public class Task<Progress, Value, Error>
     /// then (fulfilled & rejected) + closure returning task
     public func then<Progress2, Value2>(thenClosure: (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
     {
-        let newTask = Task<Progress2, Value2, Error> { (progress, fulfill, _reject: _RejectHandler, configure) in
+        let newTask = Task<Progress2, Value2, Error> { machine, progress, fulfill, _reject, configure in
             
-            let bind = { (value: Value?, errorInfo: ErrorInfo?) -> Void in
+            let bind = { [weak machine] (value: Value?, errorInfo: ErrorInfo?) -> Void in
                 let innerTask = thenClosure(value, errorInfo)
                 
                 // NOTE: don't call `then` for innerTask, or recursive bindings may occur
@@ -309,6 +399,11 @@ public class Task<Progress, Value, Error>
                     case .Rejected:
                         _reject(innerTask.errorInfo!)
                     default:
+                        innerTask.machine.addEventHandler(.Progress) { context in
+                            if let (_, progressValue) = context.userInfo as? Task<Progress2, Value2, Error>.ProgressTuple {
+                                progress(progressValue)
+                            }
+                        }
                         innerTask.machine.addEventHandler(.Fulfill) { context in
                             if let value = context.userInfo as? Value2 {
                                 fulfill(value)
@@ -324,6 +419,14 @@ public class Task<Progress, Value, Error>
                 configure.pause = { innerTask.pause(); return }
                 configure.resume = { innerTask.resume(); return }
                 configure.cancel = { innerTask.cancel(); return }
+                
+                // pause/cancel innerTask if descendant task is already paused/cancelled
+                if machine!.state == .Paused {
+                    innerTask.pause()
+                }
+                else if machine!.state == .Cancelled {
+                    innerTask.cancel()
+                }
             }
             
             switch self.machine.state {
@@ -332,6 +435,11 @@ public class Task<Progress, Value, Error>
                 case .Rejected:
                     bind(nil, self.errorInfo!)
                 default:
+                    self.machine.addEventHandler(.Progress) { context in
+                        if let (_, progressValue) = context.userInfo as? Task<Progress2, Value2, Error>.ProgressTuple {
+                            progress(progressValue)
+                        }
+                    }
                     self.machine.addEventHandler(.Fulfill) { context in
                         if let value = context.userInfo as? Value {
                             bind(value, nil)
@@ -345,6 +453,8 @@ public class Task<Progress, Value, Error>
             }
             
         }
+        
+        newTask._parentTask = self
         
         return newTask
     }
@@ -360,12 +470,14 @@ public class Task<Progress, Value, Error>
     /// success (fulfilled) + closure returning task
     public func success<Progress2, Value2>(successClosure: Value -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
     {
-        let newTask = Task<Progress2, Value2, Error> { (progress, fulfill, _reject: _RejectHandler, configure) in
+        let newTask = Task<Progress2, Value2, Error> { machine, progress, fulfill, _reject, configure in
             
-            let bind = { (value: Value) -> Void in
+            let bind = { [weak machine] (value: Value) -> Void in
                 let innerTask = successClosure(value)
                 
-                innerTask.then { (value: Value2?, errorInfo: ErrorInfo?) -> Void in
+                innerTask.progress { _, progressValue in
+                    progress(progressValue)
+                }.then { (value: Value2?, errorInfo: ErrorInfo?) -> Void in
                     if let value = value {
                         fulfill(value)
                     }
@@ -377,6 +489,14 @@ public class Task<Progress, Value, Error>
                 configure.pause = { innerTask.pause(); return }
                 configure.resume = { innerTask.resume(); return }
                 configure.cancel = { innerTask.cancel(); return }
+                
+                // pause/cancel innerTask if descendant task is already paused/cancelled
+                if machine!.state == .Paused {
+                    innerTask.pause()
+                }
+                else if machine!.state == .Cancelled {
+                    innerTask.cancel()
+                }
             }
             
             switch self.machine.state {
@@ -385,6 +505,11 @@ public class Task<Progress, Value, Error>
                 case .Rejected:
                     _reject(self.errorInfo!)
                 default:
+                    self.machine.addEventHandler(.Progress) { context in
+                        if let (_, progressValue) = context.userInfo as? Task<Progress2, Value2, Error>.ProgressTuple {
+                            progress(progressValue)
+                        }
+                    }
                     self.machine.addEventHandler(.Fulfill) { context in
                         if let value = context.userInfo as? Value {
                             bind(value)
@@ -398,6 +523,8 @@ public class Task<Progress, Value, Error>
             }
             
         }
+        
+        newTask._parentTask = self
         
         return newTask
     }
@@ -413,12 +540,14 @@ public class Task<Progress, Value, Error>
     /// failure (rejected) + closure returning task
     public func failure(failureClosure: ErrorInfo -> Task) -> Task
     {
-        let newTask = Task { (progress, fulfill, _reject: _RejectHandler, configure) in
+        let newTask = Task { machine, progress, fulfill, _reject, configure in
             
-            let bind = { (errorInfo: ErrorInfo) -> Void in
+            let bind = { [weak machine] (errorInfo: ErrorInfo) -> Void in
                 let innerTask = failureClosure(errorInfo)
                 
-                innerTask.then { (value: Value?, errorInfo: ErrorInfo?) -> Void in
+                innerTask.progress { _, progressValue in
+                    progress(progressValue)
+                }.then { (value: Value?, errorInfo: ErrorInfo?) -> Void in
                     if let value = value {
                         fulfill(value)
                     }
@@ -429,7 +558,15 @@ public class Task<Progress, Value, Error>
                 
                 configure.pause = { innerTask.pause(); return }
                 configure.resume = { innerTask.resume(); return }
-                configure.cancel = { innerTask.cancel(); return}
+                configure.cancel = { innerTask.cancel(); return }
+                
+                // pause/cancel innerTask if descendant task is already paused/cancelled
+                if machine!.state == .Paused {
+                    innerTask.pause()
+                }
+                else if machine!.state == .Cancelled {
+                    innerTask.cancel()
+                }
             }
             
             switch self.machine.state {
@@ -439,6 +576,11 @@ public class Task<Progress, Value, Error>
                     let errorInfo = self.errorInfo!
                     bind(errorInfo)
                 default:
+                    self.machine.addEventHandler(.Progress) { context in
+                        if let (_, progressValue) = context.userInfo as? Task.ProgressTuple {
+                            progress(progressValue)
+                        }
+                    }
                     self.machine.addEventHandler(.Fulfill) { context in
                         if let value = context.userInfo as? Value {
                             fulfill(value)
@@ -453,20 +595,22 @@ public class Task<Progress, Value, Error>
             
         }
         
+        newTask._parentTask = self
+        
         return newTask
     }
     
-    public func pause() -> Bool
+    public override func pause() -> Bool
     {
         return self.machine <-! .Pause
     }
     
-    public func resume() -> Bool
+    public override func resume() -> Bool
     {
         return self.machine <-! .Resume
     }
     
-    public func cancel(error: Error? = nil) -> Bool
+    public override func cancel(error: Error? = nil) -> Bool
     {
         return self._cancel(error: error)
     }
@@ -481,7 +625,7 @@ extension Task
 {
     public class func all(tasks: [Task]) -> Task<BulkProgress, [Value], Error>
     {
-        return Task<BulkProgress, [Value], Error> { (progress, fulfill, _reject: _RejectHandler, configure) in
+        return Task<BulkProgress, [Value], Error> { machine, progress, fulfill, _reject, configure in
             
             var completedCount = 0
             let totalCount = tasks.count
@@ -527,7 +671,7 @@ extension Task
     
     public class func any(tasks: [Task]) -> Task
     {
-        return Task<Progress, Value, Error> { (progress, fulfill, _reject: _RejectHandler, configure) in
+        return Task<Progress, Value, Error> { machine, progress, fulfill, _reject, configure in
             
             var completedCount = 0
             var rejectedCount = 0
@@ -572,7 +716,7 @@ extension Task
     /// This new task will NEVER be internally rejected.
     public class func some(tasks: [Task]) -> Task<BulkProgress, [Value], Error>
     {
-        return Task<BulkProgress, [Value], Error> { (progress, fulfill, _reject: _RejectHandler, configure) in
+        return Task<BulkProgress, [Value], Error> { machine, progress, fulfill, _reject, configure in
             
             var completedCount = 0
             let totalCount = tasks.count
@@ -629,6 +773,20 @@ extension Task
             task.resume()
         }
     }
+}
+
+//--------------------------------------------------
+// MARK: - Custom Operators
+// + - * / % = < > ! & | ^ ~ .
+//--------------------------------------------------
+
+infix operator ~ { associativity left }
+
+/// abbreviation for `try()`
+/// e.g. (task ~ 3).then { ... }
+public func ~ <P, V, E>(task: Task<P, V, E>, tryCount: Int) -> Task<P, V, E>
+{
+    return task.try(tryCount)
 }
 
 //--------------------------------------------------

@@ -25,15 +25,10 @@ class _TestCase: XCTestCase
         super.tearDown()
     }
     
-    func wait(handler: (Void -> Void)? = nil)
+    func wait(_ timeout: NSTimeInterval = 3)
     {
-        self.waitForExpectationsWithTimeout(3) { error in
-            
+        self.waitForExpectationsWithTimeout(timeout) { error in
             println("wait error = \(error)")
-            
-            if let handler = handler {
-                handler()
-            }
         }
     }
     

@@ -1,9 +1,13 @@
 SwiftTask
 =========
 
-[Promise](http://www.html5rocks.com/en/tutorials/es6/promises/) + progress + pause + cancel, using [SwiftState](https://github.com/inamiy/SwiftState) (state machine).
+[Promise](http://www.html5rocks.com/en/tutorials/es6/promises/) + progress + pause + cancel + retry, using [SwiftState](https://github.com/inamiy/SwiftState) (state machine).
 
 ![SwiftTask](Screenshots/diagram.png)
+
+### Ver 2.1.0 Changelog (2014/12/05)
+
+- added **retryable** feature `try()`
 
 ### Ver 2.0.0 Changelog (2014/11/18)
 
@@ -108,12 +112,30 @@ task.progress { (oldProgress: Progress?, newProgress: Progress) in
 }
 ```
 
+### Retry-able
+
+From ver 2.1.0, `Task` is **retryable** for multiple times by using `try()` method ([Pull Request #9](https://github.com/ReactKit/SwiftTask/pull/9)).
+For example, `task.try(n)` will retry at most `n-1` times if `task` keeps rejected, and `task.try(1)` is obviously same as `task` itself having no retries.
+
+This feature is extremely useful for unstable tasks e.g. network connection.
+By implementing *retryable* from `SwiftTask`'s side, similar code is no longer needed for `player` (inner logic) class.
+
+```swift
+task.try(3).progress { ... }.success { ...
+    // this closure will be called even when task is rejected for 1st & 2nd try
+    // but finally fulfilled in 3rd try.
+}
+
+// shorthand
+(task ~ 3).then { ... }
+```
+
 For more examples, please see XCTest cases.
 
 
 ## API Reference
 
-### Task.init(closure:)
+### Task.init(initClosure:)
 
 Define your `task` inside `initClosure`.
 
@@ -242,6 +264,10 @@ task.success { (value: String) -> Void in
     return
 }
 ```
+
+### task.try(_ tryCount:) -> newTask
+
+See [Retry-able section](#retry-able).
 
 ### Task.all(_ tasks:) -> newTask
 
