@@ -127,7 +127,8 @@ public class Task<Progress, Value, Error>: _Task<Error>
     
     ///
     /// Creates new task.
-    /// e.g. Task<P, V, E>(weakified: false) { progress, fulfill, reject, configure in ... }
+    ///
+    /// - e.g. Task<P, V, E>(weakified: false) { progress, fulfill, reject, configure in ... }
     ///
     /// :param: weakified Weakifies progress/fulfill/reject handlers to let player (inner asynchronous implementation inside initClosure) NOT CAPTURE this created new task. Normally, weakified = false should be set to gain "player -> task" retaining, so that task will be automatically deinited when player is deinited. If weakified = true, task must be manually retained somewhere else, or it will be immediately deinited.
     ///
@@ -364,6 +365,11 @@ public class Task<Progress, Value, Error>: _Task<Error>
         return nextTask!
     }
     
+    ///
+    /// Add progress handler delivered from `initClosure`'s `progress()` argument.
+    ///
+    /// - e.g. task.progress { oldProgress, newProgress in ... }
+    ///
     public func progress(progressClosure: ProgressTuple -> Void) -> Task
     {
         self.machine.addEventHandler(.Progress) { [weak self] context in
@@ -375,7 +381,11 @@ public class Task<Progress, Value, Error>: _Task<Error>
         return self
     }
     
+    ///
     /// then (fulfilled & rejected) + closure returning value
+    ///
+    /// - e.g. task.then { value, errorInfo -> NextValueType in ... }
+    ///
     public func then<Value2>(thenClosure: (Value?, ErrorInfo?) -> Value2) -> Task<Progress, Value2, Error>
     {
         return self.then { (value: Value?, errorInfo: ErrorInfo?) -> Task<Progress, Value2, Error> in
@@ -383,7 +393,11 @@ public class Task<Progress, Value, Error>: _Task<Error>
         }
     }
     
+    ///
     /// then (fulfilled & rejected) + closure returning task
+    ///
+    /// - e.g. task.then { value, errorInfo -> NextTaskType in ... }
+    ///
     public func then<Progress2, Value2>(thenClosure: (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
     {
         let newTask = Task<Progress2, Value2, Error> { machine, progress, fulfill, _reject, configure in
@@ -459,7 +473,11 @@ public class Task<Progress, Value, Error>: _Task<Error>
         return newTask
     }
     
+    ///
     /// success (fulfilled) + closure returning value
+    ///
+    /// - e.g. task.success { value -> NextValueType in ... }
+    ///
     public func success<Value2>(successClosure: Value -> Value2) -> Task<Progress, Value2, Error>
     {
         return self.success { (value: Value) -> Task<Progress, Value2, Error> in
@@ -467,7 +485,11 @@ public class Task<Progress, Value, Error>: _Task<Error>
         }
     }
     
+    ///
     /// success (fulfilled) + closure returning task
+    ///
+    /// - e.g. task.success { value -> NextTaskType in ... }
+    ///
     public func success<Progress2, Value2>(successClosure: Value -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
     {
         let newTask = Task<Progress2, Value2, Error> { machine, progress, fulfill, _reject, configure in
@@ -529,7 +551,12 @@ public class Task<Progress, Value, Error>: _Task<Error>
         return newTask
     }
     
+    ///
     /// failure (rejected) + closure returning value
+    ///
+    /// - e.g. task.failure { errorInfo -> NextValueType in ... }
+    /// - e.g. task.failure { error, isCancelled -> NextValueType in ... }
+    ///
     public func failure(failureClosure: ErrorInfo -> Value) -> Task
     {
         return self.failure { (errorInfo: ErrorInfo) -> Task in
@@ -537,7 +564,12 @@ public class Task<Progress, Value, Error>: _Task<Error>
         }
     }
 
+    ///
     /// failure (rejected) + closure returning task
+    ///
+    /// - e.g. task.failure { errorInfo -> NextTaskType in ... }
+    /// - e.g. task.failure { error, isCancelled -> NextTaskType in ... }
+    ///
     public func failure(failureClosure: ErrorInfo -> Task) -> Task
     {
         let newTask = Task { machine, progress, fulfill, _reject, configure in
