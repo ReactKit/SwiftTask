@@ -7,6 +7,7 @@
 //
 
 import SwiftTask
+//import Alamofire  // comment-out: include source code for OSX test as well
 import XCTest
 
 class AlamofireTests: _TestCase
@@ -21,10 +22,6 @@ class AlamofireTests: _TestCase
             
             request(.GET, "http://httpbin.org/get", parameters: ["foo": "bar"])
             .response { (request, response, data, error) in
-                    
-                println(request)
-                println(response)
-                println(error)
                 
                 if let error = error {
                     reject(error)
@@ -39,9 +36,8 @@ class AlamofireTests: _TestCase
             
         }
         
-        task.then { (value: String) -> Void in
+        task.success { (value: String) -> Void in
             XCTAssertEqual(value, "OK")
-            
             expect.fulfill()
         }
         
@@ -59,10 +55,6 @@ class AlamofireTests: _TestCase
             request(.GET, dummyURLString, parameters: ["foo": "bar"])
             .response { (request, response, data, error) in
                 
-                println(request)
-                println(response)
-                println(error)
-                
                 if let error = error {
                     reject(error)   // pass non-nil error
                     return
@@ -74,16 +66,13 @@ class AlamofireTests: _TestCase
             
         }
             
-        task.then { (value: String?) -> Void in
+        task.success { (value: String?) -> Void in
             
             XCTFail("Should never reach here.")
             
         }.failure { (error: NSError?, isCancelled: Bool) -> Void in
             
-//            println(error)
-            
             XCTAssertTrue(error != nil, "Should receive non-nil error.")
-            
             expect.fulfill()
             
         }
@@ -106,10 +95,6 @@ class AlamofireTests: _TestCase
                 
             }.response { (request, response, data, error) in
                 
-                println(request)
-                println(response)
-                println(error)
-                
                 if let error = error {
                     reject(error)
                     return
@@ -124,16 +109,14 @@ class AlamofireTests: _TestCase
         }
         
         // set progress & then
-        task.progress { progress in
+        task.progress { _, progress in
             
             println("bytesWritten = \(progress.bytesWritten)")
             println("totalBytesWritten = \(progress.totalBytesWritten)")
             println("totalBytesExpectedToWrite = \(progress.totalBytesExpectedToWrite)")
+            println()
             
-        }.then { (value: String) -> Void in
-            
-            XCTAssertEqual(value, "OK")
-            
+        }.then { value, errorInfo -> Void in
             expect.fulfill()
         }
         
@@ -155,10 +138,6 @@ class AlamofireTests: _TestCase
             
             .response { (request, response, data, error) in
                 
-                println(request)
-                println(response)
-                println(error)
-                
                 if let error = error {
                     reject(error)
                     return
@@ -172,12 +151,8 @@ class AlamofireTests: _TestCase
             
         }
         
-        // set then
-        task.then { (value: String) -> Void in
-            
-            XCTAssertEqual(value, "OK")
-            XCTAssertEqual(nsProgress.completedUnitCount, 50)
-            
+        task.then { value, errorInfo -> Void in
+            XCTAssertTrue(nsProgress.completedUnitCount == 50)
             expect.fulfill()
         }
         
@@ -195,7 +170,7 @@ class AlamofireTests: _TestCase
     //   nsurlsession - (NSURLSessionDownloadTask cancelByProducingResumeData) crashes nsnetwork daemon iOS 7.0 - Stack Overflow
     //   http://stackoverflow.com/questions/25297750/nsurlsessiondownloadtask-cancelbyproducingresumedata-crashes-nsnetwork-daemon
     //
-    func __testCancel()
+    func testCancel()
     {
         var expect = self.expectationWithDescription(__FUNCTION__)
         
@@ -204,10 +179,6 @@ class AlamofireTests: _TestCase
             let downloadRequst = download(.GET, "http://httpbin.org/stream/100", Request.suggestedDownloadDestination(directory: .DocumentDirectory, domain: .UserDomainMask))
 
             .response { (request, response, data, error) in
-                
-                println(request)
-                println(response)
-                println(error)
                 
                 if let error = error {
                     reject(error)
@@ -228,13 +199,11 @@ class AlamofireTests: _TestCase
             
         } // end of 1st task definition (NOTE: don't chain with `then` or `failure` for 1st task cancellation)
             
-        task.then { (value: String?) -> Void in
+        task.success { (value: String?) -> Void in
             
             XCTFail("Should never reach here because task is cancelled.")
             
         }.failure { (error: NSError?, isCancelled: Bool) -> Void in
-            
-//            println(error)
             
             XCTAssertTrue(error == nil, "Should receive nil error via task.cancel().")
             XCTAssertTrue(isCancelled)
