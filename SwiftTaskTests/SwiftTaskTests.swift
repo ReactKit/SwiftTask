@@ -920,7 +920,7 @@ class SwiftTaskTests: _TestCase
         if !self.isAsync { return }
         
         var expect = self.expectationWithDescription(__FUNCTION__)
-        var tryCount = 3
+        var maxTryCount = 3
         var actualTryCount = 0
         
         Task<Float, String, ErrorString> { progress, fulfill, reject, configure in
@@ -929,7 +929,7 @@ class SwiftTaskTests: _TestCase
                 
                 actualTryCount++
                 
-                if actualTryCount < tryCount {
+                if actualTryCount < maxTryCount {
                     reject("ERROR \(actualTryCount)")
                 }
                 else {
@@ -937,9 +937,9 @@ class SwiftTaskTests: _TestCase
                 }
             }
             
-        }.try(tryCount).failure { errorInfo -> String in
+        }.try(maxTryCount).failure { errorInfo -> String in
             
-            XCTFail("Should never reach here because `task.try(\(tryCount))` will be fulfilled on try[\(tryCount)] even though try[1...\(tryCount-1)] will be rejected.")
+            XCTFail("Should never reach here because `task.try(\(maxTryCount))` will be fulfilled on try[\(maxTryCount)] even though try[1...\(maxTryCount-1)] will be rejected.")
             
             return "DUMMY"
             
@@ -959,7 +959,7 @@ class SwiftTaskTests: _TestCase
         if !self.isAsync { return }
         
         var expect = self.expectationWithDescription(__FUNCTION__)
-        var tryCount = 3
+        var maxTryCount = 3
         var actualTryCount = 0
         
         let t = Task<Float, String, ErrorString> { progress, fulfill, reject, configure in
@@ -969,7 +969,7 @@ class SwiftTaskTests: _TestCase
                 reject("ERROR \(actualTryCount)")
             }
             
-        }.try(tryCount).failure { error, isCancelled -> String in
+        }.try(maxTryCount).failure { error, isCancelled -> String in
             
             XCTAssertEqual(error!, "ERROR \(actualTryCount)")
             XCTAssertFalse(isCancelled)
@@ -989,7 +989,7 @@ class SwiftTaskTests: _TestCase
         if !self.isAsync { return }
         
         var expect = self.expectationWithDescription(__FUNCTION__)
-        var tryCount = 3
+        var maxTryCount = 3
         var actualTryCount = 0
         var progressCount = 0
         
@@ -1001,7 +1001,7 @@ class SwiftTaskTests: _TestCase
                 
                 actualTryCount++
                 
-                if actualTryCount < tryCount {
+                if actualTryCount < maxTryCount {
                     reject("ERROR \(actualTryCount)")
                 }
                 else {
@@ -1009,13 +1009,13 @@ class SwiftTaskTests: _TestCase
                 }
             }
             
-        }.try(tryCount).progress { _ in
+        }.try(maxTryCount).progress { _ in
             
             progressCount++
             
-            // 1 <= progressCount <= tryCount
+            // 1 <= progressCount <= maxTryCount
             XCTAssertGreaterThanOrEqual(progressCount, 1)
-            XCTAssertLessThanOrEqual(progressCount, tryCount)
+            XCTAssertLessThanOrEqual(progressCount, maxTryCount)
             
         }.success { value -> Void in
             
@@ -1026,7 +1026,7 @@ class SwiftTaskTests: _TestCase
         
         self.wait()
         
-        XCTAssertEqual(progressCount, tryCount)
+        XCTAssertEqual(progressCount, maxTryCount)
     }
     
     func testTry_pauseResume()
@@ -1035,7 +1035,7 @@ class SwiftTaskTests: _TestCase
         if !self.isAsync { return }
         
         var expect = self.expectationWithDescription(__FUNCTION__)
-        var tryCount = 5
+        var maxTryCount = 5
         var actualTryCount = 0
         
         let retryableTask = Task<Float, String, ErrorString> { progress, fulfill, reject, configure in
@@ -1051,7 +1051,7 @@ class SwiftTaskTests: _TestCase
                     NSThread.sleepForTimeInterval(0.1)
                 }
                 Async.main(after: 0.2) {
-                    if actualTryCount < tryCount {
+                    if actualTryCount < maxTryCount {
                         reject("ERROR \(actualTryCount)")
                     }
                     else {
@@ -1069,7 +1069,7 @@ class SwiftTaskTests: _TestCase
                 return
             }
             
-        }.try(tryCount)
+        }.try(maxTryCount)
         
         retryableTask.success { value -> Void in
             
@@ -1078,7 +1078,7 @@ class SwiftTaskTests: _TestCase
             
         }
         
-        // pause `retryableTask` at some point
+        // pause `retryableTask` at some point before all tries completes
         Async.main(after: 0.5) {
             retryableTask.pause()
             return
@@ -1091,7 +1091,56 @@ class SwiftTaskTests: _TestCase
         
         self.wait(5)    // wait a little longer
         
-        XCTAssertEqual(actualTryCount, tryCount)
+        XCTAssertEqual(actualTryCount, maxTryCount)
+    }
+    
+    func testTry_cancel()
+    {
+        // NOTE: this is async test
+        if !self.isAsync { return }
+        
+        var expect = self.expectationWithDescription(__FUNCTION__)
+        var maxTryCount = 3
+        var actualTryCount = 0
+        
+        let retryableTask = Task<Float, String, ErrorString> { progress, fulfill, reject, configure in
+            
+            Async.main(after: 0.1) {
+                
+                actualTryCount++
+                
+                if actualTryCount < maxTryCount {
+                    reject("ERROR \(actualTryCount)")
+                }
+                else {
+                    fulfill("OK")
+                }
+            }
+            
+            return
+            
+        }.try(maxTryCount)
+            
+        retryableTask.success { value -> Void in
+            
+            XCTFail("Should never reach here because `retryableTask` is cancelled.")
+                
+        }.failure { errorInfo -> Void in
+            
+            XCTAssertTrue(errorInfo.isCancelled)
+            expect.fulfill()
+            
+        }
+        
+        // cancel `retryableTask` at some point before all tries completes
+        Async.main(after: 0.2) {
+            retryableTask.cancel()
+            return
+        }
+        
+        self.wait()
+        
+        XCTAssertTrue(actualTryCount < maxTryCount, "`actualTryCount` should not reach `maxTryCount` because of cancellation.")
     }
     
     //--------------------------------------------------

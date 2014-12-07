@@ -350,9 +350,9 @@ public class Task<Progress, Value, Error>: _Task<Error>
     
     /// Returns new task that is retryable for `tryCount-1` times.
     /// `task.try(n)` is conceptually equal to `task.failure(clonedTask1).failure(clonedTask2)...` with n-1 failure-able.
-    public func try(tryCount: Int) -> Task
+    public func try(maxTryCount: Int) -> Task
     {
-        if tryCount < 2 { return self }
+        if maxTryCount < 2 { return self }
         
         let weakified = self._weakified
         let initClosure = self._initClosure
@@ -361,7 +361,7 @@ public class Task<Progress, Value, Error>: _Task<Error>
         
         var nextTask: Task = self
         
-        for i in 1...tryCount-1 {
+        for i in 1...maxTryCount-1 {
             nextTask = nextTask.failure { _ -> Task in
                 return Task(weakified: weakified, _initClosure: initClosure!)   // create a clone-task when rejected
             }
