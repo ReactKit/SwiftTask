@@ -921,8 +921,8 @@ class SwiftTaskTests: _TestCase
         
         var expect = self.expectationWithDescription(__FUNCTION__)
         var maxTryCount = 3
-        var actualTryCount = 0
         let fulfilledTryCount = 2
+        var actualTryCount = 0
         
         Task<Float, String, ErrorString> { progress, fulfill, reject, configure in
             
@@ -940,7 +940,7 @@ class SwiftTaskTests: _TestCase
             
         }.try(maxTryCount).failure { errorInfo -> String in
             
-            XCTFail("Should never reach here because `task.try(\(maxTryCount))` will be fulfilled on try[\(maxTryCount)] even though try[1...\(maxTryCount-1)] will be rejected.")
+            XCTFail("Should never reach here because `task.try(\(maxTryCount))` will be fulfilled on try[\(fulfilledTryCount)] even though try[1...\(fulfilledTryCount-1)] will be rejected.")
             
             return "DUMMY"
             
