@@ -922,6 +922,7 @@ class SwiftTaskTests: _TestCase
         var expect = self.expectationWithDescription(__FUNCTION__)
         var maxTryCount = 3
         var actualTryCount = 0
+        let fulfilledTryCount = 2
         
         Task<Float, String, ErrorString> { progress, fulfill, reject, configure in
             
@@ -929,7 +930,7 @@ class SwiftTaskTests: _TestCase
                 
                 actualTryCount++
                 
-                if actualTryCount < maxTryCount {
+                if actualTryCount != fulfilledTryCount {
                     reject("ERROR \(actualTryCount)")
                 }
                 else {
@@ -951,6 +952,8 @@ class SwiftTaskTests: _TestCase
         }
         
         self.wait()
+        
+        XCTAssertEqual(actualTryCount, fulfilledTryCount, "`actualTryCount` should be stopped at `fulfilledTryCount`, not `maxTryCount`.")
     }
     
     func testTry_failure()
@@ -962,7 +965,7 @@ class SwiftTaskTests: _TestCase
         var maxTryCount = 3
         var actualTryCount = 0
         
-        let t = Task<Float, String, ErrorString> { progress, fulfill, reject, configure in
+        Task<Float, String, ErrorString> { progress, fulfill, reject, configure in
             
             self.perform {
                 actualTryCount++
@@ -981,6 +984,8 @@ class SwiftTaskTests: _TestCase
         }
         
         self.wait()
+        
+        XCTAssertEqual(actualTryCount, maxTryCount, "`actualTryCount` should reach `maxTryCount` because task keeps rejected and never fulfilled.")
     }
     
     func testTry_progress()
