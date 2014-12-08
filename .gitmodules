@@ -1,9 +1,9 @@
-[submodule "Vendor/SwiftState"]
-	path = Vendor/SwiftState
-	url = https://github.com/ReactKit/SwiftState.git
 [submodule "Vendor/Alamofire"]
 	path = Vendor/Alamofire
 	url = https://github.com/Alamofire/Alamofire.git
 [submodule "Vendor/Async"]
 	path = Vendor/Async
 	url = https://github.com/duemunk/Async.git
+[submodule "Carthage.checkout/SwiftState"]
+	path = Carthage.checkout/SwiftState
+	url = https://github.com/ReactKit/SwiftState.git
