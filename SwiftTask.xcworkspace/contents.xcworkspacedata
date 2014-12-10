@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Workspace
    version = "1.0">
-   <FileRef
-      location = "group:Carthage.checkout">
-   </FileRef>
+   <Group
+      location = "group:Carthage.checkout"
+      name = "Carthage.checkout">
+      <FileRef
+         location = "group:SwiftState/SwiftState.xcodeproj">
+      </FileRef>
+   </Group>
    <FileRef
       location = "group:SwiftTask.xcodeproj">
    </FileRef>
