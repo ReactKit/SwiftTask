@@ -27,10 +27,6 @@
 		485C31F21A1D619A00040DA3 /* TypeInferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485C31F01A1D619A00040DA3 /* TypeInferenceTests.swift */; };
 		48A1E8221A366F9C007619EB /* SwiftTask.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F46DED4199EDF1000F97868 /* SwiftTask.framework */; };
 		48A1E8231A366FA8007619EB /* SwiftTask.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48CD5A0C19AEE3570042B9F1 /* SwiftTask.framework */; };
-		48C6AB331A3683410076A158 /* SwiftState.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48C6AB2E1A3682F00076A158 /* SwiftState.framework */; };
-		48C6AB341A3683480076A158 /* SwiftState.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48C6AB301A3682F00076A158 /* SwiftState.framework */; };
-		48C6AB351A36839F0076A158 /* SwiftState.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48C6AB301A3682F00076A158 /* SwiftState.framework */; };
-		48C6AB6A1A3688850076A158 /* SwiftState.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48C6AB2E1A3682F00076A158 /* SwiftState.framework */; };
 		48CD5A3C19AEEBDF0042B9F1 /* SwiftTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEFA199EDF8100F97868 /* SwiftTask.swift */; };
 		48CD5A4619AEEC2E0042B9F1 /* SwiftTask.h in Headers */ = {isa = PBXBuildFile; fileRef = 1F46DED9199EDF1000F97868 /* SwiftTask.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
@@ -51,8 +47,6 @@
 		4822F0D019D00ABF00F5F572 /* SwiftTask-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SwiftTask-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		48511C5A19C17563002FE03C /* RetainCycleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RetainCycleTests.swift; sourceTree = "<group>"; };
 		485C31F01A1D619A00040DA3 /* TypeInferenceTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TypeInferenceTests.swift; sourceTree = "<group>"; };
-		48C6AB2E1A3682F00076A158 /* SwiftState.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SwiftState.framework; sourceTree = "<group>"; };
-		48C6AB301A3682F00076A158 /* SwiftState.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SwiftState.framework; sourceTree = "<group>"; };
 		48CD5A0C19AEE3570042B9F1 /* SwiftTask.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftTask.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -61,7 +55,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				48C6AB341A3683480076A158 /* SwiftState.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,7 +63,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				48A1E8221A366F9C007619EB /* SwiftTask.framework in Frameworks */,
-				48C6AB351A36839F0076A158 /* SwiftState.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,7 +71,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				48A1E8231A366FA8007619EB /* SwiftTask.framework in Frameworks */,
-				48C6AB6A1A3688850076A158 /* SwiftState.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -87,7 +78,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				48C6AB331A3683410076A158 /* SwiftState.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -105,7 +95,6 @@
 		1F46DECA199EDF1000F97868 = {
 			isa = PBXGroup;
 			children = (
-				48C6AB2C1A3682F00076A158 /* Carthage.build */,
 				1FA4631219A8D70A00DD8729 /* Vendor */,
 				1F46DED6199EDF1000F97868 /* SwiftTask */,
 				1F46DEE0199EDF1000F97868 /* SwiftTaskTests */,
@@ -187,31 +176,6 @@
 				1FA4631719A8D70A00DD8729 /* Alamofire.swift */,
 			);
 			path = Source;
-			sourceTree = "<group>";
-		};
-		48C6AB2C1A3682F00076A158 /* Carthage.build */ = {
-			isa = PBXGroup;
-			children = (
-				48C6AB2D1A3682F00076A158 /* iOS */,
-				48C6AB2F1A3682F00076A158 /* Mac */,
-			);
-			path = Carthage.build;
-			sourceTree = "<group>";
-		};
-		48C6AB2D1A3682F00076A158 /* iOS */ = {
-			isa = PBXGroup;
-			children = (
-				48C6AB2E1A3682F00076A158 /* SwiftState.framework */,
-			);
-			path = iOS;
-			sourceTree = "<group>";
-		};
-		48C6AB2F1A3682F00076A158 /* Mac */ = {
-			isa = PBXGroup;
-			children = (
-				48C6AB301A3682F00076A158 /* SwiftState.framework */,
-			);
-			path = Mac;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
