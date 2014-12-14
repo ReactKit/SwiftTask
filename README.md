@@ -17,6 +17,11 @@ SwiftTask
 - `task.then()` is now used for completed (either fulfilled or rejected) case only, and **no longer used for fulfilled-only handling** (this will improve Swift type-inference)
 
 
+## How to install
+
+See [ReactKit Wiki page](https://github.com/ReactKit/ReactKit/wiki/How-to-install).
+
+
 ## Example
 
 ### Basic
