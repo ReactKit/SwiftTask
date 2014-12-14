@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		1F0E284019C1DEA0005EF467 /* Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F0E282319C1DEA0005EF467 /* Async.swift */; };
+		1F1C2D061A3D265400944BCA /* SwiftState.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F1C2D051A3D265400944BCA /* SwiftState.framework */; };
+		1F1C2D071A3D268E00944BCA /* SwiftState.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F1C2D051A3D265400944BCA /* SwiftState.framework */; };
 		1F20250219ADA8FD00DE0495 /* BasicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F20250119ADA8FD00DE0495 /* BasicTests.swift */; };
 		1F2C0C1C1A32A15300CFBB47 /* AlamofireTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F5FA35619A374E600975FB9 /* AlamofireTests.swift */; };
 		1F2C0C1D1A32A15300CFBB47 /* AlamofireTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F5FA35619A374E600975FB9 /* AlamofireTests.swift */; };
@@ -25,10 +27,6 @@
 		48511C5B19C17563002FE03C /* RetainCycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48511C5A19C17563002FE03C /* RetainCycleTests.swift */; };
 		485C31F11A1D619A00040DA3 /* TypeInferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485C31F01A1D619A00040DA3 /* TypeInferenceTests.swift */; };
 		485C31F21A1D619A00040DA3 /* TypeInferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485C31F01A1D619A00040DA3 /* TypeInferenceTests.swift */; };
-		48A0FC771A3A7B8B00FE2637 /* SwiftState.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48A0FC711A3A7B8B00FE2637 /* SwiftState.framework */; };
-		48A0FC7A1A3A7B8B00FE2637 /* SwiftState.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48A0FC741A3A7B8B00FE2637 /* SwiftState.framework */; };
-		48A0FC7F1A3A7CA900FE2637 /* SwiftState.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48A0FC711A3A7B8B00FE2637 /* SwiftState.framework */; };
-		48A0FC801A3A7CAF00FE2637 /* SwiftState.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48A0FC741A3A7B8B00FE2637 /* SwiftState.framework */; };
 		48A1E8221A366F9C007619EB /* SwiftTask.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F46DED4199EDF1000F97868 /* SwiftTask.framework */; };
 		48A1E8231A366FA8007619EB /* SwiftTask.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48CD5A0C19AEE3570042B9F1 /* SwiftTask.framework */; };
 		48CD5A3C19AEEBDF0042B9F1 /* SwiftTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEFA199EDF8100F97868 /* SwiftTask.swift */; };
@@ -37,6 +35,7 @@
 
 /* Begin PBXFileReference section */
 		1F0E282319C1DEA0005EF467 /* Async.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Async.swift; sourceTree = "<group>"; };
+		1F1C2D051A3D265400944BCA /* SwiftState.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftState.framework; path = Carthage.checkout/SwiftState/build/Debug/SwiftState.framework; sourceTree = "<group>"; };
 		1F20250119ADA8FD00DE0495 /* BasicTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasicTests.swift; sourceTree = "<group>"; };
 		1F46DED4199EDF1000F97868 /* SwiftTask.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftTask.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F46DED8199EDF1000F97868 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -51,8 +50,6 @@
 		4822F0D019D00ABF00F5F572 /* SwiftTask-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SwiftTask-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		48511C5A19C17563002FE03C /* RetainCycleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RetainCycleTests.swift; sourceTree = "<group>"; };
 		485C31F01A1D619A00040DA3 /* TypeInferenceTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TypeInferenceTests.swift; sourceTree = "<group>"; };
-		48A0FC711A3A7B8B00FE2637 /* SwiftState.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SwiftState.framework; sourceTree = "<group>"; };
-		48A0FC741A3A7B8B00FE2637 /* SwiftState.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SwiftState.framework; sourceTree = "<group>"; };
 		48CD5A0C19AEE3570042B9F1 /* SwiftTask.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftTask.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -61,7 +58,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				48A0FC7A1A3A7B8B00FE2637 /* SwiftState.framework in Frameworks */,
+				1F1C2D061A3D265400944BCA /* SwiftState.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -69,7 +66,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				48A0FC801A3A7CAF00FE2637 /* SwiftState.framework in Frameworks */,
 				48A1E8221A366F9C007619EB /* SwiftTask.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -78,7 +74,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				48A0FC7F1A3A7CA900FE2637 /* SwiftState.framework in Frameworks */,
 				48A1E8231A366FA8007619EB /* SwiftTask.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -87,7 +82,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				48A0FC771A3A7B8B00FE2637 /* SwiftState.framework in Frameworks */,
+				1F1C2D071A3D268E00944BCA /* SwiftState.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -105,7 +100,7 @@
 		1F46DECA199EDF1000F97868 = {
 			isa = PBXGroup;
 			children = (
-				48A0FC6F1A3A7B8B00FE2637 /* Carthage.build */,
+				1F1C2D051A3D265400944BCA /* SwiftState.framework */,
 				1FA4631219A8D70A00DD8729 /* Vendor */,
 				1F46DED6199EDF1000F97868 /* SwiftTask */,
 				1F46DEE0199EDF1000F97868 /* SwiftTaskTests */,
@@ -187,31 +182,6 @@
 				1FA4631719A8D70A00DD8729 /* Alamofire.swift */,
 			);
 			path = Source;
-			sourceTree = "<group>";
-		};
-		48A0FC6F1A3A7B8B00FE2637 /* Carthage.build */ = {
-			isa = PBXGroup;
-			children = (
-				48A0FC701A3A7B8B00FE2637 /* iOS */,
-				48A0FC731A3A7B8B00FE2637 /* Mac */,
-			);
-			path = Carthage.build;
-			sourceTree = "<group>";
-		};
-		48A0FC701A3A7B8B00FE2637 /* iOS */ = {
-			isa = PBXGroup;
-			children = (
-				48A0FC711A3A7B8B00FE2637 /* SwiftState.framework */,
-			);
-			path = iOS;
-			sourceTree = "<group>";
-		};
-		48A0FC731A3A7B8B00FE2637 /* Mac */ = {
-			isa = PBXGroup;
-			children = (
-				48A0FC741A3A7B8B00FE2637 /* SwiftState.framework */,
-			);
-			path = Mac;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -528,10 +498,6 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Carthage.build/Mac",
-				);
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = SwiftTask/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -553,10 +519,6 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Carthage.build/Mac",
-				);
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = SwiftTask/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -575,7 +537,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
 					"$(inherited)",
-					"$(PROJECT_DIR)/Carthage.build/Mac",
 				);
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -595,7 +556,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
 					"$(inherited)",
-					"$(PROJECT_DIR)/Carthage.build/Mac",
 				);
 				INFOPLIST_FILE = SwiftTaskTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks $(PROJECT_DIR)/Carthage.build/Mac";
@@ -610,7 +570,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
-					"$(PROJECT_DIR)/Carthage.build/iOS",
 				);
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -630,7 +589,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
-					"$(PROJECT_DIR)/Carthage.build/iOS",
 				);
 				INFOPLIST_FILE = SwiftTaskTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
@@ -649,10 +607,6 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Carthage.build/iOS",
-				);
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -675,10 +629,6 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Carthage.build/iOS",
-				);
 				INFOPLIST_FILE = SwiftTask/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
