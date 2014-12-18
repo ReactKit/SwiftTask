@@ -60,6 +60,10 @@ class AlamofireTests: _TestCase
                     return
                 }
                 
+                if response?.statusCode >= 300 {
+                    reject(NSError())
+                }
+                
                 fulfill("OK")
                 
             }

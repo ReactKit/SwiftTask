@@ -359,15 +359,33 @@ public class Task<Progress, Value, Error>: _Task<Error>
         
         if initClosure == nil { return self }
         
-        var nextTask: Task = self
+        let newTask = Task { [weak self] machine, progress, fulfill, _reject, configure in
         
-        for i in 1...maxTryCount-1 {
-            nextTask = nextTask.failure { _ -> Task in
-                return Task(weakified: weakified, _initClosure: initClosure!)   // create a clone-task when rejected
+            var nextTask: Task = self!
+        
+            for i in 1...maxTryCount-1 {
+                nextTask = nextTask.progress { _, progressValue in
+                    progress(progressValue)
+                }.failure { _ -> Task in
+                    return Task(weakified: weakified, _initClosure: initClosure!)   // create a clone-task when rejected
+                }
             }
+            
+            nextTask.progress { _, progressValue in
+                progress(progressValue)
+            }.success { value -> Void in
+                fulfill(value)
+            }.failure { errorInfo -> Void in
+                _reject(errorInfo)
+            }
+            
+            configure.pause = { nextTask.pause(); return }
+            configure.resume = { nextTask.resume(); return }
+            configure.cancel = { nextTask.cancel(); return }
+            
         }
         
-        return nextTask
+        return newTask
     }
     
     ///
@@ -455,11 +473,12 @@ public class Task<Progress, Value, Error>: _Task<Error>
                     case .Rejected:
                         bind(nil, self_.errorInfo!)
                     default:
-                        self_.machine.addEventHandler(.Progress) { context in
-                            if let (_, progressValue) = context.userInfo as? Task<Progress2, Value2, Error>.ProgressTuple {
-                                progress(progressValue)
-                            }
-                        }
+                        // comment-out: only innerTask's progress should be sent to newTask
+//                        self_.machine.addEventHandler(.Progress) { context in
+//                            if let (_, progressValue) = context.userInfo as? Task<Progress2, Value2, Error>.ProgressTuple {
+//                                progress(progressValue)
+//                            }
+//                        }
                         self_.machine.addEventHandler(.Fulfill) { context in
                             if let value = context.userInfo as? Value {
                                 bind(value, nil)
@@ -535,11 +554,12 @@ public class Task<Progress, Value, Error>: _Task<Error>
                     case .Rejected:
                         _reject(self_.errorInfo!)
                     default:
-                        self_.machine.addEventHandler(.Progress) { context in
-                            if let (_, progressValue) = context.userInfo as? Task<Progress2, Value2, Error>.ProgressTuple {
-                                progress(progressValue)
-                            }
-                        }
+                        // comment-out: only innerTask's progress should be sent to newTask
+//                        self_.machine.addEventHandler(.Progress) { context in
+//                            if let (_, progressValue) = context.userInfo as? Task<Progress2, Value2, Error>.ProgressTuple {
+//                                progress(progressValue)
+//                            }
+//                        }
                         self_.machine.addEventHandler(.Fulfill) { context in
                             if let value = context.userInfo as? Value {
                                 bind(value)
@@ -618,11 +638,12 @@ public class Task<Progress, Value, Error>: _Task<Error>
                         let errorInfo = self_.errorInfo!
                         bind(errorInfo)
                     default:
-                        self_.machine.addEventHandler(.Progress) { context in
-                            if let (_, progressValue) = context.userInfo as? Task.ProgressTuple {
-                                progress(progressValue)
-                            }
-                        }
+                        // comment-out: only innerTask's progress should be sent to newTask
+//                        self_.machine.addEventHandler(.Progress) { context in
+//                            if let (_, progressValue) = context.userInfo as? Task.ProgressTuple {
+//                                progress(progressValue)
+//                            }
+//                        }
                         self_.machine.addEventHandler(.Fulfill) { context in
                             if let value = context.userInfo as? Value {
                                 fulfill(value)
