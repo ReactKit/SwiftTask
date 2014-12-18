@@ -495,7 +495,7 @@ class SwiftTaskTests: _TestCase
             return
         }.success { value -> Void in
             XCTAssertEqual(value, "OK")
-            XCTAssertEqual(progressCount, 10, "`task3` should receive progresses from `task` & `task2`, so total `progressCount` should be 5 + 5 = 10 on task3-fulfilled.")
+            XCTAssertEqual(progressCount, 5, "`task3` should receive progress only from `task2` but not from `task`.")
             expect.fulfill()
         }
         
@@ -522,10 +522,10 @@ class SwiftTaskTests: _TestCase
             progressCount++
             println(progressValues)
             return
-            }.success { value -> Void in
-                XCTAssertEqual(value, "OK")
-                XCTAssertEqual(progressCount, 10, "`task3` should receive progresses from `task` & `task2`, so total `progressCount` should be 5 + 5 = 10 on task3-fulfilled.")
-                expect.fulfill()
+        }.success { value -> Void in
+            XCTAssertEqual(value, "OK")
+            XCTAssertEqual(progressCount, 5, "`task3` should receive progress only from `task2` but not from `task`.")
+            expect.fulfill()
         }
         
         self.wait()
@@ -553,7 +553,7 @@ class SwiftTaskTests: _TestCase
             return
         }.success { value -> Void in
             XCTAssertEqual(value, "OK")
-            XCTAssertEqual(progressCount, 10, "`task3` should receive progresses from `task` & `task2`, so total `progressCount` should be 5 + 5 = 10 on task3-fulfilled.")
+            XCTAssertEqual(progressCount, 5, "`task3` should receive progress only from `task2` but not from `task`.")
             expect.fulfill()
         }
         
@@ -768,10 +768,12 @@ class SwiftTaskTests: _TestCase
         var expect = self.expectationWithDescription(__FUNCTION__)
         
         let task = self._interruptableTask()
+        weak var innerTask: _InterruptableTask?
         
         // chain async-task with then
         let task2 = task.then { [weak self] _ -> _InterruptableTask in
-            return self!._interruptableTask()
+            innerTask = self!._interruptableTask()
+            return innerTask!
         }
         
         task2.success { value -> Void in
@@ -785,8 +787,10 @@ class SwiftTaskTests: _TestCase
             // NOTE: parentTask should also be paused (if not, `task` will never be fulfilled/rejected)
             task2.pause()
             
+            XCTAssertNil(innerTask, "`innerTask` has not been created yet.")
+            
             XCTAssertEqual(task2.state, TaskState.Paused)
-            XCTAssertTrue(task2.progress? == 0.5)
+            XCTAssertNil(task2.progress, "`task2.progress` should be nil because `innerTask.progress()` has not been invoked yet.")
             
             XCTAssertEqual(task.state, TaskState.Paused, "Parent task should also be paused.")
             XCTAssertTrue(task.progress? == 0.5)
@@ -795,7 +799,7 @@ class SwiftTaskTests: _TestCase
             Async.main(after: 0.3) {
                 
                 XCTAssertEqual(task2.state, TaskState.Paused)
-                XCTAssertTrue(task2.progress? == 0.5)
+                XCTAssertNil(task2.progress, "`task2.progress` should still be nil.")
                 
                 XCTAssertEqual(task.state, TaskState.Paused, "Parent task should also be paused.")
                 XCTAssertTrue(task.progress? == 0.5)
@@ -818,10 +822,12 @@ class SwiftTaskTests: _TestCase
         var expect = self.expectationWithDescription(__FUNCTION__)
         
         let task = self._interruptableTask()
+        weak var innerTask: _InterruptableTask?
         
         // chain async-task with success
         let task2 = task.success { [weak self] _ -> _InterruptableTask in
-            return self!._interruptableTask()
+            innerTask = self!._interruptableTask()
+            return innerTask!
         }
         
         task2.success { value -> Void in
@@ -836,7 +842,7 @@ class SwiftTaskTests: _TestCase
             task2.pause()
             
             XCTAssertEqual(task2.state, TaskState.Paused)
-            XCTAssertTrue(task2.progress? == 0.5)
+            XCTAssertNil(task2.progress, "`task2.progress` should be nil because `innerTask.progress()` has not been invoked yet.")
             
             XCTAssertEqual(task.state, TaskState.Paused, "Parent task should also be paused.")
             XCTAssertTrue(task.progress? == 0.5)
@@ -844,8 +850,10 @@ class SwiftTaskTests: _TestCase
             // resume after 0.3sec (t=0.6)
             Async.main(after: 0.3) {
                 
+                XCTAssertNil(innerTask, "`innerTask` has not been created yet.")
+                
                 XCTAssertEqual(task2.state, TaskState.Paused)
-                XCTAssertTrue(task2.progress? == 0.5)
+                XCTAssertNil(task2.progress, "`task2.progress` should still be nil.")
                 
                 XCTAssertEqual(task.state, TaskState.Paused, "Parent task should also be paused.")
                 XCTAssertTrue(task.progress? == 0.5)
@@ -868,10 +876,12 @@ class SwiftTaskTests: _TestCase
         var expect = self.expectationWithDescription(__FUNCTION__)
         
         let task = self._interruptableTask()
+        weak var innerTask: _InterruptableTask?
         
         // chain async-task with failure
         let task2 = task.failure { [weak self] _ -> _InterruptableTask in
-            return self!._interruptableTask()
+            innerTask = self!._interruptableTask()
+            return innerTask!
         }
             
         task2.success { value -> Void in
@@ -886,7 +896,7 @@ class SwiftTaskTests: _TestCase
             task2.pause()
             
             XCTAssertEqual(task2.state, TaskState.Paused)
-            XCTAssertTrue(task2.progress? == 0.5)
+            XCTAssertNil(task2.progress, "`task2.progress` should be nil because `innerTask.progress()` has not been invoked yet.")
             
             XCTAssertEqual(task.state, TaskState.Paused, "Parent task should also be paused.")
             XCTAssertTrue(task.progress? == 0.5)
@@ -895,7 +905,7 @@ class SwiftTaskTests: _TestCase
             Async.main(after: 0.3) {
                 
                 XCTAssertEqual(task2.state, TaskState.Paused)
-                XCTAssertTrue(task2.progress? == 0.5)
+                XCTAssertNil(task2.progress, "`task2.progress` should still be nil.")
                 
                 XCTAssertEqual(task.state, TaskState.Paused, "Parent task should also be paused.")
                 XCTAssertTrue(task.progress? == 0.5)
