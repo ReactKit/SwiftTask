@@ -200,6 +200,7 @@ public class Task<Progress, Value, Error>: _Task<Error>
         
         let configuration = Configuration()
         
+        // NOTE: Swift 1.1 compiler fails if using [weak self] instead...
         weak var weakSelf = self
         
         // setup state machine
