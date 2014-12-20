@@ -65,14 +65,14 @@ public class TaskConfiguration
     }
 }
 
-// abstract class for `weak _parentTask`
+// abstract class for `weak _parentTask` with arbitrary `Progress` & `Value` types
 public class _Task<Error>
 {
     internal weak var _parentTask: _Task?
     
     internal let _weakified: Bool
     
-    public init(weakified: Bool) { self._weakified = weakified }
+    public init(weakified: Bool, paused: Bool) { self._weakified = weakified }
     public func pause() -> Bool { return true }
     public func resume() -> Bool { return true }
     public func cancel(error: Error? = nil) -> Bool { return true }
@@ -98,10 +98,13 @@ public class Task<Progress, Value, Error>: _Task<Error>
     
     internal typealias Machine = StateMachine<TaskState, TaskEvent>
     
-    internal var machine: Machine!
+    private var machine: Machine!
     
     // store initial parameters for cloning task when using `try()`
     internal var _initClosure: _InitClosure?    // will be nil on fulfilled/rejected
+    
+    /// wrapper closure for `_initClosure` to invoke only once when started `.Running`
+    internal var _performInitClosure: (Void -> Void)?
     
     /// progress value
     public internal(set) var progress: Progress?
@@ -127,84 +130,109 @@ public class Task<Progress, Value, Error>: _Task<Error>
     }
     
     ///
-    /// Creates new task.
+    /// Creates a new task.
     ///
-    /// - e.g. Task<P, V, E>(weakified: false) { progress, fulfill, reject, configure in ... }
+    /// - e.g. Task<P, V, E>(weakified: false, paused: false) { progress, fulfill, reject, configure in ... }
     ///
     /// :param: weakified Weakifies progress/fulfill/reject handlers to let player (inner asynchronous implementation inside initClosure) NOT CAPTURE this created new task. Normally, weakified = false should be set to gain "player -> task" retaining, so that task will be automatically deinited when player is deinited. If weakified = true, task must be manually retained somewhere else, or it will be immediately deinited.
+    ///
+    /// :param: paused Flag to invoke `initClosure` immediately or not. If `paused = true`, task's initial state will be `.Paused` and needs to `resume()` in order to start `.Running`. If `paused = false`, `initClosure` will be invoked immediately.
     ///
     /// :param: initClosure e.g. { progress, fulfill, reject, configure in ... }. fulfill(value) and reject(error) handlers must be called inside this closure, where calling progress(progressValue) handler is optional. Also as options, configure.pause/resume/cancel closures can be set to gain control from outside e.g. task.pause()/resume()/cancel(). When using configure, make sure to use weak modifier when appropriate to avoid "task -> player" retaining which often causes retain cycle.
     ///
     /// :returns: New task.
     ///
-    public init(weakified: Bool, initClosure: InitClosure)
+    public init(weakified: Bool, paused: Bool, initClosure: InitClosure)
     {
-        super.init(weakified: weakified)
+        super.init(weakified: weakified, paused: paused)
         
         let _initClosure: _InitClosure = { machine, progress, fulfill, _reject, configure in
             // NOTE: don't expose rejectHandler with ErrorInfo (isCancelled) for public init
             initClosure(progress: progress, fulfill: fulfill, reject: { (error: Error?) in _reject(ErrorInfo(error: error, isCancelled: false)) }, configure: configure)
-            return
         }
         
-        self.setup(weakified, _initClosure)
+        self.setup(weakified, paused: paused, _initClosure)
     }
     
-    /// creates task without weakifying progress/fulfill/reject handlers
+    ///
+    /// creates a new task without weakifying progress/fulfill/reject handlers
+    ///
+    /// - e.g. Task<P, V, E>(paused: false) { progress, fulfill, reject, configure in ... }
+    ///
+    public convenience init(paused: Bool, initClosure: InitClosure)
+    {
+        self.init(weakified: false, paused: paused, initClosure: initClosure)
+    }
+    
+    ///
+    /// creates a new task without weakifying progress/fulfill/reject handlers (non-paused)
+    ///
+    /// - e.g. Task<P, V, E> { progress, fulfill, reject, configure in ... }
+    ///
     public convenience init(initClosure: InitClosure)
     {
-        self.init(weakified: false, initClosure: initClosure)
+        self.init(weakified: false, paused: false, initClosure: initClosure)
     }
     
-    /// creates fulfilled task
+    ///
+    /// creates fulfilled task (non-paused)
+    ///
+    /// - e.g. Task<P, V, E>(value: someValue)
+    ///
     public convenience init(value: Value)
     {
         self.init(initClosure: { progress, fulfill, reject, configure in
             fulfill(value)
-            return
         })
     }
     
-    /// creates rejected task
+    ///
+    /// creates rejected task (non-paused)
+    ///
+    /// - e.g. Task<P, V, E>(error: someError)
+    ///
     public convenience init(error: Error)
     {
         self.init(initClosure: { progress, fulfill, reject, configure in
             reject(error)
-            return
         })
     }
     
+    ///
     /// creates promise-like task which only allows fulfill & reject (no progress & configure)
+    ///
+    /// - e.g. Task<Any, Value, Error> { fulfill, reject in ... }
+    ///
     public convenience init(promiseInitClosure: PromiseInitClosure)
     {
         self.init(initClosure: { progress, fulfill, reject, configure in
             promiseInitClosure(fulfill: fulfill, reject: { (error: Error) in reject(error) })
-            return
         })
     }
     
-    /// NOTE: _initClosure has _RejectHandler as argument
-    internal init(weakified: Bool = false, _initClosure: _InitClosure)
+    /// internal-init for accessing private `machine` inside `_initClosure`
+    /// (NOTE: _initClosure has _RejectHandler as argument)
+    internal init(weakified: Bool = false, paused: Bool = false, _initClosure: _InitClosure)
     {
-        super.init(weakified: weakified)
-        self.setup(weakified, _initClosure)
+        super.init(weakified: weakified, paused: paused)
+        self.setup(weakified, paused: paused, _initClosure)
     }
     
-    internal func setup(weakified: Bool, _initClosure: _InitClosure)
+    internal func setup(weakified: Bool, paused: Bool, _initClosure: _InitClosure)
     {
 //        #if DEBUG
 //            println("[init] \(self)")
 //        #endif
         
-        self._initClosure = _initClosure
-        
         let configuration = Configuration()
+        
+        let initialState: TaskState = paused ? .Paused : .Running
         
         // NOTE: Swift 1.1 compiler fails if using [weak self] instead...
         weak var weakSelf = self
         
         // setup state machine
-        self.machine = Machine(state: .Running) {
+        self.machine = Machine(state: initialState) {
             
             $0.addRouteEvent(.Pause, transitions: [.Running => .Paused])
             $0.addRouteEvent(.Resume, transitions: [.Paused => .Running])
@@ -245,97 +273,114 @@ public class Task<Progress, Value, Error>: _Task<Error>
             // clear `_initClosure` & all StateMachine's handlers to prevent retain cycle
             $0.addEventHandler(.Fulfill, order: 255) { context in
                 weakSelf?._initClosure = nil
+                weakSelf?._performInitClosure = nil
                 weakSelf?.machine?.removeAllHandlers()
             }
             $0.addEventHandler(.Reject, order: 255) { context in
                 weakSelf?._initClosure = nil
+                weakSelf?._performInitClosure = nil
                 weakSelf?.machine?.removeAllHandlers()
             }
             
         }
         
-        var progressHandler: ProgressHandler
-        var fulfillHandler: FulFillHandler
-        var rejectHandler: _RejectHandler
+        self._initClosure = _initClosure
         
-        if weakified {
-            progressHandler = { [weak self] (progress: Progress) in
-                if let self_ = self {
-                    let oldProgress = self_.progress
-                    self_.machine <-! (.Progress, (oldProgress, progress))
-                }
-            }
+        // will be invoked only once
+        self._performInitClosure = { [weak self] in
             
-            fulfillHandler = { [weak self] (value: Value) in
-                if let self_ = self {
-                    self_.machine <-! (.Fulfill, value)
-                }
-            }
-            
-            rejectHandler = { [weak self] (errorInfo: ErrorInfo) in
-                if let self_ = self {
-                    self_.machine <-! (.Reject, errorInfo)
-                }
-            }
-        }
-        else {
-            progressHandler = { (progress: Progress) in
-                let oldProgress = self.progress
-                self.machine <-! (.Progress, (oldProgress, progress))
-                return
-            }
-            
-            fulfillHandler = { (value: Value) in
-                self.machine <-! (.Fulfill, value)
-                return
-            }
-            
-            rejectHandler = { (errorInfo: ErrorInfo) in
-                self.machine <-! (.Reject, errorInfo)
-                return
-            }
-        }
-        
-        _initClosure(machine: self.machine, progress: progressHandler, fulfill: fulfillHandler, _reject: rejectHandler, configure: configuration)
-        
-        let userPauseClosure = configuration.pause
-        let userResumeClosure = configuration.resume
-        let userCancelClosure = configuration.cancel
-        
-        // add parentTask-pause/resume/cancel functionalities after retrieving user-defined configuration
-        configuration.pause = { [weak self] in
-            userPauseClosure?()
-            
-            var task: _Task? = self
-            while let parentTask = task?._parentTask {
-                if parentTask._weakified { break }
+            if let self_ = self {
                 
-                parentTask.pause()
-                task = parentTask
-            }
-            
-        }
-        configuration.resume = { [weak self] in
-            userResumeClosure?()
-            
-            var task: _Task? = self
-            while let parentTask = task?._parentTask {
-                if parentTask._weakified { break }
+                var progressHandler: ProgressHandler
+                var fulfillHandler: FulFillHandler
+                var rejectHandler: _RejectHandler
                 
-                parentTask.resume()
-                task = parentTask
-            }
-        }
-        configuration.cancel = { [weak self] in
-            userCancelClosure?()
+                if weakified {
+                    progressHandler = { [weak self_] (progress: Progress) in
+                        if let self_ = self_ {
+                            let oldProgress = self_.progress
+                            self_.machine <-! (.Progress, (oldProgress, progress))
+                        }
+                    }
+                    
+                    fulfillHandler = { [weak self_] (value: Value) in
+                        if let self_ = self_ {
+                            self_.machine <-! (.Fulfill, value)
+                        }
+                    }
+                    
+                    rejectHandler = { [weak self_] (errorInfo: ErrorInfo) in
+                        if let self_ = self_ {
+                            self_.machine <-! (.Reject, errorInfo)
+                        }
+                    }
+                }
+                else {
+                    progressHandler = { (progress: Progress) in
+                        let oldProgress = self_.progress
+                        self_.machine <-! (.Progress, (oldProgress, progress))
+                        return
+                    }
+                    
+                    fulfillHandler = { (value: Value) in
+                        self_.machine <-! (.Fulfill, value)
+                        return
+                    }
+                    
+                    rejectHandler = { (errorInfo: ErrorInfo) in
+                        self_.machine <-! (.Reject, errorInfo)
+                        return
+                    }
+                }
             
-            var task: _Task? = self
-            while let parentTask = task?._parentTask {
-                if parentTask._weakified { break }
+                _initClosure(machine: self_.machine, progress: progressHandler, fulfill: fulfillHandler, _reject: rejectHandler, configure: configuration)
                 
-                parentTask.cancel()
-                task = parentTask
+                let userPauseClosure = configuration.pause
+                let userResumeClosure = configuration.resume
+                let userCancelClosure = configuration.cancel
+                
+                // add parentTask-pause/resume/cancel functionalities after retrieving user-defined configuration
+                configuration.pause = { [weak self_] in
+                    userPauseClosure?()
+                    
+                    var task: _Task? = self_
+                    while let parentTask = task?._parentTask {
+                        if parentTask._weakified { break }
+                        
+                        parentTask.pause()
+                        task = parentTask
+                    }
+                    
+                }
+                configuration.resume = { [weak self_] in
+                    userResumeClosure?()
+                    
+                    var task: _Task? = self_
+                    while let parentTask = task?._parentTask {
+                        if parentTask._weakified { break }
+                        
+                        parentTask.resume()
+                        task = parentTask
+                    }
+                }
+                configuration.cancel = { [weak self_] in
+                    userCancelClosure?()
+                    
+                    var task: _Task? = self_
+                    while let parentTask = task?._parentTask {
+                        if parentTask._weakified { break }
+                        
+                        parentTask.cancel()
+                        task = parentTask
+                    }
+                }
+                
             }
+        
+        }
+        
+        if !paused {
+            self.resume()
         }
     }
     
@@ -672,6 +717,11 @@ public class Task<Progress, Value, Error>: _Task<Error>
     
     public override func resume() -> Bool
     {
+        // always try `_performInitClosure` only once on `resume()`
+        // even when to-Resume-transition fails, e.g. already been fulfilled/rejected
+        self._performInitClosure?()
+        self._performInitClosure = nil
+        
         return self.machine <-! .Resume
     }
     
