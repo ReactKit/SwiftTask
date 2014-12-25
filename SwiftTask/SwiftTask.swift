@@ -65,7 +65,7 @@ public class TaskConfiguration
     }
 }
 
-public class Task<Progress, Value, Error>
+public class Task<Progress, Value, Error>: Printable
 {
     public typealias ErrorInfo = (error: Error?, isCancelled: Bool)
     
@@ -103,6 +103,8 @@ public class Task<Progress, Value, Error>
     /// rejected/cancelled tuple info
     public internal(set) var errorInfo: ErrorInfo?
     
+    public var name: String = "DefaultTask"
+    
     public var state: TaskState
     {
         // return .Cancelled if .Rejected & errorInfo.isCancelled=true
@@ -115,6 +117,11 @@ public class Task<Progress, Value, Error>
         }
             
         return self.machine.state
+    }
+    
+    public var description: String
+    {
+        return self.name
     }
     
     ///
@@ -343,6 +350,13 @@ public class Task<Progress, Value, Error>
         self._cancel(error: nil)
     }
     
+    /// Sets task name (method chainable)
+    public func name(name: String) -> Self
+    {
+        self.name = name
+        return self
+    }
+    
     /// Returns new task that is retryable for `tryCount-1` times.
     /// `task.try(n)` is conceptually equal to `task.failure(clonedTask1).failure(clonedTask2)...` with n-1 failure-able.
     public func try(maxTryCount: Int) -> Task
@@ -354,7 +368,7 @@ public class Task<Progress, Value, Error>
         
         if initClosure == nil { return self }
         
-        let newTask = Task { [weak self] machine, progress, fulfill, _reject, configure in
+        return Task { [weak self] machine, progress, fulfill, _reject, configure in
         
             var chainedTasks = [self!]
             var nextTask: Task = self!
@@ -394,9 +408,7 @@ public class Task<Progress, Value, Error>
                 }
             }
             
-        }
-        
-        return newTask
+        }.name("\(self.name)-try(\(maxTryCount))")
     }
     
     ///
@@ -434,7 +446,7 @@ public class Task<Progress, Value, Error>
     ///
     public func then<Progress2, Value2>(thenClosure: (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
     {
-        let newTask = Task<Progress2, Value2, Error> { [weak self] machine, progress, fulfill, _reject, configure in
+        return Task<Progress2, Value2, Error> { [weak self] machine, progress, fulfill, _reject, configure in
             
             let bind = { [weak machine] (value: Value?, errorInfo: ErrorInfo?) -> Void in
                 let innerTask = thenClosure(value, errorInfo)
@@ -503,9 +515,7 @@ public class Task<Progress, Value, Error>
                 }
             }
             
-        }
-        
-        return newTask
+        }.name("\(self.name)-then")
     }
     
     ///
@@ -527,7 +537,7 @@ public class Task<Progress, Value, Error>
     ///
     public func success<Progress2, Value2>(successClosure: Value -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
     {
-        let newTask = Task<Progress2, Value2, Error> { [weak self] machine, progress, fulfill, _reject, configure in
+        return Task<Progress2, Value2, Error> { [weak self] machine, progress, fulfill, _reject, configure in
             
             let bind = { [weak machine] (value: Value) -> Void in
                 let innerTask = successClosure(value)
@@ -582,9 +592,7 @@ public class Task<Progress, Value, Error>
                 }
             }
             
-        }
-        
-        return newTask
+        }.name("\(self.name)-success")
     }
     
     ///
@@ -608,7 +616,7 @@ public class Task<Progress, Value, Error>
     ///
     public func failure(failureClosure: ErrorInfo -> Task) -> Task
     {
-        let newTask = Task { [weak self] machine, progress, fulfill, _reject, configure in
+        return Task { [weak self] machine, progress, fulfill, _reject, configure in
             
             let bind = { [weak machine] (errorInfo: ErrorInfo) -> Void in
                 let innerTask = failureClosure(errorInfo)
@@ -664,9 +672,7 @@ public class Task<Progress, Value, Error>
                 }
             }
             
-        }
-        
-        return newTask
+        }.name("\(self.name)-failure")
     }
     
     public func pause() -> Bool
@@ -740,7 +746,7 @@ extension Task
             configure.resume = { self.resumeAll(tasks); return }
             configure.cancel = { self.cancelAll(tasks); return }
             
-        }
+        }.name("Task.all")
     }
     
     public class func any(tasks: [Task]) -> Task
@@ -783,7 +789,7 @@ extension Task
             configure.resume = { self.resumeAll(tasks); return }
             configure.cancel = { self.cancelAll(tasks); return }
             
-        }
+        }.name("Task.any")
     }
     
     /// Returns new task which performs all given tasks and stores only fulfilled values.
@@ -824,7 +830,7 @@ extension Task
             configure.resume = { self.resumeAll(tasks); return }
             configure.cancel = { self.cancelAll(tasks); return }
             
-        }
+        }.name("Task.some")
     }
     
     public class func cancelAll(tasks: [Task])
