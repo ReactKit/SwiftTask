@@ -19,6 +19,8 @@
 		1F46DEFB199EDF8100F97868 /* SwiftTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEFA199EDF8100F97868 /* SwiftTask.swift */; };
 		1F46DEFD199EE2C200F97868 /* _TestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEFC199EE2C200F97868 /* _TestCase.swift */; };
 		1F6A8CA319A4E4F200369A5D /* SwiftTaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEE3199EDF1000F97868 /* SwiftTaskTests.swift */; };
+		1FF52EB41A4C395A00B4BA28 /* _InterruptableTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF52EB31A4C395A00B4BA28 /* _InterruptableTask.swift */; };
+		1FF52EB51A4C395A00B4BA28 /* _InterruptableTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF52EB31A4C395A00B4BA28 /* _InterruptableTask.swift */; };
 		4822F0DC19D00B2300F5F572 /* _TestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEFC199EE2C200F97868 /* _TestCase.swift */; };
 		4822F0DD19D00B2300F5F572 /* BasicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F20250119ADA8FD00DE0495 /* BasicTests.swift */; };
 		4822F0DE19D00B2300F5F572 /* SwiftTaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEE3199EDF1000F97868 /* SwiftTaskTests.swift */; };
@@ -47,6 +49,7 @@
 		1F46DEFC199EE2C200F97868 /* _TestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = _TestCase.swift; sourceTree = "<group>"; };
 		1F5FA35619A374E600975FB9 /* AlamofireTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlamofireTests.swift; sourceTree = "<group>"; };
 		1FA4631719A8D70A00DD8729 /* Alamofire.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alamofire.swift; sourceTree = "<group>"; };
+		1FF52EB31A4C395A00B4BA28 /* _InterruptableTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = _InterruptableTask.swift; sourceTree = "<group>"; };
 		4822F0D019D00ABF00F5F572 /* SwiftTask-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SwiftTask-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		48511C5A19C17563002FE03C /* RetainCycleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RetainCycleTests.swift; sourceTree = "<group>"; };
 		485C31F01A1D619A00040DA3 /* TypeInferenceTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TypeInferenceTests.swift; sourceTree = "<group>"; };
@@ -140,6 +143,7 @@
 		1F46DEE0199EDF1000F97868 /* SwiftTaskTests */ = {
 			isa = PBXGroup;
 			children = (
+				1FF52EB31A4C395A00B4BA28 /* _InterruptableTask.swift */,
 				1F46DEFC199EE2C200F97868 /* _TestCase.swift */,
 				1F20250119ADA8FD00DE0495 /* BasicTests.swift */,
 				1F46DEE3199EDF1000F97868 /* SwiftTaskTests.swift */,
@@ -366,6 +370,7 @@
 			files = (
 				1F20250219ADA8FD00DE0495 /* BasicTests.swift in Sources */,
 				1F0E284019C1DEA0005EF467 /* Async.swift in Sources */,
+				1FF52EB41A4C395A00B4BA28 /* _InterruptableTask.swift in Sources */,
 				1F2C0C1E1A32A19300CFBB47 /* Alamofire.swift in Sources */,
 				1F6A8CA319A4E4F200369A5D /* SwiftTaskTests.swift in Sources */,
 				1F2C0C1C1A32A15300CFBB47 /* AlamofireTests.swift in Sources */,
@@ -381,6 +386,7 @@
 			files = (
 				4822F0DE19D00B2300F5F572 /* SwiftTaskTests.swift in Sources */,
 				4822F0DD19D00B2300F5F572 /* BasicTests.swift in Sources */,
+				1FF52EB51A4C395A00B4BA28 /* _InterruptableTask.swift in Sources */,
 				1F2C0C1F1A32A19300CFBB47 /* Alamofire.swift in Sources */,
 				4822F0E319D00B3100F5F572 /* Async.swift in Sources */,
 				1F2C0C1D1A32A15300CFBB47 /* AlamofireTests.swift in Sources */,
