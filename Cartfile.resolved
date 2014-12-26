@@ -1,0 +1,3 @@
+github "Alamofire/Alamofire" "2dd2f6f6186b98f27b75479b15c109ebd4dd8b52"
+github "duemunk/Async" "32cec7ee89d6f1a39b10f2f69d91640ba3416eca"
+github "ReactKit/SwiftState" "1.1.1"
