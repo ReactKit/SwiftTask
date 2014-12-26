@@ -121,7 +121,16 @@ public class Task<Progress, Value, Error>: Printable
     
     public var description: String
     {
-        return self.name
+        var valueString: String?
+        
+        switch (self.state) {
+            case .Fulfilled: valueString = "value=\(self.value!)"
+            case .Rejected: fallthrough
+            case .Cancelled: valueString = "errorInfo=\(self.errorInfo!)"
+            default: valueString = "progress=\(self.progress)"
+        }
+        
+        return "<\(self.name); state=\(self.state.rawValue); \(valueString!))>"
     }
     
     ///
