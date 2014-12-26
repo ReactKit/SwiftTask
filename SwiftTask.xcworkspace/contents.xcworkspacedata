@@ -2,11 +2,15 @@
 <Workspace
    version = "1.0">
    <Group
-      location = "group:Carthage.checkout"
-      name = "Carthage.checkout">
-      <FileRef
-         location = "group:SwiftState/SwiftState.xcodeproj">
-      </FileRef>
+      location = "group:Carthage/Checkouts"
+      name = "Checkouts">
+      <Group
+         location = "group:SwiftState"
+         name = "SwiftState">
+         <FileRef
+            location = "group:SwiftState.xcodeproj">
+         </FileRef>
+      </Group>
    </Group>
    <FileRef
       location = "group:SwiftTask.xcodeproj">
