@@ -89,9 +89,11 @@ public class Task<Progress, Value, Error>: Printable
     
     // store initial parameters for cloning task when using `try()`
     internal let _weakified: Bool
-    internal var _initClosure: _InitClosure?    // will be nil on fulfilled/rejected
+    internal let _paused: Bool
+    internal var _initClosure: _InitClosure!    // retained throughout task's lifetime
     
-    /// wrapper closure for `_initClosure` to invoke only once when started `.Running`
+    /// wrapper closure for `_initClosure` to invoke only once when started `.Running`,
+    /// and will be set to `nil` afterward
     internal var _performInitClosure: (Void -> Void)?
     
     /// progress value
@@ -149,6 +151,7 @@ public class Task<Progress, Value, Error>: Printable
     public init(weakified: Bool, paused: Bool, initClosure: InitClosure)
     {
         self._weakified = weakified
+        self._paused = paused
         
         let _initClosure: _InitClosure = { machine, progress, fulfill, _reject, configure in
             // NOTE: don't expose rejectHandler with ErrorInfo (isCancelled) for public init
@@ -219,16 +222,17 @@ public class Task<Progress, Value, Error>: Printable
     internal init(weakified: Bool = false, paused: Bool = false, _initClosure: _InitClosure)
     {
         self._weakified = weakified
+        self._paused = paused
         
         self.setup(weakified, paused: paused, _initClosure)
     }
     
     internal func setup(weakified: Bool, paused: Bool, _initClosure: _InitClosure)
-    {
+    {        
 //        #if DEBUG
-//            println("[init] \(self)")
+//            println("[init] \(self.name)")
 //        #endif
-        
+
         let configuration = Configuration()
         
         let initialState: TaskState = paused ? .Paused : .Running
@@ -277,12 +281,12 @@ public class Task<Progress, Value, Error>: Printable
             
             // clear `_initClosure` & all StateMachine's handlers to prevent retain cycle
             $0.addEventHandler(.Fulfill, order: 255) { context in
-                weakSelf?._initClosure = nil
+//                weakSelf?._initClosure = nil  // comment-out: let `task.deinit()` handle this
                 weakSelf?._performInitClosure = nil
                 weakSelf?.machine?.removeAllHandlers()
             }
             $0.addEventHandler(.Reject, order: 255) { context in
-                weakSelf?._initClosure = nil
+//                weakSelf?._initClosure = nil
                 weakSelf?._performInitClosure = nil
                 weakSelf?.machine?.removeAllHandlers()
             }
@@ -352,7 +356,7 @@ public class Task<Progress, Value, Error>: Printable
     deinit
     {
 //        #if DEBUG
-//            println("[deinit] \(self)")
+//            println("[deinit] \(self.name)")
 //        #endif
         
         // cancel in case machine is still running
@@ -366,34 +370,27 @@ public class Task<Progress, Value, Error>: Printable
         return self
     }
     
-    /// Returns new task that is retryable for `tryCount-1` times.
-    /// `task.try(n)` is conceptually equal to `task.failure(clonedTask1).failure(clonedTask2)...` with n-1 failure-able.
+    /// Creates cloned task.
+    public func clone() -> Task
+    {
+        return Task(weakified: self._weakified, paused: self._paused, _initClosure: self._initClosure)
+    }
+    
+    /// Returns new task that is retryable for `maxTryCount-1` times.
     public func try(maxTryCount: Int) -> Task
     {
         if maxTryCount < 2 { return self }
         
-        let weakified = self._weakified
-        let initClosure = self._initClosure
-        
-        if initClosure == nil { return self }
-        
-        return Task { [weak self] machine, progress, fulfill, _reject, configure in
-        
-            var chainedTasks = [self!]
-            var nextTask: Task = self!
-        
-            for i in 1...maxTryCount-1 {
-                nextTask = nextTask.progress { _, progressValue in
-                    progress(progressValue)
-                }.failure { _ -> Task in
-                    return Task(weakified: weakified, _initClosure: initClosure!)   // create a clone-task when rejected
-                }
-                
-                chainedTasks += [nextTask]
-            }
+        return Task { machine, progress, fulfill, _reject, configure in
             
-            nextTask.progress { _, progressValue in
+            let task = self.progress { _, progressValue in
                 progress(progressValue)
+            }.failure { [weak self] _ -> Task in
+                return self!.clone().try(maxTryCount-1) // clone & try recursively
+            }
+                
+            task.progress { _, progressValue in
+                progress(progressValue) // also receive progresses from clone-try-task
             }.success { value -> Void in
                 fulfill(value)
             }.failure { errorInfo -> Void in
@@ -401,20 +398,16 @@ public class Task<Progress, Value, Error>: Printable
             }
             
             configure.pause = {
-                for task in chainedTasks {
-                    task.pause();
-                }
+                self.pause()
+                task.pause()
             }
             configure.resume = {
-                for task in chainedTasks {
-                    task.resume();
-                }
+                self.resume()
+                task.resume()
             }
             configure.cancel = {
-                // NOTE: use `reverse()` to cancel from downstream to upstream
-                for task in chainedTasks.reverse() {
-                    task.cancel();
-                }
+                task.cancel()   // cancel downstream first
+                self.cancel()
             }
             
         }.name("\(self.name)-try(\(maxTryCount))")
