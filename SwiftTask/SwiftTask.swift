@@ -191,6 +191,7 @@ public class Task<Progress, Value, Error>: Printable
         self.init(initClosure: { progress, fulfill, reject, configure in
             fulfill(value)
         })
+        self.name = "FulfilledTask"
     }
     
     ///
@@ -203,6 +204,7 @@ public class Task<Progress, Value, Error>: Printable
         self.init(initClosure: { progress, fulfill, reject, configure in
             reject(error)
         })
+        self.name = "RejectedTask"
     }
     
     ///
@@ -373,7 +375,9 @@ public class Task<Progress, Value, Error>: Printable
     /// Creates cloned task.
     public func clone() -> Task
     {
-        return Task(weakified: self._weakified, paused: self._paused, _initClosure: self._initClosure)
+        let clonedTask = Task(weakified: self._weakified, paused: self._paused, _initClosure: self._initClosure)
+        clonedTask.name = "\(self.name)-clone"
+        return clonedTask
     }
     
     /// Returns new task that is retryable for `maxTryCount-1` times.
