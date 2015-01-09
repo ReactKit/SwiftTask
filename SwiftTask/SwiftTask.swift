@@ -30,21 +30,38 @@ public enum TaskState: String, StateType, Printable
     }
 }
 
-public enum TaskEvent: String, StateEventType, Printable
+internal enum _TaskEvent: String, StateEventType, Printable
 {
     case Pause = "Pause"
     case Resume = "Resume"
     case Progress = "Progress"
     case Fulfill = "Fulfill"
     case Reject = "Reject"      // also used in cancellation for simplicity
+    
+    //
+    // Private events to temporarily switch states (no event handlers)
+    // without invoking `configure.resume()`,
+    // i.e.
+    //
+    // `.Paused` (paused-init)
+    // => `.Running` (only while invoking `_performInitClosure()`)
+    // => `.Paused` (switch back)
+    //
+    // and finally by sending regular `.Resume` event:
+    //
+    // => `.Running` (again, but this time `configure.resume()` will be invoked)
+    //
+    case _InitResume = "_InitResume"
+    case _InitPause = "_InitPause"
+    
     case Any = "Any"
     
-    public init(nilLiteral: Void)
+    internal init(nilLiteral: Void)
     {
         self = Any
     }
     
-    public var description: String
+    internal var description: String
     {
         return self.rawValue
     }
@@ -83,7 +100,7 @@ public class Task<Progress, Value, Error>: Printable
     internal typealias _RejectHandler = (ErrorInfo) -> Void
     internal typealias _InitClosure = (machine: Machine, progress: ProgressHandler, fulfill: FulFillHandler, _reject: _RejectHandler, configure: TaskConfiguration) -> Void
     
-    internal typealias Machine = StateMachine<TaskState, TaskEvent>
+    internal typealias Machine = StateMachine<TaskState, _TaskEvent>
     
     private var machine: Machine!
     
@@ -244,6 +261,9 @@ public class Task<Progress, Value, Error>: Printable
         
         // setup state machine
         self.machine = Machine(state: initialState) {
+            
+            $0.addRouteEvent(._InitPause, transitions: [.Running => .Paused])
+            $0.addRouteEvent(._InitResume, transitions: [.Paused => .Running])
             
             $0.addRouteEvent(.Pause, transitions: [.Running => .Paused])
             $0.addRouteEvent(.Resume, transitions: [.Paused => .Running])
@@ -688,10 +708,37 @@ public class Task<Progress, Value, Error>: Printable
     
     public func resume() -> Bool
     {
-        // always try `_performInitClosure` only once on `resume()`
-        // even when to-Resume-transition fails, e.g. already been fulfilled/rejected
-        self._performInitClosure?()
-        self._performInitClosure = nil
+        //
+        // Always try `_performInitClosure` only once on `resume()`
+        // even when `.Pause => .Resume` transition fails, e.g. already been fulfilled/rejected.
+        //
+        // NOTE:
+        // **`downstream._performInitClosure` should be invoked first before `downstream.machine <-! .Resume`**
+        // to add upstream's progress/fulfill/reject handlers inside `downstream.initClosure()` 
+        // before their actual calls, which often happens 
+        // when downstream's `resume()` is configured to call upstream's `resume()`
+        // which eventually calls `upstream._performInitClosure` and thus actual event handlers.
+        //
+        if (self._performInitClosure != nil) {
+            
+            let isPaused = self.machine.state == .Paused
+            
+            //
+            // Temporarily switch to `.Running` without invoking `configure.resume()`.
+            // This allows paused-inited-task to safely call progress/fulfill/reject handlers
+            // inside its `initClosure` *immediately*.
+            //
+            if isPaused {
+                self.machine <-! ._InitResume
+            }
+            
+            self._performInitClosure?()
+            self._performInitClosure = nil
+            
+            if isPaused {
+                self.machine <-! ._InitPause    // switch back
+            }
+        }
         
         return self.machine <-! .Resume
     }
