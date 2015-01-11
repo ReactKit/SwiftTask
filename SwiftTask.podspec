@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name     = 'SwiftTask'
-  s.version  = '2.4.0'
+  s.version  = '2.5.0'
   s.license  = { :type => 'MIT' }
   s.homepage = 'https://github.com/ReactKit/SwiftTask'
   s.authors  = { 'Yasuhiro Inami' => 'inamiy@gmail.com' }
