@@ -640,9 +640,9 @@ public class Task<Progress, Value, Error>: Printable
     /// - e.g. task.failure { errorInfo -> NextTaskType in ... }
     /// - e.g. task.failure { error, isCancelled -> NextTaskType in ... }
     ///
-    public func failure(failureClosure: ErrorInfo -> Task) -> Task
+    public func failure<Progress2>(failureClosure: ErrorInfo -> Task<Progress2, Value, Error>) -> Task<Progress2, Value, Error>
     {
-        return Task { [weak self] machine, progress, fulfill, _reject, configure in
+        return Task<Progress2, Value, Error> { [weak self] machine, progress, fulfill, _reject, configure in
             
             let bind = { [weak machine] (errorInfo: ErrorInfo) -> Void in
                 let innerTask = failureClosure(errorInfo)
