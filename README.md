@@ -1,9 +1,13 @@
 SwiftTask
 =========
 
-[Promise](http://www.html5rocks.com/en/tutorials/es6/promises/) + progress + pause + cancel + retry, using [SwiftState](https://github.com/inamiy/SwiftState) (state machine).
+[Promise](http://www.html5rocks.com/en/tutorials/es6/promises/) + progress + pause + cancel + retry for Swift.
 
 ![SwiftTask](Screenshots/diagram.png)
+
+### Ver 2.6.0 Changelog (2015/01/21)
+
+- **240x faster** ([Pull Request #22](https://github.com/ReactKit/SwiftTask/pull/22))
 
 ### Ver 2.1.0 Changelog (2014/12/05)
 
