@@ -1,6 +1,3 @@
-[submodule "Carthage/Checkouts/SwiftState"]
-	path = Carthage/Checkouts/SwiftState
-	url = https://github.com/ReactKit/SwiftState.git
 [submodule "Carthage/Checkouts/Alamofire"]
 	path = Carthage/Checkouts/Alamofire
 	url = https://github.com/Alamofire/Alamofire.git

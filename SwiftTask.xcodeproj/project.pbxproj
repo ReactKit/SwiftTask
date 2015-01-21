@@ -24,13 +24,13 @@
 		484552331A4CF37F007770CA /* Alamofire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484551CE1A4CF37F007770CA /* Alamofire.swift */; };
 		4845524A1A4CF37F007770CA /* Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484551DC1A4CF37F007770CA /* Async.swift */; };
 		4845524B1A4CF37F007770CA /* Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484551DC1A4CF37F007770CA /* Async.swift */; };
-		484552CA1A4CF48A007770CA /* SwiftState.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 484552C91A4CF48A007770CA /* SwiftState.framework */; };
-		484552CB1A4CF48D007770CA /* SwiftState.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 484552C91A4CF48A007770CA /* SwiftState.framework */; };
 		48511C5B19C17563002FE03C /* RetainCycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48511C5A19C17563002FE03C /* RetainCycleTests.swift */; };
 		485C31F11A1D619A00040DA3 /* TypeInferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485C31F01A1D619A00040DA3 /* TypeInferenceTests.swift */; };
 		485C31F21A1D619A00040DA3 /* TypeInferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485C31F01A1D619A00040DA3 /* TypeInferenceTests.swift */; };
 		48A1E8221A366F9C007619EB /* SwiftTask.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F46DED4199EDF1000F97868 /* SwiftTask.framework */; };
 		48A1E8231A366FA8007619EB /* SwiftTask.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48CD5A0C19AEE3570042B9F1 /* SwiftTask.framework */; };
+		48B58D7B1A6F255E0068E18C /* _StateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48B58D7A1A6F255E0068E18C /* _StateMachine.swift */; };
+		48B58D7C1A6F255E0068E18C /* _StateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48B58D7A1A6F255E0068E18C /* _StateMachine.swift */; };
 		48CD5A3C19AEEBDF0042B9F1 /* SwiftTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEFA199EDF8100F97868 /* SwiftTask.swift */; };
 		48CD5A4619AEEC2E0042B9F1 /* SwiftTask.h in Headers */ = {isa = PBXBuildFile; fileRef = 1F46DED9199EDF1000F97868 /* SwiftTask.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
@@ -50,9 +50,9 @@
 		4822F0D019D00ABF00F5F572 /* SwiftTask-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SwiftTask-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		484551CE1A4CF37F007770CA /* Alamofire.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Alamofire.swift; sourceTree = "<group>"; };
 		484551DC1A4CF37F007770CA /* Async.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Async.swift; sourceTree = "<group>"; };
-		484552C91A4CF48A007770CA /* SwiftState.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftState.framework; path = Carthage/Checkouts/SwiftState/build/Debug/SwiftState.framework; sourceTree = "<group>"; };
 		48511C5A19C17563002FE03C /* RetainCycleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RetainCycleTests.swift; sourceTree = "<group>"; };
 		485C31F01A1D619A00040DA3 /* TypeInferenceTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TypeInferenceTests.swift; sourceTree = "<group>"; };
+		48B58D7A1A6F255E0068E18C /* _StateMachine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = _StateMachine.swift; sourceTree = "<group>"; };
 		48CD5A0C19AEE3570042B9F1 /* SwiftTask.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftTask.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -61,7 +61,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				484552CA1A4CF48A007770CA /* SwiftState.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,7 +84,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				484552CB1A4CF48D007770CA /* SwiftState.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -95,7 +93,6 @@
 		1F46DECA199EDF1000F97868 = {
 			isa = PBXGroup;
 			children = (
-				484552C91A4CF48A007770CA /* SwiftState.framework */,
 				484551B31A4CF37F007770CA /* Checkouts */,
 				1F46DED6199EDF1000F97868 /* SwiftTask */,
 				1F46DEE0199EDF1000F97868 /* SwiftTaskTests */,
@@ -118,6 +115,7 @@
 			isa = PBXGroup;
 			children = (
 				1F46DED9199EDF1000F97868 /* SwiftTask.h */,
+				48B58D7A1A6F255E0068E18C /* _StateMachine.swift */,
 				1F46DEFA199EDF8100F97868 /* SwiftTask.swift */,
 				1F46DED7199EDF1000F97868 /* Supporting Files */,
 			);
@@ -362,6 +360,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1F46DEFB199EDF8100F97868 /* SwiftTask.swift in Sources */,
+				48B58D7B1A6F255E0068E18C /* _StateMachine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -402,6 +401,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				48CD5A3C19AEEBDF0042B9F1 /* SwiftTask.swift in Sources */,
+				48B58D7C1A6F255E0068E18C /* _StateMachine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
