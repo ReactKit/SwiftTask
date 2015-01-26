@@ -15,12 +15,12 @@ class Player
     
     init()
     {
-        println("[init] \(self)")
+//        println("[init] \(self)")
     }
     
     deinit
     {
-        println("[deinit] \(self)")
+//        println("[deinit] \(self)")
     }
     
     func doSomething(completion: (Void -> Void)? = nil)
