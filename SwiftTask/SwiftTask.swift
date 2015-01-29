@@ -14,13 +14,6 @@ public enum TaskState: String, Printable
     case Fulfilled = "Fulfilled"
     case Rejected = "Rejected"
     case Cancelled = "Cancelled"
-    case Any = "Any"
-    
-        
-    public init(nilLiteral: Void)
-    {
-        self = Any
-    }
     
     public var description: String
     {
@@ -545,14 +538,14 @@ internal func _bindInnerTask<Progress2, Value2, Error>(
     )
 {
     switch innerTask.state {
-    case .Fulfilled:
-        fulfill(innerTask.value!)
-        return
-    case .Rejected, .Cancelled:
-        _reject(innerTask.errorInfo!)
-        return
-    default:
-        break
+        case .Fulfilled:
+            fulfill(innerTask.value!)
+            return
+        case .Rejected, .Cancelled:
+            _reject(innerTask.errorInfo!)
+            return
+        default:
+            break
     }
     
     innerTask.progress { _, progressValue in
@@ -578,6 +571,8 @@ internal func _bindInnerTask<Progress2, Value2, Error>(
         innerTask.cancel()
     }
 }
+
+// MARK: - Multiple Tasks
 
 extension Task
 {
