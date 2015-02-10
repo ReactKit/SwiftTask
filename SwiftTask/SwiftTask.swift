@@ -125,7 +125,7 @@ public class Task<Progress, Value, Error>: Printable
             initClosure(progress: progress, fulfill: fulfill, reject: { (error: Error?) in _reject(ErrorInfo(error: error, isCancelled: false)) }, configure: configure)
         }
         
-        self.setup(weakified, paused: paused, _initClosure)
+        self.setup(weakified, paused: paused, _initClosure: _initClosure)
     }
     
     ///
@@ -194,7 +194,7 @@ public class Task<Progress, Value, Error>: Printable
         self._paused = paused
         self._machine = _Machine(paused: paused)
         
-        self.setup(weakified, paused: paused, _initClosure)
+        self.setup(weakified, paused: paused, _initClosure: _initClosure)
     }
     
     internal func setup(weakified: Bool, paused: Bool, _initClosure: _InitClosure)

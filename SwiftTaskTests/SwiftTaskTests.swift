@@ -679,13 +679,13 @@ class SwiftTaskTests: _TestCase
             task.pause()
             
             XCTAssertEqual(task.state, TaskState.Paused)
-            XCTAssertTrue(task.progress? == 2, "`task` should be progressed halfway.")
+            XCTAssertTrue(task.progress! == 2, "`task` should be progressed halfway.")
             
             // resume at t=0.6
             Async.main(after: 0.3) {
                 
                 XCTAssertEqual(task.state, TaskState.Paused)
-                XCTAssertTrue(task.progress? == 2, "`task` should pause progressing.")
+                XCTAssertTrue(task.progress! == 2, "`task` should pause progressing.")
                 
                 task.resume()
                 
@@ -730,7 +730,7 @@ class SwiftTaskTests: _TestCase
             XCTAssertNil(innerTask, "`innerTask` should NOT be created yet.")
             
             XCTAssertEqual(task.state, TaskState.Running, "`task` should NOT be paused.")
-            XCTAssertTrue(task.progress? == 2, "`task` should be halfway progressed.")
+            XCTAssertTrue(task.progress! == 2, "`task` should be halfway progressed.")
             XCTAssertNil(task.value, "`task` should NOT be fulfilled yet.")
             
             // resume at t=0.6
