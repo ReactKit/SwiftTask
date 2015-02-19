@@ -197,7 +197,7 @@ public class Task<Progress, Value, Error>: Printable
         self.setup(weakified, paused: paused, _initClosure)
     }
     
-    internal func setup(weakified: Bool, paused: Bool, _initClosure: _InitClosure)
+    internal func setup(weakified: Bool, paused: Bool, _ _initClosure: _InitClosure)
     {        
 //        #if DEBUG
 //            println("[init] \(self.name)")
