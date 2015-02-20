@@ -21,7 +21,7 @@ public enum TaskState: String, Printable
     }
 }
 
-// NOTE: use class instead of struct to pass reference to closures so that future values can be stored
+// NOTE: use class instead of struct to pass reference to `_initClosure` to set `pause`/`resume`/`cancel` closures
 public class TaskConfiguration
 {
     public var pause: (Void -> Void)?
@@ -106,11 +106,11 @@ public class Task<Progress, Value, Error>: Printable
     ///
     /// - e.g. Task<P, V, E>(weakified: false, paused: false) { progress, fulfill, reject, configure in ... }
     ///
-    /// :param: weakified Weakifies progress/fulfill/reject handlers to let player (inner asynchronous implementation inside initClosure) NOT CAPTURE this created new task. Normally, weakified = false should be set to gain "player -> task" retaining, so that task will be automatically deinited when player is deinited. If weakified = true, task must be manually retained somewhere else, or it will be immediately deinited.
+    /// :param: weakified Weakifies progress/fulfill/reject handlers to let player (inner asynchronous implementation inside `initClosure`) NOT CAPTURE this created new task. Normally, `weakified = false` should be set to gain "player -> task" retaining, so that task will be automatically deinited when player is deinited. If `weakified = true`, task must be manually retained somewhere else, or it will be immediately deinited.
     ///
     /// :param: paused Flag to invoke `initClosure` immediately or not. If `paused = true`, task's initial state will be `.Paused` and needs to `resume()` in order to start `.Running`. If `paused = false`, `initClosure` will be invoked immediately.
     ///
-    /// :param: initClosure e.g. { progress, fulfill, reject, configure in ... }. fulfill(value) and reject(error) handlers must be called inside this closure, where calling progress(progressValue) handler is optional. Also as options, configure.pause/resume/cancel closures can be set to gain control from outside e.g. task.pause()/resume()/cancel(). When using configure, make sure to use weak modifier when appropriate to avoid "task -> player" retaining which often causes retain cycle.
+    /// :param: initClosure e.g. { progress, fulfill, reject, configure in ... }. `fulfill(value)` and `reject(error)` handlers must be called inside this closure, where calling `progress(progressValue)` handler is optional. Also as options, `configure.pause`/`configure.resume`/`configure.cancel` closures can be set to gain control from outside e.g. `task.pause()`/`task.resume()`/`task.cancel()`. When using `configure`, make sure to use weak modifier when appropriate to avoid "task -> player" retaining which often causes retain cycle.
     ///
     /// :returns: New task.
     ///
@@ -499,7 +499,7 @@ public class Task<Progress, Value, Error>: Printable
             // inside its `initClosure` *immediately*.
             //
             if isPaused {
-                self._machine.state = .Running
+                self._machine.state = .Running  // switch temporarily
             }
             
             self._performInitClosure?()
@@ -508,7 +508,7 @@ public class Task<Progress, Value, Error>: Printable
             // switch back to `.Paused` only if temporary `.Running` has not changed
             // (NOTE: `_performInitClosure` sometimes invokes `initClosure`'s `fulfill()`/`reject()` immediately)
             if isPaused && self.state == .Running {
-                self._machine.state = .Paused
+                self._machine.state = .Paused   // switch back
             }
         }
         
