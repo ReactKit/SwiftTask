@@ -114,5 +114,6 @@ internal class _StateMachine<Progress, Value, Error>
         self.progressTupleHandlers.removeAll()
         self.completionHandlers.removeAll()
         self.configuration.clear()
+        self.progress = nil
     }
 }
