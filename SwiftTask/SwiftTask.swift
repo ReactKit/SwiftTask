@@ -122,7 +122,7 @@ public class Task<Progress, Value, Error>: Printable
         
         let _initClosure: _InitClosure = { _, progress, fulfill, _reject, configure in
             // NOTE: don't expose rejectHandler with ErrorInfo (isCancelled) for public init
-            initClosure(progress: progress, fulfill: fulfill, reject: { (error: Error?) in _reject(ErrorInfo(error: error, isCancelled: false)) }, configure: configure)
+            initClosure(progress: progress, fulfill: fulfill, reject: { (error: Error) in _reject(ErrorInfo(error: error, isCancelled: false)) }, configure: configure)
         }
         
         self.setup(weakified, paused: paused, _initClosure: _initClosure)
