@@ -14,6 +14,7 @@ internal class _StateMachine<Progress, Value, Error>
 {
     internal typealias ErrorInfo = Task<Progress, Value, Error>.ErrorInfo
     
+    internal let weakified: Bool
     internal var state: TaskState
     
     internal var progress: Progress?
@@ -25,15 +26,19 @@ internal class _StateMachine<Progress, Value, Error>
     
     internal let configuration = TaskConfiguration()
     
-    internal init(paused: Bool)
+    internal init(weakified: Bool, paused: Bool)
     {
+        self.weakified = weakified
         self.state = paused ? .Paused : .Running
     }
     
     internal func handleProgress(progress: Progress)
     {
         let oldProgress = self.progress
-        self.progress = progress
+        
+        if !self.weakified {
+            self.progress = progress
+        }
         
         if self.state == .Running {
             for handler in self.progressTupleHandlers {

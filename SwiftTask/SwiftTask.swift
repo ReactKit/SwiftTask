@@ -74,7 +74,7 @@ public class Task<Progress, Value, Error>: Printable
     
     public var state: TaskState { return self._machine.state }
     
-    /// progress value
+    /// progress value (NOTE: always nil when `weakified = true`)
     public var progress: Progress? { return self._machine.progress }
     
     /// fulfilled value
@@ -118,7 +118,7 @@ public class Task<Progress, Value, Error>: Printable
     {
         self._weakified = weakified
         self._paused = paused
-        self._machine = _Machine(paused: paused)
+        self._machine = _Machine(weakified: weakified, paused: paused)
         
         let _initClosure: _InitClosure = { _, progress, fulfill, _reject, configure in
             // NOTE: don't expose rejectHandler with ErrorInfo (isCancelled) for public init
@@ -192,7 +192,7 @@ public class Task<Progress, Value, Error>: Printable
     {
         self._weakified = weakified
         self._paused = paused
-        self._machine = _Machine(paused: paused)
+        self._machine = _Machine(weakified: weakified, paused: paused)
         
         self.setup(weakified, paused: paused, _initClosure)
     }
@@ -324,6 +324,8 @@ public class Task<Progress, Value, Error>: Printable
     /// Add progress handler delivered from `initClosure`'s `progress()` argument.
     ///
     /// - e.g. task.progress { oldProgress, newProgress in ... }
+    ///
+    /// NOTE: `oldProgress` is always nil when `weakified = true`
     ///
     public func progress(progressClosure: ProgressTuple -> Void) -> Task
     {
