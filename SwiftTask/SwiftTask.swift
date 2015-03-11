@@ -205,9 +205,10 @@ public class Task<Progress, Value, Error>: Printable
         
         self._initClosure = _initClosure
         
-        // will be invoked only once
+        // will be invoked on 1st resume (only once)
         self._performInitClosure = { [weak self] in
             
+            // strongify `self` on 1st resume
             if let self_ = self {
                 
                 var progressHandler: ProgressHandler
@@ -215,6 +216,12 @@ public class Task<Progress, Value, Error>: Printable
                 var rejectInfoHandler: _RejectInfoHandler
                 
                 if weakified {
+                    //
+                    // NOTE:
+                    // When `weakified = true`,
+                    // each handler will NOT capture `self_` (strongSelf on 1st resume)
+                    // so it will immediately deinit if not retained in somewhere else.
+                    //
                     progressHandler = { [weak self_] (progress: Progress) in
                         if let self_ = self_ {
                             self_._machine.handleProgress(progress)
@@ -234,6 +241,12 @@ public class Task<Progress, Value, Error>: Printable
                     }
                 }
                 else {
+                    //
+                    // NOTE:
+                    // When `weakified = false`,
+                    // each handler will capture `self_` (strongSelf on 1st resume)
+                    // so that it will live until fulfilled/rejected.
+                    //
                     progressHandler = { (progress: Progress) in
                         self_._machine.handleProgress(progress)
                     }
@@ -292,8 +305,8 @@ public class Task<Progress, Value, Error>: Printable
             
             let task = self.progress { _, progressValue in
                 progress(progressValue)
-            }.failure { [weak self] _ -> Task in
-                return self!.clone().try(maxTryCount-1) // clone & try recursively
+            }.failure { [unowned self] _ -> Task in
+                return self.clone().try(maxTryCount-1) // clone & try recursively
             }
                 
             task.progress { _, progressValue in
@@ -353,7 +366,7 @@ public class Task<Progress, Value, Error>: Printable
     ///
     public func then<Progress2, Value2>(thenClosure: (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
     {
-        return Task<Progress2, Value2, Error> { [weak self] newMachine, progress, fulfill, _reject, configure in
+        return Task<Progress2, Value2, Error> { [unowned self] newMachine, progress, fulfill, _reject, configure in
             
             //
             // NOTE: 
@@ -362,23 +375,25 @@ public class Task<Progress, Value, Error>: Printable
             // so that `selfMachine`'s `completionHandlers` can be invoked even though `self` is deinited.
             // This is especially important for ReactKit's `deinitSignal` behavior.
             //
-            let selfMachine = self!._machine
-            
-            let completionHandler: Void -> Void = { 
+            let selfMachine = self._machine
+
+            self._then {
                 let innerTask = thenClosure(selfMachine.value, selfMachine.errorInfo)
                 _bindInnerTask(innerTask, newMachine, progress, fulfill, _reject, configure)
             }
             
-            if let self_ = self {
-                switch self_.state {
-                    case .Fulfilled, .Rejected, .Cancelled:
-                        completionHandler()
-                    default:
-                        self_._machine.completionHandlers.append(completionHandler)
-                }
-            }
-            
         }.name("\(self.name)-then")
+    }
+
+    /// invokes `completionHandler` "now" or "in the future"
+    private func _then(completionHandler: Void -> Void)
+    {
+        switch self.state {
+            case .Fulfilled, .Rejected, .Cancelled:
+                completionHandler()
+            default:
+                self._machine.completionHandlers.append(completionHandler)
+        }
     }
     
     ///
@@ -400,26 +415,18 @@ public class Task<Progress, Value, Error>: Printable
     ///
     public func success<Progress2, Value2>(successClosure: Value -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
     {
-        return Task<Progress2, Value2, Error> { [weak self] newMachine, progress, fulfill, _reject, configure in
+        return Task<Progress2, Value2, Error> { [unowned self] newMachine, progress, fulfill, _reject, configure in
             
-            let selfMachine = self!._machine
+            let selfMachine = self._machine
             
-            let completionHandler: Void -> Void = {
+            // NOTE: using `self._then()` + `selfMachine` instead of `self.then()` will reduce Task allocation
+            self._then {
                 if let value = selfMachine.value {
                     let innerTask = successClosure(value)
                     _bindInnerTask(innerTask, newMachine, progress, fulfill, _reject, configure)
                 }
                 else if let errorInfo = selfMachine.errorInfo {
                     _reject(errorInfo)
-                }
-            }
-            
-            if let self_ = self {
-                switch self_.state {
-                    case .Fulfilled, .Rejected, .Cancelled:
-                        completionHandler()
-                    default:
-                        self_._machine.completionHandlers.append(completionHandler)
                 }
             }
             
@@ -447,26 +454,17 @@ public class Task<Progress, Value, Error>: Printable
     ///
     public func failure<Progress2>(failureClosure: ErrorInfo -> Task<Progress2, Value, Error>) -> Task<Progress2, Value, Error>
     {
-        return Task<Progress2, Value, Error> { [weak self] newMachine, progress, fulfill, _reject, configure in
+        return Task<Progress2, Value, Error> { [unowned self] newMachine, progress, fulfill, _reject, configure in
             
-            let selfMachine = self!._machine
+            let selfMachine = self._machine
             
-            let completionHandler: Void -> Void = {
+            self._then {
                 if let value = selfMachine.value {
                     fulfill(value)
                 }
                 else if let errorInfo = selfMachine.errorInfo {
                     let innerTask = failureClosure(errorInfo)
                     _bindInnerTask(innerTask, newMachine, progress, fulfill, _reject, configure)
-                }
-            }
-            
-            if let self_ = self {
-                switch self_.state {
-                    case .Fulfilled, .Rejected, .Cancelled:
-                        completionHandler()
-                    default:
-                        self_._machine.completionHandlers.append(completionHandler)
                 }
             }
             
