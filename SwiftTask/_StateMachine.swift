@@ -38,14 +38,15 @@ internal class _StateMachine<Progress, Value, Error>
     
     internal func handleProgress(progress: Progress)
     {
-        let oldProgress = self.progress
-        
-        // NOTE: if `weakified = false`, don't store progressValue for less memory footprint
-        if !self.weakified {
-            self.progress = progress
-        }
-        
         if self.state == .Running {
+            
+            let oldProgress = self.progress
+            
+            // NOTE: if `weakified = false`, don't store progressValue for less memory footprint
+            if !self.weakified {
+                self.progress = progress
+            }
+            
             for handler in self.progressTupleHandlers {
                 handler(oldProgress: oldProgress, newProgress: progress)
             }
