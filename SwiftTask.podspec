@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name     = 'SwiftTask'
-  s.version  = '2.6.0'
+  s.version  = '2.6.3'
   s.license  = { :type => 'MIT' }
   s.homepage = 'https://github.com/ReactKit/SwiftTask'
   s.authors  = { 'Yasuhiro Inami' => 'inamiy@gmail.com' }
@@ -8,4 +8,7 @@ Pod::Spec.new do |s|
   s.source   = { :git => 'https://github.com/inamiy/SwiftTask.git', :tag => "#{s.version}" }
   s.source_files = 'SwiftTask/**/*.{h,swift}'
   s.requires_arc = true
+
+  s.osx.deployment_target = '10.9'
+  s.ios.deployment_target = '8.0'
 end
