@@ -68,10 +68,6 @@ public class Task<Progress, Value, Error>: Printable
     internal let _paused: Bool
     internal var _initClosure: _InitClosure!    // retained throughout task's lifetime
     
-    /// wrapper closure for `_initClosure` to invoke only once when started `.Running`,
-    /// and will be set to `nil` afterward
-    internal var _performInitClosure: (Void -> Void)?
-    
     public var state: TaskState { return self._machine.state }
     
     /// progress value (NOTE: always nil when `weakified = true`)
@@ -122,10 +118,10 @@ public class Task<Progress, Value, Error>: Printable
         
         let _initClosure: _InitClosure = { _, progress, fulfill, _reject, configure in
             // NOTE: don't expose rejectHandler with ErrorInfo (isCancelled) for public init
-            initClosure(progress: progress, fulfill: fulfill, reject: { (error: Error?) in _reject(ErrorInfo(error: error, isCancelled: false)) }, configure: configure)
+            initClosure(progress: progress, fulfill: fulfill, reject: { (error: Error) in _reject(ErrorInfo(error: error, isCancelled: false)) }, configure: configure)
         }
         
-        self.setup(weakified, paused: paused, _initClosure)
+        self.setup(weakified: weakified, paused: paused, _initClosure: _initClosure)
     }
     
     ///
@@ -194,11 +190,12 @@ public class Task<Progress, Value, Error>: Printable
         self._paused = paused
         self._machine = _Machine(weakified: weakified, paused: paused)
         
-        self.setup(weakified, paused: paused, _initClosure)
+        self.setup(weakified: weakified, paused: paused, _initClosure: _initClosure)
     }
     
-    internal func setup(weakified: Bool, paused: Bool, _initClosure: _InitClosure)
-    {        
+    // NOTE: don't use `internal init` for this setup method, or this will be a designated initalizer
+    internal func setup(#weakified: Bool, paused: Bool, _initClosure: _InitClosure)
+    {
 //        #if DEBUG
 //            println("[init] \(self.name)")
 //        #endif
@@ -206,7 +203,7 @@ public class Task<Progress, Value, Error>: Printable
         self._initClosure = _initClosure
         
         // will be invoked on 1st resume (only once)
-        self._performInitClosure = { [weak self] in
+        self._machine.initResumeClosure = { [weak self] in
             
             // strongify `self` on 1st resume
             if let self_ = self {
@@ -259,7 +256,7 @@ public class Task<Progress, Value, Error>: Printable
                         self_._machine.handleRejectInfo(errorInfo)
                     }
                 }
-            
+                
                 _initClosure(machine: self_._machine, progress: progressHandler, fulfill: fulfillHandler, _reject: rejectInfoHandler, configure: self_._machine.configuration)
                 
             }
@@ -342,7 +339,7 @@ public class Task<Progress, Value, Error>: Printable
     ///
     public func progress(progressClosure: ProgressTuple -> Void) -> Task
     {
-        self._machine.progressTupleHandlers.append(progressClosure)
+        self._machine.addProgressTupleHandler(progressClosure)
         
         return self
     }
@@ -392,7 +389,7 @@ public class Task<Progress, Value, Error>: Printable
             case .Fulfilled, .Rejected, .Cancelled:
                 completionHandler()
             default:
-                self._machine.completionHandlers.append(completionHandler)
+                self._machine.addCompletionHandler(completionHandler)
         }
     }
     
@@ -478,40 +475,6 @@ public class Task<Progress, Value, Error>: Printable
     
     public func resume() -> Bool
     {
-        //
-        // Always try `_performInitClosure` only once on `resume()`
-        // even when `.Pause => .Resume` transition fails, e.g. already been fulfilled/rejected.
-        //
-        // NOTE:
-        // **`downstream._performInitClosure` should be invoked first before `downstream.machine <-! .Resume`**
-        // to add upstream's progress/fulfill/reject handlers inside `downstream.initClosure()` 
-        // before their actual calls, which often happens 
-        // when downstream's `resume()` is configured to call upstream's `resume()`
-        // which eventually calls `upstream._performInitClosure` and thus actual event handlers.
-        //
-        if (self._performInitClosure != nil) {
-            
-            let isPaused = (self.state == .Paused)
-            
-            //
-            // Temporarily switch to `.Running` without invoking `configure.resume()`.
-            // This allows paused-inited-task to safely call progress/fulfill/reject handlers
-            // inside its `initClosure` *immediately*.
-            //
-            if isPaused {
-                self._machine.state = .Running  // switch temporarily
-            }
-            
-            self._performInitClosure?()
-            self._performInitClosure = nil
-            
-            // switch back to `.Paused` only if temporary `.Running` has not changed
-            // (NOTE: `_performInitClosure` sometimes invokes `initClosure`'s `fulfill()`/`reject()` immediately)
-            if isPaused && self.state == .Running {
-                self._machine.state = .Paused   // switch back
-            }
-        }
-        
         return self._machine.handleResume()
     }
     

@@ -17,16 +17,21 @@ import Foundation
 internal class _StateMachine<Progress, Value, Error>
 {
     internal typealias ErrorInfo = Task<Progress, Value, Error>.ErrorInfo
+    internal typealias ProgressTupleHandler = Task<Progress, Value, Error>._ProgressTupleHandler
     
     internal let weakified: Bool
-    internal var state: TaskState
+    internal private(set) var state: TaskState
     
-    internal var progress: Progress?
-    internal var value: Value?
-    internal var errorInfo: ErrorInfo?
+    internal private(set) var progress: Progress?    // NOTE: always nil if `weakified = true`
+    internal private(set) var value: Value?
+    internal private(set) var errorInfo: ErrorInfo?
     
-    internal var progressTupleHandlers: [Task<Progress, Value, Error>._ProgressTupleHandler] = []
-    internal var completionHandlers: [Void -> Void] = []
+    /// wrapper closure for `_initClosure` to invoke only once when started `.Running`,
+    /// and will be set to `nil` afterward
+    internal var initResumeClosure: (Void -> Void)?
+    
+    internal private(set) var progressTupleHandlers: [ProgressTupleHandler] = []
+    internal private(set) var completionHandlers: [Void -> Void] = []
     
     internal let configuration = TaskConfiguration()
     
@@ -34,6 +39,16 @@ internal class _StateMachine<Progress, Value, Error>
     {
         self.weakified = weakified
         self.state = paused ? .Paused : .Running
+    }
+    
+    internal func addProgressTupleHandler(progressTupleHandler: ProgressTupleHandler)
+    {
+        self.progressTupleHandlers.append(progressTupleHandler)
+    }
+    
+    internal func addCompletionHandler(completionHandler: Void -> Void)
+    {
+        self.completionHandlers.append(completionHandler)
     }
     
     internal func handleProgress(progress: Progress)
@@ -85,6 +100,50 @@ internal class _StateMachine<Progress, Value, Error>
     
     internal func handleResume() -> Bool
     {
+        //
+        // NOTE:
+        // `initResumeClosure` should be invoked first before `configure.resume()`
+        // to let downstream prepare setting upstream's progress/fulfill/reject handlers
+        // before upstream actually starts sending values, which often happens
+        // when downstream's `configure.resume()` is configured to call upstream's `task.resume()`
+        // which eventually calls upstream's `initResumeClosure`
+        // and thus upstream starts sending values.
+        //
+        self._handleInitResumeIfNeeded()
+        
+        return _handleResume()
+    }
+    
+    ///
+    /// Invokes `initResumeClosure` on 1st resume (only once).
+    ///
+    /// If initial state is `.Paused`, `state` will be temporarily switched to `.Running`
+    /// during `initResumeClosure` execution, so that Task can call progress/fulfill/reject handlers safely.
+    ///
+    private func _handleInitResumeIfNeeded()
+    {
+        if (self.initResumeClosure != nil) {
+            
+            let isInitPaused = (self.state == .Paused)
+            
+            if isInitPaused {
+                self.state = .Running  // switch `.Paused` => `.Resume` temporarily without invoking `configure.resume()`
+            }
+            
+            // NOTE: performing `initResumeClosure` might change `state` to `.Fulfilled` or `.Rejected` **immediately**
+            self.initResumeClosure?()
+            self.initResumeClosure = nil
+            
+            // switch back to `.Paused` if temporary `.Running` has not changed
+            // so that consecutive `_handleResume()` can perform `configure.resume()`
+            if isInitPaused && self.state == .Running {
+                self.state = .Paused
+            }
+        }
+    }
+    
+    private func _handleResume() -> Bool
+    {
         if self.state == .Paused {
             self.configuration.resume?()
             self.state = .Running
@@ -125,6 +184,8 @@ internal class _StateMachine<Progress, Value, Error>
         self.progressTupleHandlers.removeAll()
         self.completionHandlers.removeAll()
         self.configuration.clear()
+        
+        self.initResumeClosure = nil
         self.progress = nil
     }
 }
