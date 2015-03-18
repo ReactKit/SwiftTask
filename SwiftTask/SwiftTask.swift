@@ -28,16 +28,29 @@ public class TaskConfiguration
     public var resume: (Void -> Void)?
     public var cancel: (Void -> Void)?
     
+    /// useful to terminate immediate-infinite-sequence while performing `initClosure`
+    public private(set) var isFinished: Bool = false
+    
     public init()
     {
         
     }
     
-    internal func clear()
+    internal func finish()
     {
+        //
+        // Cancel anyway on task finished (fulfilled/rejected/cancelled).
+        //
+        // NOTE:
+        // ReactKit uses this closure to call `upstreamSignal.cancel()`
+        // and let it know `configure.isFinished = true` while performing its `initClosure`.
+        //
+        self.cancel?()
+        
         self.pause = nil
         self.resume = nil
         self.cancel = nil
+        self.isFinished = true
     }
 }
 

@@ -73,7 +73,7 @@ internal class _StateMachine<Progress, Value, Error>
         if self.state == .Running {
             self.state = .Fulfilled
             self.value = value
-            self.complete()
+            self.finish()
         }
     }
     
@@ -82,7 +82,7 @@ internal class _StateMachine<Progress, Value, Error>
         if self.state == .Running || self.state == .Paused {
             self.state = errorInfo.isCancelled ? .Cancelled : .Rejected
             self.errorInfo = errorInfo
-            self.complete()
+            self.finish()
         }
     }
     
@@ -157,15 +157,9 @@ internal class _StateMachine<Progress, Value, Error>
     internal func handleCancel(error: Error? = nil) -> Bool
     {
         if self.state == .Running || self.state == .Paused {
-            
             self.state = .Cancelled
             self.errorInfo = ErrorInfo(error: error, isCancelled: true)
-            self.complete {
-                // NOTE: call `configuration.cancel()` after all `completionHandlers` are invoked
-                self.configuration.cancel?()
-                return
-            }
-            
+            self.finish()
             return true
         }
         else {
@@ -173,17 +167,16 @@ internal class _StateMachine<Progress, Value, Error>
         }
     }
     
-    internal func complete(closure: (Void -> Void)? = nil)
+    internal func finish()
     {
         for handler in self.completionHandlers {
             handler()
         }
         
-        closure?()
-        
         self.progressTupleHandlers.removeAll()
         self.completionHandlers.removeAll()
-        self.configuration.clear()
+        
+        self.configuration.finish()
         
         self.initResumeClosure = nil
         self.progress = nil
