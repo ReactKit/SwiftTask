@@ -5,21 +5,6 @@ SwiftTask
 
 ![SwiftTask](Screenshots/diagram.png)
 
-### Ver 2.6.0 Changelog (2015/01/21)
-
-- **240x faster** ([Pull Request #22](https://github.com/ReactKit/SwiftTask/pull/22))
-
-### Ver 2.1.0 Changelog (2014/12/05)
-
-- added **retryable** feature `try()`
-
-### Ver 2.0.0 Changelog (2014/11/18)
-
-- `task.progress()`'s `progressClosure` type changed from `Progress -> Void` to `(oldProgress: Progress?, newProgress: Progress) -> Void`
-- `task.then(fulfilledClosure)` is renamed to `task.success()`
-- `task.catch(catchClosure)` is renamed to `task.failure()`
-- `task.then()` is now used for completed (either fulfilled or rejected) case only, and **no longer used for fulfilled-only handling** (this will improve Swift type-inference)
-
 
 ## How to install
 
@@ -47,13 +32,13 @@ let task = Task<Float, String, NSError> { progress, fulfill, reject, configure i
 
     // pause/resume/cancel configuration (optional)
     configure.pause = { [weak player] in
-        if let p = player { p.pause() }
+        player?.pause()
     }
     configure.resume = { [weak player] in
-        if let p = player { p.resume() }
+        player?.resume()
     }
     configure.cancel = { [weak player] in
-        if let p = player { p.cancel() }
+        player?.cancel()
     }
 
 }
@@ -171,13 +156,13 @@ To add `pause`/`resume`/`cancel` functionality to your `task`, use `configure` t
 ```swift
 // NOTE: use weak to let task NOT CAPTURE player via configure
 configure.pause = { [weak player] in
-    if let p = player { p.pause() }
+    player?.pause()
 }
 configure.resume = { [weak player] in
-    if let p = player { p.resume() }
+    player?.resume()
 }
 configure.cancel = { [weak player] in
-    if let p = player { p.cancel() }
+    player?.cancel()
 }
 ```
 
