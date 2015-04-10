@@ -6,6 +6,9 @@
 //  Copyright (c) 2014年 Yasuhiro Inami. All rights reserved.
 //
 
+// Required for use in the playground Sources folder
+import ObjectiveC
+
 // NOTE: nested type inside generic Task class is not allowed in Swift 1.1
 public enum TaskState: String, Printable
 {
