@@ -2,6 +2,19 @@
 <Workspace
    version = "1.0">
    <Group
+      location = "group:Playgrounds"
+      name = "Playgrounds">
+      <FileRef
+         location = "group:01-Sync.playground">
+      </FileRef>
+      <FileRef
+         location = "group:02-Async.playground">
+      </FileRef>
+      <FileRef
+         location = "group:03-Alamofire.playground">
+      </FileRef>
+   </Group>
+   <Group
       location = "group:Carthage/Checkouts"
       name = "Checkouts">
       <Group
