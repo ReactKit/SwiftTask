@@ -1,2 +1,2 @@
-github "Alamofire/Alamofire" "2dd2f6f6186b98f27b75479b15c109ebd4dd8b52"
-github "duemunk/Async" "32cec7ee89d6f1a39b10f2f69d91640ba3416eca"
+github "Alamofire/Alamofire" ~> 1.2.0
+github "duemunk/Async" "2f0c5b69e3ff0e41c9391016b7855cd319000515"

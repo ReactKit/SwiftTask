@@ -7,6 +7,7 @@
 //
 
 import SwiftTask
+import Async
 import XCTest
 
 /// Safe background flag checking delay to not conflict with main-dispatch_after.

@@ -7,6 +7,7 @@
 //
 
 import SwiftTask
+import Async
 
 typealias _InterruptableTask = Task<Int, String, String>
 

@@ -7,7 +7,7 @@
 //
 
 import SwiftTask
-//import Alamofire  // comment-out: include source code for OSX test as well
+import Alamofire
 import XCTest
 
 class AlamofireTests: _TestCase
