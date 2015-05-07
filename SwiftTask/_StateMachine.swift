@@ -30,8 +30,8 @@ internal class _StateMachine<Progress, Value, Error>
     /// and will be set to `nil` afterward
     internal var initResumeClosure: (Void -> Void)?
     
-    internal private(set) var progressTupleHandlers: [ProgressTupleHandler] = []
-    internal private(set) var completionHandlers: [Void -> Void] = []
+    internal private(set) lazy var progressTupleHandlers: [ProgressTupleHandler] = []
+    internal private(set) lazy var completionHandlers: [Void -> Void] = []
     
     internal let configuration = TaskConfiguration()
     
@@ -43,12 +43,16 @@ internal class _StateMachine<Progress, Value, Error>
     
     internal func addProgressTupleHandler(progressTupleHandler: ProgressTupleHandler)
     {
-        self.progressTupleHandlers.append(progressTupleHandler)
+        if self.state == .Running || self.state == .Paused {
+            self.progressTupleHandlers.append(progressTupleHandler)
+        }
     }
     
     internal func addCompletionHandler(completionHandler: Void -> Void)
     {
-        self.completionHandlers.append(completionHandler)
+        if self.state == .Running || self.state == .Paused {
+            self.completionHandlers.append(completionHandler)
+        }
     }
     
     internal func handleProgress(progress: Progress)
