@@ -355,7 +355,13 @@ public class Task<Progress, Value, Error>: Printable
     ///
     public func progress(progressClosure: ProgressTuple -> Void) -> Task
     {
-        self._machine.addProgressTupleHandler(progressClosure)
+        var token: HandlerToken? = nil
+        return self.progress(&token, progressClosure)
+    }
+    
+    public func progress(inout token: HandlerToken?, _ progressClosure: ProgressTuple -> Void) -> Task
+    {
+        self._machine.addProgressTupleHandler(&token, progressClosure)
         
         return self
     }
@@ -367,7 +373,13 @@ public class Task<Progress, Value, Error>: Printable
     ///
     public func then<Value2>(thenClosure: (Value?, ErrorInfo?) -> Value2) -> Task<Progress, Value2, Error>
     {
-        return self.then { (value: Value?, errorInfo: ErrorInfo?) -> Task<Progress, Value2, Error> in
+        var token: HandlerToken? = nil
+        return self.then(&token, thenClosure)
+    }
+    
+    public func then<Value2>(inout token: HandlerToken?, _ thenClosure: (Value?, ErrorInfo?) -> Value2) -> Task<Progress, Value2, Error>
+    {
+        return self.then(&token) { (value: Value?, errorInfo: ErrorInfo?) -> Task<Progress, Value2, Error> in
             return Task<Progress, Value2, Error>(value: thenClosure(value, errorInfo))
         }
     }
@@ -379,6 +391,12 @@ public class Task<Progress, Value, Error>: Printable
     ///
     public func then<Progress2, Value2>(thenClosure: (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
     {
+        var token: HandlerToken? = nil
+        return self.then(&token, thenClosure)
+    }
+    
+    public func then<Progress2, Value2>(inout token: HandlerToken?, _ thenClosure: (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
+    {
         return Task<Progress2, Value2, Error> { [unowned self] newMachine, progress, fulfill, _reject, configure in
             
             //
@@ -389,8 +407,8 @@ public class Task<Progress, Value, Error>: Printable
             // This is especially important for ReactKit's `deinitSignal` behavior.
             //
             let selfMachine = self._machine
-
-            self._then {
+            
+            self._then(&token) {
                 let innerTask = thenClosure(selfMachine.value, selfMachine.errorInfo)
                 _bindInnerTask(innerTask, newMachine, progress, fulfill, _reject, configure)
             }
@@ -399,13 +417,13 @@ public class Task<Progress, Value, Error>: Printable
     }
 
     /// invokes `completionHandler` "now" or "in the future"
-    private func _then(completionHandler: Void -> Void)
+    private func _then(inout token: HandlerToken?, _ completionHandler: Void -> Void)
     {
         switch self.state {
             case .Fulfilled, .Rejected, .Cancelled:
                 completionHandler()
             default:
-                self._machine.addCompletionHandler(completionHandler)
+                self._machine.addCompletionHandler(&token, completionHandler)
         }
     }
     
@@ -416,7 +434,13 @@ public class Task<Progress, Value, Error>: Printable
     ///
     public func success<Value2>(successClosure: Value -> Value2) -> Task<Progress, Value2, Error>
     {
-        return self.success { (value: Value) -> Task<Progress, Value2, Error> in
+        var token: HandlerToken? = nil
+        return self.success(&token, successClosure)
+    }
+    
+    public func success<Value2>(inout token: HandlerToken?, _ successClosure: Value -> Value2) -> Task<Progress, Value2, Error>
+    {
+        return self.success(&token) { (value: Value) -> Task<Progress, Value2, Error> in
             return Task<Progress, Value2, Error>(value: successClosure(value))
         }
     }
@@ -428,12 +452,18 @@ public class Task<Progress, Value, Error>: Printable
     ///
     public func success<Progress2, Value2>(successClosure: Value -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
     {
+        var token: HandlerToken? = nil
+        return self.success(&token, successClosure)
+    }
+    
+    public func success<Progress2, Value2>(inout token: HandlerToken?, _ successClosure: Value -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
+    {
         return Task<Progress2, Value2, Error> { [unowned self] newMachine, progress, fulfill, _reject, configure in
             
             let selfMachine = self._machine
             
             // NOTE: using `self._then()` + `selfMachine` instead of `self.then()` will reduce Task allocation
-            self._then {
+            self._then(&token) {
                 if let value = selfMachine.value {
                     let innerTask = successClosure(value)
                     _bindInnerTask(innerTask, newMachine, progress, fulfill, _reject, configure)
@@ -454,7 +484,13 @@ public class Task<Progress, Value, Error>: Printable
     ///
     public func failure(failureClosure: ErrorInfo -> Value) -> Task
     {
-        return self.failure { (errorInfo: ErrorInfo) -> Task in
+        var token: HandlerToken? = nil
+        return self.failure(&token, failureClosure)
+    }
+    
+    public func failure(inout token: HandlerToken?, _ failureClosure: ErrorInfo -> Value) -> Task
+    {
+        return self.failure(&token) { (errorInfo: ErrorInfo) -> Task in
             return Task(value: failureClosure(errorInfo))
         }
     }
@@ -467,11 +503,17 @@ public class Task<Progress, Value, Error>: Printable
     ///
     public func failure<Progress2>(failureClosure: ErrorInfo -> Task<Progress2, Value, Error>) -> Task<Progress2, Value, Error>
     {
+        var token: HandlerToken? = nil
+        return self.failure(&token, failureClosure)
+    }
+    
+    public func failure<Progress2>(inout token: HandlerToken?, _ failureClosure: ErrorInfo -> Task<Progress2, Value, Error>) -> Task<Progress2, Value, Error>
+    {
         return Task<Progress2, Value, Error> { [unowned self] newMachine, progress, fulfill, _reject, configure in
             
             let selfMachine = self._machine
             
-            self._then {
+            self._then(&token) {
                 if let value = selfMachine.value {
                     fulfill(value)
                 }
@@ -503,6 +545,20 @@ public class Task<Progress, Value, Error>: Printable
     {
         return self._machine.handleCancel(error: error)
     }
+    
+    // MARK: Remove Handlers
+    
+    public func removeProgress(handlerToken: HandlerToken)
+    {
+        return self._machine.removeProgressTupleHandler(handlerToken)
+    }
+    
+    /// NOTE: `task.removeThen(token)` will force `let task2 = task.then(&token)` to deinit immediately and tries cancellation if it is still running.
+    public func removeThen(handlerToken: HandlerToken)
+    {
+        return self._machine.removeCompletionHandler(handlerToken)
+    }
+    
 }
 
 // MARK: - Helper

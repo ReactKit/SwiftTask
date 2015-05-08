@@ -30,8 +30,8 @@ internal class _StateMachine<Progress, Value, Error>
     /// and will be set to `nil` afterward
     internal var initResumeClosure: (Void -> Void)?
     
-    internal private(set) lazy var progressTupleHandlers: [ProgressTupleHandler] = []
-    internal private(set) lazy var completionHandlers: [Void -> Void] = []
+    internal private(set) lazy var progressTupleHandlers = _Handlers<ProgressTupleHandler>()
+    internal private(set) lazy var completionHandlers = _Handlers<Void -> Void>()
     
     internal let configuration = TaskConfiguration()
     
@@ -41,18 +41,28 @@ internal class _StateMachine<Progress, Value, Error>
         self.state = paused ? .Paused : .Running
     }
     
-    internal func addProgressTupleHandler(progressTupleHandler: ProgressTupleHandler)
+    internal func addProgressTupleHandler(inout token: HandlerToken?, _ progressTupleHandler: ProgressTupleHandler)
     {
         if self.state == .Running || self.state == .Paused {
-            self.progressTupleHandlers.append(progressTupleHandler)
+            token = self.progressTupleHandlers.append(progressTupleHandler)
         }
     }
     
-    internal func addCompletionHandler(completionHandler: Void -> Void)
+    internal func removeProgressTupleHandler(handlerToken: HandlerToken)
+    {
+        self.progressTupleHandlers.remove(handlerToken)
+    }
+    
+    internal func addCompletionHandler(inout token: HandlerToken?, _ completionHandler: Void -> Void)
     {
         if self.state == .Running || self.state == .Paused {
-            self.completionHandlers.append(completionHandler)
+            token = self.completionHandlers.append(completionHandler)
         }
+    }
+    
+    internal func removeCompletionHandler(handlerToken: HandlerToken)
+    {
+        self.completionHandlers.remove(handlerToken)
     }
     
     internal func handleProgress(progress: Progress)
@@ -184,5 +194,44 @@ internal class _StateMachine<Progress, Value, Error>
         
         self.initResumeClosure = nil
         self.progress = nil
+    }
+}
+
+//--------------------------------------------------
+// MARK: - Utility
+//--------------------------------------------------
+
+public struct HandlerToken
+{
+    internal let key: Int
+}
+
+internal struct _Handlers<T>: SequenceType
+{
+    private var currentKey: Int = 0
+    private var elements = [Int : T]()
+    
+    internal mutating func append(value: T) -> HandlerToken
+    {
+        self.currentKey = self.currentKey &+ 1
+        
+        self.elements[self.currentKey] = value
+        
+        return HandlerToken(key: self.currentKey)
+    }
+    
+    internal mutating func remove(token: HandlerToken)
+    {
+        self.elements.removeValueForKey(token.key)
+    }
+    
+    internal mutating func removeAll(keepCapacity: Bool = false)
+    {
+        self.elements.removeAll(keepCapacity: keepCapacity)
+    }
+    
+    internal func generate() -> GeneratorOf<T>
+    {
+        return GeneratorOf(self.elements.values.generate())
     }
 }
