@@ -41,32 +41,40 @@ internal class _StateMachine<Progress, Value, Error>
         self.state = paused ? .Paused : .Running
     }
     
-    internal func addProgressTupleHandler(inout token: _HandlerToken?, _ progressTupleHandler: ProgressTupleHandler)
+    internal func addProgressTupleHandler(inout token: _HandlerToken?, _ progressTupleHandler: ProgressTupleHandler) -> Bool
     {
         if self.state == .Running || self.state == .Paused {
             token = self.progressTupleHandlers.append(progressTupleHandler)
+            return token != nil
         }
+        return false
     }
     
-    internal func removeProgressTupleHandler(handlerToken: _HandlerToken?)
+    internal func removeProgressTupleHandler(handlerToken: _HandlerToken?) -> Bool
     {
         if let handlerToken = handlerToken {
-            self.progressTupleHandlers.remove(handlerToken)
+            let removedHandler = self.progressTupleHandlers.remove(handlerToken)
+            return removedHandler != nil
         }
+        return false
     }
     
-    internal func addCompletionHandler(inout token: _HandlerToken?, _ completionHandler: Void -> Void)
+    internal func addCompletionHandler(inout token: _HandlerToken?, _ completionHandler: Void -> Void) -> Bool
     {
         if self.state == .Running || self.state == .Paused {
             token = self.completionHandlers.append(completionHandler)
+            return token != nil
         }
+        return false
     }
     
-    internal func removeCompletionHandler(handlerToken: _HandlerToken?)
+    internal func removeCompletionHandler(handlerToken: _HandlerToken?) -> Bool
     {
         if let handlerToken = handlerToken {
-            self.completionHandlers.remove(handlerToken)
+            let removedHandler = self.completionHandlers.remove(handlerToken)
+            return removedHandler != nil
         }
+        return false
     }
     
     internal func handleProgress(progress: Progress)
@@ -224,9 +232,9 @@ internal struct _Handlers<T>: SequenceType
         return _HandlerToken(key: self.currentKey)
     }
     
-    internal mutating func remove(token: _HandlerToken)
+    internal mutating func remove(token: _HandlerToken) -> T?
     {
-        self.elements.removeValueForKey(token.key)
+        return self.elements.removeValueForKey(token.key)
     }
     
     internal mutating func removeAll(keepCapacity: Bool = false)
