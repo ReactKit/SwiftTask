@@ -20,6 +20,8 @@
 		1FCF71141AD8CD2F007079C2 /* Async.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FCF71131AD8CD2F007079C2 /* Async.framework */; };
 		1FCF71161AD8CD38007079C2 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FCF71151AD8CD38007079C2 /* Alamofire.framework */; };
 		1FCF71181AD8CD3C007079C2 /* Async.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FCF71171AD8CD3C007079C2 /* Async.framework */; };
+		1FD7197B1AFE387C00BC38C4 /* Cancellable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FD7197A1AFE387C00BC38C4 /* Cancellable.swift */; };
+		1FD7197C1AFE387C00BC38C4 /* Cancellable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FD7197A1AFE387C00BC38C4 /* Cancellable.swift */; };
 		1FF52EB41A4C395A00B4BA28 /* _InterruptableTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF52EB31A4C395A00B4BA28 /* _InterruptableTask.swift */; };
 		1FF52EB51A4C395A00B4BA28 /* _InterruptableTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF52EB31A4C395A00B4BA28 /* _InterruptableTask.swift */; };
 		4822F0DC19D00B2300F5F572 /* _TestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEFC199EE2C200F97868 /* _TestCase.swift */; };
@@ -53,6 +55,7 @@
 		1FCF71131AD8CD2F007079C2 /* Async.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Async.framework; path = "../Carthage/Checkouts/Async/build/Debug-iphoneos/Async.framework"; sourceTree = "<group>"; };
 		1FCF71151AD8CD38007079C2 /* Alamofire.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Alamofire.framework; path = ../Carthage/Checkouts/Alamofire/build/Debug/Alamofire.framework; sourceTree = "<group>"; };
 		1FCF71171AD8CD3C007079C2 /* Async.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Async.framework; path = ../Carthage/Checkouts/Async/build/Debug/Async.framework; sourceTree = "<group>"; };
+		1FD7197A1AFE387C00BC38C4 /* Cancellable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cancellable.swift; sourceTree = "<group>"; };
 		1FF52EB31A4C395A00B4BA28 /* _InterruptableTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = _InterruptableTask.swift; sourceTree = "<group>"; };
 		4822F0D019D00ABF00F5F572 /* SwiftTask-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SwiftTask-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		48511C5A19C17563002FE03C /* RetainCycleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RetainCycleTests.swift; sourceTree = "<group>"; };
@@ -124,6 +127,7 @@
 			children = (
 				1F46DED9199EDF1000F97868 /* SwiftTask.h */,
 				1F46DEFA199EDF8100F97868 /* SwiftTask.swift */,
+				1FD7197A1AFE387C00BC38C4 /* Cancellable.swift */,
 				48B58D7A1A6F255E0068E18C /* _StateMachine.swift */,
 				1F46DED7199EDF1000F97868 /* Supporting Files */,
 			);
@@ -339,6 +343,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1F46DEFB199EDF8100F97868 /* SwiftTask.swift in Sources */,
+				1FD7197B1AFE387C00BC38C4 /* Cancellable.swift in Sources */,
 				48B58D7B1A6F255E0068E18C /* _StateMachine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -378,6 +383,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				48CD5A3C19AEEBDF0042B9F1 /* SwiftTask.swift in Sources */,
+				1FD7197C1AFE387C00BC38C4 /* Cancellable.swift in Sources */,
 				48B58D7C1A6F255E0068E18C /* _StateMachine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

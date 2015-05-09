@@ -18,26 +18,22 @@ class RemoveHandlerTests: _TestCase
         
         var expect = self.expectationWithDescription(__FUNCTION__)
         
-        var progressToken: HandlerToken? = nil
+        var latestProgressValue: Float?
+        var canceller: AutoCanceller? = nil
         
         // define task
-        let task = Task { progress, fulfill, reject, configure in
-            
+        Task { progress, fulfill, reject, configure in
             progress(0.0)
-            
             Async.main(after: 0.1) {
                 progress(1.0)
-                
                 fulfill("OK")
             }
-            
-        }
-        
-        task.progress { oldProgress, newProgress in
+        }.progress { oldProgress, newProgress in
             
             println("progress1 = \(newProgress)")
+            latestProgressValue = newProgress
         
-        }.progress(&progressToken) { oldProgress, newProgress in
+        }.progress(&canceller) { oldProgress, newProgress in
             
             println("progress2 = \(newProgress)")
             XCTFail("Should never reach here because this progress-handler will be removed soon.")
@@ -50,44 +46,37 @@ class RemoveHandlerTests: _TestCase
                 
         }
         
-        XCTAssertTrue(progressToken != nil, "Async `task` will return non-nil `progressToken`.")
+        XCTAssertTrue(canceller != nil, "Async `task` will return non-nil `progressToken`.")
         
         // remove progress-handler
-        task.removeProgress(progressToken!)
+        canceller = nil
         
         self.wait()
+        
+        XCTAssertTrue(latestProgressValue == 1.0)
     }
     
     func testRemoveThen()
     {
         typealias Task = SwiftTask.Task<Float, String, ErrorString>
-        
+
         var expect = self.expectationWithDescription(__FUNCTION__)
-        var progressCount = 0
+        var canceller: AutoCanceller? = nil
         
         // define task
-        let task = Task { progress, fulfill, reject, configure in
-            
-            progress(0.0)
+        Task { progress, fulfill, reject, configure in
             
             Async.main(after: 0.1) {
-                progress(1.0)
                 fulfill("OK")
             }
+            return
             
-        }
-        
-        var thenToken: HandlerToken? = nil
-        
-        // NOTE: reference to `task2` is required in order to call `task2.removeThen(thenToken)`
-        let task2 = task.success { value -> String in
+        }.success { value -> String in
                 
             XCTAssertEqual(value, "OK")
             return "Now OK"
-                
-        }
         
-        task2.then(&thenToken) { value, errorInfo -> String in
+        }.then(&canceller) { value, errorInfo -> String in
             
             println("Should never reach here")
             
@@ -97,17 +86,20 @@ class RemoveHandlerTests: _TestCase
             
         }.then { value, errorInfo -> Void in
             
+            println("value = \(value)")
+            println("errorInfo = \(errorInfo)")
+            
             XCTAssertTrue(value == nil)
             XCTAssertTrue(errorInfo != nil)
             XCTAssertTrue(errorInfo!.error == nil)
-            XCTAssertTrue(errorInfo!.isCancelled, "`task2.removeThen(token)` will force `let task3 = task2.then(&token)` to deinit immediately and tries cancellation if it is still running.")
+            XCTAssertTrue(errorInfo!.isCancelled, "Deallocation of `canceller` will force `task2` (where `task2 = task.then(&canceller)`) to deinit immediately and tries cancellation if it is still running.")
             
             expect.fulfill()
                 
         }
         
         // remove then-handler
-        task2.removeThen(thenToken!)
+        canceller = nil
         
         self.wait()
     }

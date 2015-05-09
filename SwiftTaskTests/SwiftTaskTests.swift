@@ -598,7 +598,7 @@ class SwiftTaskTests: _TestCase
         // cancel at time between 1st & 2nd delay (t=0.3)
         Async.main(after: 0.3) {
             
-            task.cancel(error: "I get bored.")
+            task.cancel("I get bored.")
             
             XCTAssertEqual(task.state, TaskState.Cancelled)
             
@@ -635,7 +635,7 @@ class SwiftTaskTests: _TestCase
         // cancel task3 at time between task1 fulfilled & before task2 completed (t=0.6)
         Async.main(after: 0.6) {
             
-            task3.cancel(error: "I get bored.")
+            task3.cancel("I get bored.")
             
             XCTAssertEqual(task3.state, TaskState.Cancelled)
             
@@ -1175,7 +1175,7 @@ class SwiftTaskTests: _TestCase
         
         // cancel before fulfilled
         Async.main(after: 0.01) {
-            groupedTask.cancel(error: "Cancel")
+            groupedTask.cancel("Cancel")
             return
         }
         
@@ -1390,7 +1390,7 @@ class SwiftTaskTests: _TestCase
         
         // cancel before fulfilled
         self.perform {
-            groupedTask.cancel(error: "Cancel")
+            groupedTask.cancel("Cancel")
             return
         }
         

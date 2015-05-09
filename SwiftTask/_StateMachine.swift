@@ -41,28 +41,32 @@ internal class _StateMachine<Progress, Value, Error>
         self.state = paused ? .Paused : .Running
     }
     
-    internal func addProgressTupleHandler(inout token: HandlerToken?, _ progressTupleHandler: ProgressTupleHandler)
+    internal func addProgressTupleHandler(inout token: _HandlerToken?, _ progressTupleHandler: ProgressTupleHandler)
     {
         if self.state == .Running || self.state == .Paused {
             token = self.progressTupleHandlers.append(progressTupleHandler)
         }
     }
     
-    internal func removeProgressTupleHandler(handlerToken: HandlerToken)
+    internal func removeProgressTupleHandler(handlerToken: _HandlerToken?)
     {
-        self.progressTupleHandlers.remove(handlerToken)
+        if let handlerToken = handlerToken {
+            self.progressTupleHandlers.remove(handlerToken)
+        }
     }
     
-    internal func addCompletionHandler(inout token: HandlerToken?, _ completionHandler: Void -> Void)
+    internal func addCompletionHandler(inout token: _HandlerToken?, _ completionHandler: Void -> Void)
     {
         if self.state == .Running || self.state == .Paused {
             token = self.completionHandlers.append(completionHandler)
         }
     }
     
-    internal func removeCompletionHandler(handlerToken: HandlerToken)
+    internal func removeCompletionHandler(handlerToken: _HandlerToken?)
     {
-        self.completionHandlers.remove(handlerToken)
+        if let handlerToken = handlerToken {
+            self.completionHandlers.remove(handlerToken)
+        }
     }
     
     internal func handleProgress(progress: Progress)
@@ -201,7 +205,7 @@ internal class _StateMachine<Progress, Value, Error>
 // MARK: - Utility
 //--------------------------------------------------
 
-public struct HandlerToken
+internal struct _HandlerToken
 {
     internal let key: Int
 }
@@ -211,16 +215,16 @@ internal struct _Handlers<T>: SequenceType
     private var currentKey: Int = 0
     private var elements = [Int : T]()
     
-    internal mutating func append(value: T) -> HandlerToken
+    internal mutating func append(value: T) -> _HandlerToken
     {
         self.currentKey = self.currentKey &+ 1
         
         self.elements[self.currentKey] = value
         
-        return HandlerToken(key: self.currentKey)
+        return _HandlerToken(key: self.currentKey)
     }
     
-    internal mutating func remove(token: HandlerToken)
+    internal mutating func remove(token: _HandlerToken)
     {
         self.elements.removeValueForKey(token.key)
     }
