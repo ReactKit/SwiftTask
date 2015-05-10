@@ -12,7 +12,13 @@ public protocol Cancellable
 {
     typealias Error
     
-    func cancel(error: Error) -> Bool
+    //
+    // NOTE:
+    // Single `func cancel(error: Error) -> Bool` is preferred (as first implemented in 8a22ed5),
+    // but two overloaded methods are required for SwiftTask ver 3.x API compatibility.
+    //
+    func cancel() -> Bool
+    func cancel(#error: Error) -> Bool
 }
 
 public class Canceller: Cancellable
@@ -24,7 +30,12 @@ public class Canceller: Cancellable
         self.cancelHandler = cancelHandler
     }
     
-    public func cancel(error: Void) -> Bool
+    public func cancel() -> Bool
+    {
+        return self.cancel(error: ())
+    }
+    
+    public func cancel(#error: Void) -> Bool
     {
         if let cancelHandler = self.cancelHandler {
             self.cancelHandler = nil

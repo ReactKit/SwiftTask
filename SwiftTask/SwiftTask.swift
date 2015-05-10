@@ -564,10 +564,10 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
     //
     public func cancel() -> Bool
     {
-        return self.cancel(nil)
+        return self.cancel(error: nil)
     }
     
-    public func cancel(error: Error?) -> Bool
+    public func cancel(#error: Error?) -> Bool
     {
         return self._cancel(error: error)
     }
