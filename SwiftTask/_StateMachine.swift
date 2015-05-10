@@ -220,21 +220,28 @@ internal struct _HandlerToken
 
 internal struct _Handlers<T>: SequenceType
 {
+    internal typealias KeyValue = (key: Int, value: T)
+    
     private var currentKey: Int = 0
-    private var elements = [Int : T]()
+    private var elements = [KeyValue]()
     
     internal mutating func append(value: T) -> _HandlerToken
     {
         self.currentKey = self.currentKey &+ 1
         
-        self.elements[self.currentKey] = value
+        self.elements += [(key: self.currentKey, value: value)]
         
         return _HandlerToken(key: self.currentKey)
     }
     
     internal mutating func remove(token: _HandlerToken) -> T?
     {
-        return self.elements.removeValueForKey(token.key)
+        for var i = 0; i < self.elements.count; i++ {
+            if self.elements[i].key == token.key {
+                return self.elements.removeAtIndex(i).value
+            }
+        }
+        return nil
     }
     
     internal mutating func removeAll(keepCapacity: Bool = false)
@@ -244,6 +251,6 @@ internal struct _Handlers<T>: SequenceType
     
     internal func generate() -> GeneratorOf<T>
     {
-        return GeneratorOf(self.elements.values.generate())
+        return GeneratorOf(self.elements.map { $0.value }.generate())
     }
 }
