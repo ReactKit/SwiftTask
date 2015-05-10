@@ -374,7 +374,8 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
     }
     
     ///
-    /// then (fulfilled & rejected) + closure returning value
+    /// then (fulfilled & rejected) + closure returning **value** 
+    /// (a.k.a. `map` in functional programming term)
     ///
     /// - e.g. task.then { value, errorInfo -> NextValueType in ... }
     ///
@@ -392,7 +393,8 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
     }
     
     ///
-    /// then (fulfilled & rejected) + closure returning task
+    /// then (fulfilled & rejected) + closure returning **task**
+    /// (a.k.a. `flatMap` in functional programming term)
     ///
     /// - e.g. task.then { value, errorInfo -> NextTaskType in ... }
     ///
@@ -402,6 +404,12 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
         return self.then(&dummyCanceller, thenClosure)
     }
     
+    //
+    // NOTE: then-canceller is a shorthand of `task.cancel(nil)`, i.e. these two are the same:
+    //
+    // - `let canceller = Canceller(); task1.then(&canceller) {...}; canceller.cancel();`
+    // - `let task2 = task1.then {...}; task2.cancel();`
+    //
     public func then<Progress2, Value2, C: Canceller>(inout canceller: C?, _ thenClosure: (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
     {
         return Task<Progress2, Value2, Error> { [unowned self, weak canceller] newMachine, progress, fulfill, _reject, configure in
@@ -440,7 +448,7 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
     }
     
     ///
-    /// success (fulfilled) + closure returning value
+    /// success (fulfilled) + closure returning **value**
     ///
     /// - e.g. task.success { value -> NextValueType in ... }
     ///
@@ -458,7 +466,7 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
     }
     
     ///
-    /// success (fulfilled) + closure returning task
+    /// success (fulfilled) + closure returning **task**
     ///
     /// - e.g. task.success { value -> NextTaskType in ... }
     ///
@@ -489,7 +497,7 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
     }
     
     ///
-    /// failure (rejected) + closure returning value
+    /// failure (rejected or cancelled) + closure returning **value**
     ///
     /// - e.g. task.failure { errorInfo -> NextValueType in ... }
     /// - e.g. task.failure { error, isCancelled -> NextValueType in ... }
@@ -508,7 +516,7 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
     }
 
     ///
-    /// failure (rejected) + closure returning task
+    /// failure (rejected or cancelled) + closure returning **task**
     ///
     /// - e.g. task.failure { errorInfo -> NextTaskType in ... }
     /// - e.g. task.failure { error, isCancelled -> NextTaskType in ... }
