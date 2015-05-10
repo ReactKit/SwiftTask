@@ -57,7 +57,7 @@ public class TaskConfiguration
     }
 }
 
-public class Task<Progress, Value, Error>: Printable
+public class Task<Progress, Value, Error>: Cancellable, Printable
 {
     public typealias ProgressTuple = (oldProgress: Progress?, newProgress: Progress)
     public typealias ErrorInfo = (error: Error?, isCancelled: Bool)
@@ -213,7 +213,8 @@ public class Task<Progress, Value, Error>: Printable
     internal func setup(#weakified: Bool, paused: Bool, _initClosure: _InitClosure)
     {
 //        #if DEBUG
-//            println("[init] \(self.name)")
+//            let addr = String(format: "%p", unsafeAddressOf(self))
+//            NSLog("[init] \(self.name) \(addr)")
 //        #endif
         
         self._initClosure = _initClosure
@@ -287,7 +288,8 @@ public class Task<Progress, Value, Error>: Printable
     deinit
     {
 //        #if DEBUG
-//            println("[deinit] \(self.name)")
+//            let addr = String(format: "%p", unsafeAddressOf(self))
+//            NSLog("[deinit] \(self.name) \(addr)")
 //        #endif
         
         // cancel in case machine is still running
@@ -355,31 +357,62 @@ public class Task<Progress, Value, Error>: Printable
     ///
     public func progress(progressClosure: ProgressTuple -> Void) -> Task
     {
-        self._machine.addProgressTupleHandler(progressClosure)
+        var dummyCanceller: Canceller? = nil
+        return self.progress(&dummyCanceller, progressClosure)
+    }
+    
+    public func progress<C: Canceller>(inout canceller: C?, _ progressClosure: ProgressTuple -> Void) -> Task
+    {
+        var token: _HandlerToken? = nil
+        self._machine.addProgressTupleHandler(&token, progressClosure)
+        
+        canceller = C { [weak self] in
+            self?._machine.removeProgressTupleHandler(token)
+        }
         
         return self
     }
     
     ///
-    /// then (fulfilled & rejected) + closure returning value
+    /// then (fulfilled & rejected) + closure returning **value** 
+    /// (a.k.a. `map` in functional programming term)
     ///
     /// - e.g. task.then { value, errorInfo -> NextValueType in ... }
     ///
     public func then<Value2>(thenClosure: (Value?, ErrorInfo?) -> Value2) -> Task<Progress, Value2, Error>
     {
-        return self.then { (value: Value?, errorInfo: ErrorInfo?) -> Task<Progress, Value2, Error> in
+        var dummyCanceller: Canceller? = nil
+        return self.then(&dummyCanceller, thenClosure)
+    }
+    
+    public func then<Value2, C: Canceller>(inout canceller: C?, _ thenClosure: (Value?, ErrorInfo?) -> Value2) -> Task<Progress, Value2, Error>
+    {
+        return self.then(&canceller) { (value: Value?, errorInfo: ErrorInfo?) -> Task<Progress, Value2, Error> in
             return Task<Progress, Value2, Error>(value: thenClosure(value, errorInfo))
         }
     }
     
     ///
-    /// then (fulfilled & rejected) + closure returning task
+    /// then (fulfilled & rejected) + closure returning **task**
+    /// (a.k.a. `flatMap` in functional programming term)
     ///
     /// - e.g. task.then { value, errorInfo -> NextTaskType in ... }
     ///
     public func then<Progress2, Value2>(thenClosure: (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
     {
-        return Task<Progress2, Value2, Error> { [unowned self] newMachine, progress, fulfill, _reject, configure in
+        var dummyCanceller: Canceller? = nil
+        return self.then(&dummyCanceller, thenClosure)
+    }
+    
+    //
+    // NOTE: then-canceller is a shorthand of `task.cancel(nil)`, i.e. these two are the same:
+    //
+    // - `let canceller = Canceller(); task1.then(&canceller) {...}; canceller.cancel();`
+    // - `let task2 = task1.then {...}; task2.cancel();`
+    //
+    public func then<Progress2, Value2, C: Canceller>(inout canceller: C?, _ thenClosure: (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
+    {
+        return Task<Progress2, Value2, Error> { [unowned self, weak canceller] newMachine, progress, fulfill, _reject, configure in
             
             //
             // NOTE: 
@@ -389,8 +422,8 @@ public class Task<Progress, Value, Error>: Printable
             // This is especially important for ReactKit's `deinitSignal` behavior.
             //
             let selfMachine = self._machine
-
-            self._then {
+            
+            self._then(&canceller) {
                 let innerTask = thenClosure(selfMachine.value, selfMachine.errorInfo)
                 _bindInnerTask(innerTask, newMachine, progress, fulfill, _reject, configure)
             }
@@ -399,41 +432,58 @@ public class Task<Progress, Value, Error>: Printable
     }
 
     /// invokes `completionHandler` "now" or "in the future"
-    private func _then(completionHandler: Void -> Void)
+    private func _then<C: Canceller>(inout canceller: C?, _ completionHandler: Void -> Void)
     {
         switch self.state {
             case .Fulfilled, .Rejected, .Cancelled:
                 completionHandler()
             default:
-                self._machine.addCompletionHandler(completionHandler)
+                var token: _HandlerToken? = nil
+                self._machine.addCompletionHandler(&token, completionHandler)
+            
+                canceller = C { [weak self] in
+                    self?._machine.removeCompletionHandler(token)
+                }
         }
     }
     
     ///
-    /// success (fulfilled) + closure returning value
+    /// success (fulfilled) + closure returning **value**
     ///
     /// - e.g. task.success { value -> NextValueType in ... }
     ///
     public func success<Value2>(successClosure: Value -> Value2) -> Task<Progress, Value2, Error>
     {
-        return self.success { (value: Value) -> Task<Progress, Value2, Error> in
+        var dummyCanceller: Canceller? = nil
+        return self.success(&dummyCanceller, successClosure)
+    }
+    
+    public func success<Value2, C: Canceller>(inout canceller: C?, _ successClosure: Value -> Value2) -> Task<Progress, Value2, Error>
+    {
+        return self.success(&canceller) { (value: Value) -> Task<Progress, Value2, Error> in
             return Task<Progress, Value2, Error>(value: successClosure(value))
         }
     }
     
     ///
-    /// success (fulfilled) + closure returning task
+    /// success (fulfilled) + closure returning **task**
     ///
     /// - e.g. task.success { value -> NextTaskType in ... }
     ///
     public func success<Progress2, Value2>(successClosure: Value -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
+    {
+        var dummyCanceller: Canceller? = nil
+        return self.success(&dummyCanceller, successClosure)
+    }
+    
+    public func success<Progress2, Value2, C: Canceller>(inout canceller: C?, _ successClosure: Value -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
     {
         return Task<Progress2, Value2, Error> { [unowned self] newMachine, progress, fulfill, _reject, configure in
             
             let selfMachine = self._machine
             
             // NOTE: using `self._then()` + `selfMachine` instead of `self.then()` will reduce Task allocation
-            self._then {
+            self._then(&canceller) {
                 if let value = selfMachine.value {
                     let innerTask = successClosure(value)
                     _bindInnerTask(innerTask, newMachine, progress, fulfill, _reject, configure)
@@ -447,31 +497,43 @@ public class Task<Progress, Value, Error>: Printable
     }
     
     ///
-    /// failure (rejected) + closure returning value
+    /// failure (rejected or cancelled) + closure returning **value**
     ///
     /// - e.g. task.failure { errorInfo -> NextValueType in ... }
     /// - e.g. task.failure { error, isCancelled -> NextValueType in ... }
     ///
     public func failure(failureClosure: ErrorInfo -> Value) -> Task
     {
-        return self.failure { (errorInfo: ErrorInfo) -> Task in
+        var dummyCanceller: Canceller? = nil
+        return self.failure(&dummyCanceller, failureClosure)
+    }
+    
+    public func failure<C: Canceller>(inout canceller: C?, _ failureClosure: ErrorInfo -> Value) -> Task
+    {
+        return self.failure(&canceller) { (errorInfo: ErrorInfo) -> Task in
             return Task(value: failureClosure(errorInfo))
         }
     }
 
     ///
-    /// failure (rejected) + closure returning task
+    /// failure (rejected or cancelled) + closure returning **task**
     ///
     /// - e.g. task.failure { errorInfo -> NextTaskType in ... }
     /// - e.g. task.failure { error, isCancelled -> NextTaskType in ... }
     ///
     public func failure<Progress2>(failureClosure: ErrorInfo -> Task<Progress2, Value, Error>) -> Task<Progress2, Value, Error>
     {
+        var dummyCanceller: Canceller? = nil
+        return self.failure(&dummyCanceller, failureClosure)
+    }
+    
+    public func failure<Progress2, C: Canceller>(inout canceller: C?, _ failureClosure: ErrorInfo -> Task<Progress2, Value, Error>) -> Task<Progress2, Value, Error>
+    {
         return Task<Progress2, Value, Error> { [unowned self] newMachine, progress, fulfill, _reject, configure in
             
             let selfMachine = self._machine
             
-            self._then {
+            self._then(&canceller) {
                 if let value = selfMachine.value {
                     fulfill(value)
                 }
@@ -494,7 +556,18 @@ public class Task<Progress, Value, Error>: Printable
         return self._machine.handleResume()
     }
     
-    public func cancel(error: Error? = nil) -> Bool
+    //
+    // NOTE: 
+    // To conform to `Cancellable`, this method is needed in replace of:
+    // - `public func cancel(error: Error? = nil) -> Bool`
+    // - `public func cancel(_ error: Error? = nil) -> Bool` (segfault in Swift 1.2)
+    //
+    public func cancel() -> Bool
+    {
+        return self.cancel(error: nil)
+    }
+    
+    public func cancel(#error: Error?) -> Bool
     {
         return self._cancel(error: error)
     }
@@ -503,6 +576,7 @@ public class Task<Progress, Value, Error>: Printable
     {
         return self._machine.handleCancel(error: error)
     }
+    
 }
 
 // MARK: - Helper
