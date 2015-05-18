@@ -84,16 +84,16 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
     internal let _paused: Bool
     internal var _initClosure: _InitClosure!    // retained throughout task's lifetime
     
-    public var state: TaskState { return self._machine.state }
+    public var state: TaskState { return self._machine.state.rawValue }
     
     /// progress value (NOTE: always nil when `weakified = true`)
-    public var progress: Progress? { return self._machine.progress }
+    public var progress: Progress? { return self._machine.progress.rawValue }
     
     /// fulfilled value
-    public var value: Value? { return self._machine.value }
+    public var value: Value? { return self._machine.value.rawValue }
     
     /// rejected/cancelled tuple info
-    public var errorInfo: ErrorInfo? { return self._machine.errorInfo }
+    public var errorInfo: ErrorInfo? { return self._machine.errorInfo.rawValue }
     
     public var name: String = "DefaultTask"
     
@@ -424,7 +424,7 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
             let selfMachine = self._machine
             
             self._then(&canceller) {
-                let innerTask = thenClosure(selfMachine.value, selfMachine.errorInfo)
+                let innerTask = thenClosure(selfMachine.value.rawValue, selfMachine.errorInfo.rawValue)
                 _bindInnerTask(innerTask, newMachine, progress, fulfill, _reject, configure)
             }
             
@@ -484,11 +484,11 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
             
             // NOTE: using `self._then()` + `selfMachine` instead of `self.then()` will reduce Task allocation
             self._then(&canceller) {
-                if let value = selfMachine.value {
+                if let value = selfMachine.value.rawValue {
                     let innerTask = successClosure(value)
                     _bindInnerTask(innerTask, newMachine, progress, fulfill, _reject, configure)
                 }
-                else if let errorInfo = selfMachine.errorInfo {
+                else if let errorInfo = selfMachine.errorInfo.rawValue {
                     _reject(errorInfo)
                 }
             }
@@ -534,10 +534,10 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
             let selfMachine = self._machine
             
             self._then(&canceller) {
-                if let value = selfMachine.value {
+                if let value = selfMachine.value.rawValue {
                     fulfill(value)
                 }
-                else if let errorInfo = selfMachine.errorInfo {
+                else if let errorInfo = selfMachine.errorInfo.rawValue {
                     let innerTask = failureClosure(errorInfo)
                     _bindInnerTask(innerTask, newMachine, progress, fulfill, _reject, configure)
                 }
@@ -617,10 +617,10 @@ internal func _bindInnerTask<Progress2, Value2, Error>(
     configure.cancel = { innerTask.cancel(); return }
     
     // pause/cancel innerTask if descendant task is already paused/cancelled
-    if newMachine.state == .Paused {
+    if newMachine.state.rawValue == .Paused {
         innerTask.pause()
     }
-    else if newMachine.state == .Cancelled {
+    else if newMachine.state.rawValue == .Cancelled {
         innerTask.cancel()
     }
 }
@@ -637,36 +637,37 @@ extension Task
             
             var completedCount = 0
             let totalCount = tasks.count
+            let lock = _RecursiveLock()
             
             for task in tasks {
                 task.success { (value: Value) -> Void in
                     
-                    synchronized(self) {
-                        completedCount++
+                    lock.lock()
+                    completedCount++
+                    
+                    let progressTuple = BulkProgress(completedCount: completedCount, totalCount: totalCount)
+                    progress(progressTuple)
+                    
+                    if completedCount == totalCount {
+                        var values: [Value] = Array()
                         
-                        let progressTuple = BulkProgress(completedCount: completedCount, totalCount: totalCount)
-                        progress(progressTuple)
-                        
-                        if completedCount == totalCount {
-                            var values: [Value] = Array()
-                            
-                            for task in tasks {
-                                values.append(task.value!)
-                            }
-                            
-                            fulfill(values)
+                        for task in tasks {
+                            values.append(task.value!)
                         }
+                        
+                        fulfill(values)
                     }
+                    lock.unlock()
                     
                 }.failure { (errorInfo: ErrorInfo) -> Void in
                     
-                    synchronized(self) {
-                        _reject(errorInfo)
-                        
-                        for task in tasks {
-                            task.cancel()
-                        }
+                    lock.lock()
+                    _reject(errorInfo)
+                    
+                    for task in tasks {
+                        task.cancel()
                     }
+                    lock.unlock()
                 }
             }
             
@@ -684,32 +685,33 @@ extension Task
             var completedCount = 0
             var rejectedCount = 0
             let totalCount = tasks.count
+            let lock = _RecursiveLock()
             
             for task in tasks {
                 task.success { (value: Value) -> Void in
                     
-                    synchronized(self) {
-                        completedCount++
+                    lock.lock()
+                    completedCount++
+                    
+                    if completedCount == 1 {
+                        fulfill(value)
                         
-                        if completedCount == 1 {
-                            fulfill(value)
-                            
-                            self.cancelAll(tasks)
-                        }
+                        self.cancelAll(tasks)
                     }
+                    lock.unlock()
                     
                 }.failure { (errorInfo: ErrorInfo) -> Void in
                     
-                    synchronized(self) {
-                        rejectedCount++
+                    lock.lock()
+                    rejectedCount++
+                    
+                    if rejectedCount == totalCount {
+                        var isAnyCancelled = (tasks.filter { task in task.state == .Cancelled }.count > 0)
                         
-                        if rejectedCount == totalCount {
-                            var isAnyCancelled = (tasks.filter { task in task.state == .Cancelled }.count > 0)
-                            
-                            let errorInfo = ErrorInfo(error: nil, isCancelled: isAnyCancelled)  // NOTE: Task.any error returns nil (spec)
-                            _reject(errorInfo)
-                        }
+                        let errorInfo = ErrorInfo(error: nil, isCancelled: isAnyCancelled)  // NOTE: Task.any error returns nil (spec)
+                        _reject(errorInfo)
                     }
+                    lock.unlock()
                 }
             }
             
@@ -728,28 +730,29 @@ extension Task
             
             var completedCount = 0
             let totalCount = tasks.count
+            let lock = _RecursiveLock()
             
             for task in tasks {
                 task.then { (value: Value?, errorInfo: ErrorInfo?) -> Void in
                     
-                    synchronized(self) {
-                        completedCount++
+                    lock.lock()
+                    completedCount++
+                    
+                    let progressTuple = BulkProgress(completedCount: completedCount, totalCount: totalCount)
+                    progress(progressTuple)
+                    
+                    if completedCount == totalCount {
+                        var values: [Value] = Array()
                         
-                        let progressTuple = BulkProgress(completedCount: completedCount, totalCount: totalCount)
-                        progress(progressTuple)
-                        
-                        if completedCount == totalCount {
-                            var values: [Value] = Array()
-                            
-                            for task in tasks {
-                                if task.state == .Fulfilled {
-                                    values.append(task.value!)
-                                }
+                        for task in tasks {
+                            if task.state == .Fulfilled {
+                                values.append(task.value!)
                             }
-                            
-                            fulfill(values)
                         }
+                        
+                        fulfill(values)
                     }
+                    lock.unlock()
                     
                 }
             }
@@ -795,15 +798,4 @@ infix operator ~ { associativity left }
 public func ~ <P, V, E>(task: Task<P, V, E>, tryCount: Int) -> Task<P, V, E>
 {
     return task.try(tryCount)
-}
-
-//--------------------------------------------------
-// MARK: - Utility
-//--------------------------------------------------
-
-internal func synchronized(object: AnyObject, closure: Void -> Void)
-{
-    objc_sync_enter(object)
-    closure()
-    objc_sync_exit(object)
 }
