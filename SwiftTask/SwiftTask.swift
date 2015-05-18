@@ -84,16 +84,16 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
     internal let _paused: Bool
     internal var _initClosure: _InitClosure!    // retained throughout task's lifetime
     
-    public var state: TaskState { return self._machine.state }
+    public var state: TaskState { return self._machine.state.rawValue }
     
     /// progress value (NOTE: always nil when `weakified = true`)
-    public var progress: Progress? { return self._machine.progress }
+    public var progress: Progress? { return self._machine.progress.rawValue }
     
     /// fulfilled value
-    public var value: Value? { return self._machine.value }
+    public var value: Value? { return self._machine.value.rawValue }
     
     /// rejected/cancelled tuple info
-    public var errorInfo: ErrorInfo? { return self._machine.errorInfo }
+    public var errorInfo: ErrorInfo? { return self._machine.errorInfo.rawValue }
     
     public var name: String = "DefaultTask"
     
@@ -424,7 +424,7 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
             let selfMachine = self._machine
             
             self._then(&canceller) {
-                let innerTask = thenClosure(selfMachine.value, selfMachine.errorInfo)
+                let innerTask = thenClosure(selfMachine.value.rawValue, selfMachine.errorInfo.rawValue)
                 _bindInnerTask(innerTask, newMachine, progress, fulfill, _reject, configure)
             }
             
@@ -484,11 +484,11 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
             
             // NOTE: using `self._then()` + `selfMachine` instead of `self.then()` will reduce Task allocation
             self._then(&canceller) {
-                if let value = selfMachine.value {
+                if let value = selfMachine.value.rawValue {
                     let innerTask = successClosure(value)
                     _bindInnerTask(innerTask, newMachine, progress, fulfill, _reject, configure)
                 }
-                else if let errorInfo = selfMachine.errorInfo {
+                else if let errorInfo = selfMachine.errorInfo.rawValue {
                     _reject(errorInfo)
                 }
             }
@@ -534,10 +534,10 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
             let selfMachine = self._machine
             
             self._then(&canceller) {
-                if let value = selfMachine.value {
+                if let value = selfMachine.value.rawValue {
                     fulfill(value)
                 }
-                else if let errorInfo = selfMachine.errorInfo {
+                else if let errorInfo = selfMachine.errorInfo.rawValue {
                     let innerTask = failureClosure(errorInfo)
                     _bindInnerTask(innerTask, newMachine, progress, fulfill, _reject, configure)
                 }
@@ -617,10 +617,10 @@ internal func _bindInnerTask<Progress2, Value2, Error>(
     configure.cancel = { innerTask.cancel(); return }
     
     // pause/cancel innerTask if descendant task is already paused/cancelled
-    if newMachine.state == .Paused {
+    if newMachine.state.rawValue == .Paused {
         innerTask.pause()
     }
-    else if newMachine.state == .Cancelled {
+    else if newMachine.state.rawValue == .Cancelled {
         innerTask.cancel()
     }
 }
