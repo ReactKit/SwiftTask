@@ -35,6 +35,8 @@ internal class _StateMachine<Progress, Value, Error>
     
     internal let configuration = TaskConfiguration()
     
+    private let _recursiveLock = _RecursiveLock()
+    
     internal init(weakified: Bool, paused: Bool)
     {
         self.weakified = weakified
@@ -43,42 +45,63 @@ internal class _StateMachine<Progress, Value, Error>
     
     internal func addProgressTupleHandler(inout token: _HandlerToken?, _ progressTupleHandler: ProgressTupleHandler) -> Bool
     {
+        self._recursiveLock.lock()
         if self.state == .Running || self.state == .Paused {
             token = self.progressTupleHandlers.append(progressTupleHandler)
+            self._recursiveLock.unlock()
             return token != nil
         }
-        return false
+        else {
+            self._recursiveLock.unlock()
+            return false
+        }
     }
     
     internal func removeProgressTupleHandler(handlerToken: _HandlerToken?) -> Bool
     {
+        self._recursiveLock.lock()
         if let handlerToken = handlerToken {
             let removedHandler = self.progressTupleHandlers.remove(handlerToken)
+            self._recursiveLock.unlock()
             return removedHandler != nil
         }
-        return false
+        else {
+            self._recursiveLock.unlock()
+            return false
+        }
     }
     
     internal func addCompletionHandler(inout token: _HandlerToken?, _ completionHandler: Void -> Void) -> Bool
     {
+        self._recursiveLock.lock()
         if self.state == .Running || self.state == .Paused {
             token = self.completionHandlers.append(completionHandler)
+            self._recursiveLock.unlock()
             return token != nil
         }
-        return false
+        else {
+            self._recursiveLock.unlock()
+            return false
+        }
     }
     
     internal func removeCompletionHandler(handlerToken: _HandlerToken?) -> Bool
     {
+        self._recursiveLock.lock()
         if let handlerToken = handlerToken {
             let removedHandler = self.completionHandlers.remove(handlerToken)
+            self._recursiveLock.unlock()
             return removedHandler != nil
         }
-        return false
+        else {
+            self._recursiveLock.unlock()
+            return false
+        }
     }
     
     internal func handleProgress(progress: Progress)
     {
+        self._recursiveLock.lock()
         if self.state == .Running {
             
             let oldProgress = self.progress
@@ -91,35 +114,52 @@ internal class _StateMachine<Progress, Value, Error>
             for handler in self.progressTupleHandlers {
                 handler(oldProgress: oldProgress, newProgress: progress)
             }
+            self._recursiveLock.unlock()
+        }
+        else {
+            self._recursiveLock.unlock()
         }
     }
     
     internal func handleFulfill(value: Value)
     {
+        self._recursiveLock.lock()
         if self.state == .Running {
             self.state = .Fulfilled
             self.value = value
-            self.finish()
+            self._finish()
+            self._recursiveLock.unlock()
+        }
+        else {
+            self._recursiveLock.unlock()
         }
     }
     
     internal func handleRejectInfo(errorInfo: ErrorInfo)
     {
+        self._recursiveLock.lock()
         if self.state == .Running || self.state == .Paused {
             self.state = errorInfo.isCancelled ? .Cancelled : .Rejected
             self.errorInfo = errorInfo
-            self.finish()
+            self._finish()
+            self._recursiveLock.unlock()
+        }
+        else {
+            self._recursiveLock.unlock()
         }
     }
     
     internal func handlePause() -> Bool
     {
+        self._recursiveLock.lock()
         if self.state == .Running {
             self.configuration.pause?()
             self.state = .Paused
+            self._recursiveLock.unlock()
             return true
         }
         else {
+            self._recursiveLock.unlock()
             return false
         }
     }
@@ -135,9 +175,15 @@ internal class _StateMachine<Progress, Value, Error>
         // which eventually calls upstream's `initResumeClosure`
         // and thus upstream starts sending values.
         //
-        self._handleInitResumeIfNeeded()
         
-        return _handleResume()
+        self._recursiveLock.lock()
+        
+        self._handleInitResumeIfNeeded()
+        let resumed = _handleResume()
+        
+        self._recursiveLock.unlock()
+        
+        return resumed
     }
     
     ///
@@ -151,7 +197,6 @@ internal class _StateMachine<Progress, Value, Error>
         if (self.initResumeClosure != nil) {
             
             let isInitPaused = (self.state == .Paused)
-            
             if isInitPaused {
                 self.state = .Running  // switch `.Paused` => `.Resume` temporarily without invoking `configure.resume()`
             }
@@ -182,18 +227,21 @@ internal class _StateMachine<Progress, Value, Error>
     
     internal func handleCancel(error: Error? = nil) -> Bool
     {
+        self._recursiveLock.lock()
         if self.state == .Running || self.state == .Paused {
             self.state = .Cancelled
             self.errorInfo = ErrorInfo(error: error, isCancelled: true)
-            self.finish()
+            self._finish()
+            self._recursiveLock.unlock()
             return true
         }
         else {
+            self._recursiveLock.unlock()
             return false
         }
     }
     
-    internal func finish()
+    private func _finish()
     {
         for handler in self.completionHandlers {
             handler()

@@ -637,36 +637,37 @@ extension Task
             
             var completedCount = 0
             let totalCount = tasks.count
+            let lock = _RecursiveLock()
             
             for task in tasks {
                 task.success { (value: Value) -> Void in
                     
-                    synchronized(self) {
-                        completedCount++
+                    lock.lock()
+                    completedCount++
+                    
+                    let progressTuple = BulkProgress(completedCount: completedCount, totalCount: totalCount)
+                    progress(progressTuple)
+                    
+                    if completedCount == totalCount {
+                        var values: [Value] = Array()
                         
-                        let progressTuple = BulkProgress(completedCount: completedCount, totalCount: totalCount)
-                        progress(progressTuple)
-                        
-                        if completedCount == totalCount {
-                            var values: [Value] = Array()
-                            
-                            for task in tasks {
-                                values.append(task.value!)
-                            }
-                            
-                            fulfill(values)
+                        for task in tasks {
+                            values.append(task.value!)
                         }
+                        
+                        fulfill(values)
                     }
+                    lock.unlock()
                     
                 }.failure { (errorInfo: ErrorInfo) -> Void in
                     
-                    synchronized(self) {
-                        _reject(errorInfo)
-                        
-                        for task in tasks {
-                            task.cancel()
-                        }
+                    lock.lock()
+                    _reject(errorInfo)
+                    
+                    for task in tasks {
+                        task.cancel()
                     }
+                    lock.unlock()
                 }
             }
             
@@ -684,32 +685,33 @@ extension Task
             var completedCount = 0
             var rejectedCount = 0
             let totalCount = tasks.count
+            let lock = _RecursiveLock()
             
             for task in tasks {
                 task.success { (value: Value) -> Void in
                     
-                    synchronized(self) {
-                        completedCount++
+                    lock.lock()
+                    completedCount++
+                    
+                    if completedCount == 1 {
+                        fulfill(value)
                         
-                        if completedCount == 1 {
-                            fulfill(value)
-                            
-                            self.cancelAll(tasks)
-                        }
+                        self.cancelAll(tasks)
                     }
+                    lock.unlock()
                     
                 }.failure { (errorInfo: ErrorInfo) -> Void in
                     
-                    synchronized(self) {
-                        rejectedCount++
+                    lock.lock()
+                    rejectedCount++
+                    
+                    if rejectedCount == totalCount {
+                        var isAnyCancelled = (tasks.filter { task in task.state == .Cancelled }.count > 0)
                         
-                        if rejectedCount == totalCount {
-                            var isAnyCancelled = (tasks.filter { task in task.state == .Cancelled }.count > 0)
-                            
-                            let errorInfo = ErrorInfo(error: nil, isCancelled: isAnyCancelled)  // NOTE: Task.any error returns nil (spec)
-                            _reject(errorInfo)
-                        }
+                        let errorInfo = ErrorInfo(error: nil, isCancelled: isAnyCancelled)  // NOTE: Task.any error returns nil (spec)
+                        _reject(errorInfo)
                     }
+                    lock.unlock()
                 }
             }
             
@@ -728,28 +730,29 @@ extension Task
             
             var completedCount = 0
             let totalCount = tasks.count
+            let lock = _RecursiveLock()
             
             for task in tasks {
                 task.then { (value: Value?, errorInfo: ErrorInfo?) -> Void in
                     
-                    synchronized(self) {
-                        completedCount++
+                    lock.lock()
+                    completedCount++
+                    
+                    let progressTuple = BulkProgress(completedCount: completedCount, totalCount: totalCount)
+                    progress(progressTuple)
+                    
+                    if completedCount == totalCount {
+                        var values: [Value] = Array()
                         
-                        let progressTuple = BulkProgress(completedCount: completedCount, totalCount: totalCount)
-                        progress(progressTuple)
-                        
-                        if completedCount == totalCount {
-                            var values: [Value] = Array()
-                            
-                            for task in tasks {
-                                if task.state == .Fulfilled {
-                                    values.append(task.value!)
-                                }
+                        for task in tasks {
+                            if task.state == .Fulfilled {
+                                values.append(task.value!)
                             }
-                            
-                            fulfill(values)
                         }
+                        
+                        fulfill(values)
                     }
+                    lock.unlock()
                     
                 }
             }
@@ -795,15 +798,4 @@ infix operator ~ { associativity left }
 public func ~ <P, V, E>(task: Task<P, V, E>, tryCount: Int) -> Task<P, V, E>
 {
     return task.try(tryCount)
-}
-
-//--------------------------------------------------
-// MARK: - Utility
-//--------------------------------------------------
-
-internal func synchronized(object: AnyObject, closure: Void -> Void)
-{
-    objc_sync_enter(object)
-    closure()
-    objc_sync_exit(object)
 }
