@@ -1,0 +1,20 @@
+digraph G
+{
+    Init [label = "Initial", shape = none];
+    Running [ peripheries = 2 ];
+
+    Init -> Running [ style="dashed" ];
+
+    subgraph {
+        rank = same;
+        Paused -> Running [ label = "Resume" ];
+        Running -> Paused [ label = "Pause" ];
+    }
+
+    Running -> Running [ taillabel = "Progress", labeldistance = 2, labelangle = 60 ];
+    
+    Running -> Fulfilled [ label = "Fulfill" ];
+    
+    Running -> Rejected [ label = "Reject\n(Cancel)" ];
+    Paused -> Rejected [ label = "Reject\n(Cancel)" ];
+}
