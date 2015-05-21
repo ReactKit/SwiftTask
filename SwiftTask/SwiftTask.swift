@@ -209,7 +209,7 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
         self.setup(weakified: weakified, paused: paused, _initClosure: _initClosure)
     }
     
-    // NOTE: don't use `internal init` for this setup method, or this will be a designated initalizer
+    // NOTE: don't use `internal init` for this setup method, or this will be a designated initializer
     internal func setup(#weakified: Bool, paused: Bool, _initClosure: _InitClosure)
     {
 //        #if DEBUG
