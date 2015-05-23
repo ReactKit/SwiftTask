@@ -32,12 +32,12 @@ public class TaskConfiguration
     public var cancel: (Void -> Void)?
     
     /// useful to terminate immediate-infinite-sequence while performing `initClosure`
-    public private(set) var isFinished: Bool = false
-    
-    public init()
+    public var isFinished : Bool
     {
-        
+        return self._isFinished.rawValue
     }
+    
+    private var _isFinished = _Atomic(false)
     
     internal func finish()
     {
@@ -53,7 +53,7 @@ public class TaskConfiguration
         self.pause = nil
         self.resume = nil
         self.cancel = nil
-        self.isFinished = true
+        self._isFinished.rawValue = true
     }
 }
 
@@ -220,7 +220,7 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
         self._initClosure = _initClosure
         
         // will be invoked on 1st resume (only once)
-        self._machine.initResumeClosure = { [weak self] in
+        self._machine.initResumeClosure.rawValue = { [weak self] in
             
             // strongify `self` on 1st resume
             if let self_ = self {
