@@ -10,38 +10,69 @@ import Darwin
 
 internal final class _Atomic<T>
 {
-    private var spinlock = OS_SPINLOCK_INIT
+    private var _spinlock = OS_SPINLOCK_INIT
     private var _rawValue: T
     
     internal var rawValue: T
     {
         get {
-            lock()
+            self._lock()
             let rawValue = self._rawValue
-            unlock()
+            self._unlock()
             
             return rawValue
         }
         
         set(newValue) {
-            lock()
+            self._lock()
             self._rawValue = newValue
-            unlock()
+            self._unlock()
         }
     }
     
-    init(_ rawValue: T)
+    internal init(_ rawValue: T)
     {
         self._rawValue = rawValue
     }
     
-    private func lock()
+    internal func update(f: T -> T) -> T
     {
-        withUnsafeMutablePointer(&self.spinlock, OSSpinLockLock)
+        self._lock()
+        let oldValue = self._rawValue
+        self._rawValue = f(oldValue)
+        self._unlock()
+        
+        return oldValue
     }
     
-    private func unlock()
+    internal func tryUpdate(f: T -> (T, Bool)) -> (T, Bool)
     {
-        withUnsafeMutablePointer(&self.spinlock, OSSpinLockUnlock)
+        self._lock()
+        let oldValue = self._rawValue
+        let (newValue, shouldUpdate) = f(oldValue)
+        if shouldUpdate {
+            self._rawValue = newValue
+        }
+        self._unlock()
+        
+        return (oldValue, shouldUpdate)
+    }
+    
+    private func _lock()
+    {
+        withUnsafeMutablePointer(&self._spinlock, OSSpinLockLock)
+    }
+    
+    private func _unlock()
+    {
+        withUnsafeMutablePointer(&self._spinlock, OSSpinLockUnlock)
+    }
+}
+
+extension _Atomic: Printable
+{
+    internal var description: String
+    {
+        return toString(self.rawValue)
     }
 }

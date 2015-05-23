@@ -30,12 +30,12 @@ internal class _StateMachine<Progress, Value, Error>
     
     /// wrapper closure for `_initClosure` to invoke only once when started `.Running`,
     /// and will be set to `nil` afterward
-    internal var initResumeClosure: (Void -> Void)?
+    internal var initResumeClosure: _Atomic<(Void -> Void)?> = _Atomic(nil)
     
     private lazy var _progressTupleHandlers = _Handlers<ProgressTupleHandler>()
     private lazy var _completionHandlers = _Handlers<Void -> Void>()
     
-    private let _recursiveLock = _RecursiveLock()
+    private var _lock = _RecursiveLock()
     
     internal init(weakified: Bool, paused: Bool)
     {
@@ -45,63 +45,63 @@ internal class _StateMachine<Progress, Value, Error>
     
     internal func addProgressTupleHandler(inout token: _HandlerToken?, _ progressTupleHandler: ProgressTupleHandler) -> Bool
     {
-        self._recursiveLock.lock()
+        self._lock.lock()
         if self.state.rawValue == .Running || self.state.rawValue == .Paused {
             token = self._progressTupleHandlers.append(progressTupleHandler)
-            self._recursiveLock.unlock()
+            self._lock.unlock()
             return token != nil
         }
         else {
-            self._recursiveLock.unlock()
+            self._lock.unlock()
             return false
         }
     }
     
     internal func removeProgressTupleHandler(handlerToken: _HandlerToken?) -> Bool
     {
-        self._recursiveLock.lock()
+        self._lock.lock()
         if let handlerToken = handlerToken {
             let removedHandler = self._progressTupleHandlers.remove(handlerToken)
-            self._recursiveLock.unlock()
+            self._lock.unlock()
             return removedHandler != nil
         }
         else {
-            self._recursiveLock.unlock()
+            self._lock.unlock()
             return false
         }
     }
     
     internal func addCompletionHandler(inout token: _HandlerToken?, _ completionHandler: Void -> Void) -> Bool
     {
-        self._recursiveLock.lock()
+        self._lock.lock()
         if self.state.rawValue == .Running || self.state.rawValue == .Paused {
             token = self._completionHandlers.append(completionHandler)
-            self._recursiveLock.unlock()
+            self._lock.unlock()
             return token != nil
         }
         else {
-            self._recursiveLock.unlock()
+            self._lock.unlock()
             return false
         }
     }
     
     internal func removeCompletionHandler(handlerToken: _HandlerToken?) -> Bool
     {
-        self._recursiveLock.lock()
+        self._lock.lock()
         if let handlerToken = handlerToken {
             let removedHandler = self._completionHandlers.remove(handlerToken)
-            self._recursiveLock.unlock()
+            self._lock.unlock()
             return removedHandler != nil
         }
         else {
-            self._recursiveLock.unlock()
+            self._lock.unlock()
             return false
         }
     }
     
     internal func handleProgress(progress: Progress)
     {
-        self._recursiveLock.lock()
+        self._lock.lock()
         if self.state.rawValue == .Running {
             
             let oldProgress = self.progress.rawValue
@@ -114,110 +114,93 @@ internal class _StateMachine<Progress, Value, Error>
             for handler in self._progressTupleHandlers {
                 handler(oldProgress: oldProgress, newProgress: progress)
             }
-            self._recursiveLock.unlock()
+            self._lock.unlock()
         }
         else {
-            self._recursiveLock.unlock()
+            self._lock.unlock()
         }
     }
     
     internal func handleFulfill(value: Value)
     {
-        self._recursiveLock.lock()
-        if self.state.rawValue == .Running {
-            self.state.rawValue = .Fulfilled
+        self._lock.lock()
+        let (_, updated) = self.state.tryUpdate { $0 == .Running ? (.Fulfilled, true) : ($0, false) }
+        if updated {
             self.value.rawValue = value
             self._finish()
-            self._recursiveLock.unlock()
+            self._lock.unlock()
         }
         else {
-            self._recursiveLock.unlock()
+            self._lock.unlock()
         }
     }
     
     internal func handleRejectInfo(errorInfo: ErrorInfo)
     {
-        self._recursiveLock.lock()
-        if self.state.rawValue == .Running || self.state.rawValue == .Paused {
-            self.state.rawValue = errorInfo.isCancelled ? .Cancelled : .Rejected
+        self._lock.lock()
+        let toState = errorInfo.isCancelled ? TaskState.Cancelled : .Rejected
+        let (_, updated) = self.state.tryUpdate { $0 == .Running || $0 == .Paused ? (toState, true) : ($0, false) }
+        if updated {
             self.errorInfo.rawValue = errorInfo
             self._finish()
-            self._recursiveLock.unlock()
+            self._lock.unlock()
         }
         else {
-            self._recursiveLock.unlock()
+            self._lock.unlock()
         }
     }
     
     internal func handlePause() -> Bool
     {
-        self._recursiveLock.lock()
-        if self.state.rawValue == .Running {
+        self._lock.lock()
+        let (_, updated) = self.state.tryUpdate { $0 == .Running ? (.Paused, true) : ($0, false) }
+        if updated {
             self.configuration.pause?()
-            self.state.rawValue = .Paused
-            self._recursiveLock.unlock()
+            self._lock.unlock()
             return true
         }
         else {
-            self._recursiveLock.unlock()
+            self._lock.unlock()
             return false
         }
     }
     
     internal func handleResume() -> Bool
     {
-        //
-        // NOTE:
-        // `initResumeClosure` should be invoked first before `configure.resume()`
-        // to let downstream prepare setting upstream's progress/fulfill/reject handlers
-        // before upstream actually starts sending values, which often happens
-        // when downstream's `configure.resume()` is configured to call upstream's `task.resume()`
-        // which eventually calls upstream's `initResumeClosure`
-        // and thus upstream starts sending values.
-        //
-        
-        self._recursiveLock.lock()
-        
-        self._handleInitResumeIfNeeded()
-        let resumed = _handleResume()
-        
-        self._recursiveLock.unlock()
-        
-        return resumed
-    }
-    
-    ///
-    /// Invokes `initResumeClosure` on 1st resume (only once).
-    ///
-    /// If initial state is `.Paused`, `state` will be temporarily switched to `.Running`
-    /// during `initResumeClosure` execution, so that Task can call progress/fulfill/reject handlers safely.
-    ///
-    private func _handleInitResumeIfNeeded()
-    {
-        if (self.initResumeClosure != nil) {
+        self._lock.lock()
+        if let initResumeClosure = self.initResumeClosure.update({ _ in nil }) {
             
-            let isInitPaused = (self.state.rawValue == .Paused)
-            if isInitPaused {
-                self.state.rawValue = .Running  // switch `.Paused` => `.Resume` temporarily without invoking `configure.resume()`
-            }
+            self.state.rawValue = .Running
+            self._lock.unlock()
             
-            // NOTE: performing `initResumeClosure` might change `state` to `.Fulfilled` or `.Rejected` **immediately**
-            self.initResumeClosure?()
-            self.initResumeClosure = nil
+            //
+            // NOTE:
+            // Don't use `_lock` here so that dispatch_async'ed `handleProgress` inside `initResumeClosure()`
+            // will be safely called even when current thread goes into sleep.
+            //
+            initResumeClosure()
             
-            // switch back to `.Paused` if temporary `.Running` has not changed
-            // so that consecutive `_handleResume()` can perform `configure.resume()`
-            if isInitPaused && self.state.rawValue == .Running {
-                self.state.rawValue = .Paused
-            }
+            //
+            // Comment-Out:
+            // Don't call `configuration.resume()` when lazy starting.
+            // This prevents inapropriate starting of upstream in ReactKit.
+            //
+            //self.configuration.resume?()
+            
+            return true
+        }
+        else {
+            let resumed = _handleResume()
+            self._lock.unlock()
+            return resumed
         }
     }
     
     private func _handleResume() -> Bool
     {
-        if self.state.rawValue == .Paused {
+        let (_, updated) = self.state.tryUpdate { $0 == .Paused ? (.Running, true) : ($0, false) }
+        if updated {
             self.configuration.resume?()
-            self.state.rawValue = .Running
             return true
         }
         else {
@@ -227,16 +210,16 @@ internal class _StateMachine<Progress, Value, Error>
     
     internal func handleCancel(error: Error? = nil) -> Bool
     {
-        self._recursiveLock.lock()
-        if self.state.rawValue == .Running || self.state.rawValue == .Paused {
-            self.state.rawValue = .Cancelled
+        self._lock.lock()
+        let (_, updated) = self.state.tryUpdate { $0 == .Running || $0 == .Paused ? (.Cancelled, true) : ($0, false) }
+        if updated {
             self.errorInfo.rawValue = ErrorInfo(error: error, isCancelled: true)
             self._finish()
-            self._recursiveLock.unlock()
+            self._lock.unlock()
             return true
         }
         else {
-            self._recursiveLock.unlock()
+            self._lock.unlock()
             return false
         }
     }
@@ -252,7 +235,7 @@ internal class _StateMachine<Progress, Value, Error>
         
         self.configuration.finish()
         
-        self.initResumeClosure = nil
+        self.initResumeClosure.rawValue = nil
         self.progress.rawValue = nil
     }
 }

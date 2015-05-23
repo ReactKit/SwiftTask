@@ -34,7 +34,7 @@ public class TaskConfiguration
     /// useful to terminate immediate-infinite-sequence while performing `initClosure`
     public var isFinished : Bool
     {
-        return _isFinished.rawValue
+        return self._isFinished.rawValue
     }
     
     private var _isFinished = _Atomic(false)
@@ -220,7 +220,7 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
         self._initClosure = _initClosure
         
         // will be invoked on 1st resume (only once)
-        self._machine.initResumeClosure = { [weak self] in
+        self._machine.initResumeClosure.rawValue = { [weak self] in
             
             // strongify `self` on 1st resume
             if let self_ = self {
