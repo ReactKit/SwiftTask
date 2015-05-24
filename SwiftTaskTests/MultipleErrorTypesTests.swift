@@ -109,5 +109,37 @@ class MultipleErrorTypesTests: _TestCase
         
         self.wait()
     }
-    
+
+    func testMultipleErrorTypes_failure()
+    {
+        var expect = self.expectationWithDescription(__FUNCTION__)
+        
+        self._task1(success: false)
+            .failure { errorInfo -> Task<Dummy, String /* must be task1's value type to recover */, Dummy> in
+                
+                println("task1.failure")
+                self.flow += [3]
+                
+                //
+                // NOTE:
+                // Returning `Task2` won't work since same Value type as `task1` is required inside `task1.failure()`,
+                // so use `then()` to promote `Task2` to `Task<..., Task1.Value, ...>`.
+                //
+                return self._task2(success: false).then { value, errorInfo in
+                    return Task<Dummy, String, Dummy>(error: Dummy())  // error task
+                }
+            }
+            .failure { errorInfo -> String /* must be task1's value type to recover */ in
+                
+                println("task1.failure.failure (task2 should end at this point)")
+                self.flow += [6]
+                
+                XCTAssertEqual(self.flow, Array(1...6), "Tasks should flow in order from 1 to 6.")
+                expect.fulfill()
+                
+                return "DUMMY"
+            }
+        
+        self.wait()
+    }
 }
