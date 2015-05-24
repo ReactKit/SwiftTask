@@ -10,6 +10,8 @@
 		1F20250219ADA8FD00DE0495 /* BasicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F20250119ADA8FD00DE0495 /* BasicTests.swift */; };
 		1F218D5B1AFC3FFD00C849FF /* RemoveHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F218D5A1AFC3FFD00C849FF /* RemoveHandlerTests.swift */; };
 		1F218D5C1AFC3FFD00C849FF /* RemoveHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F218D5A1AFC3FFD00C849FF /* RemoveHandlerTests.swift */; };
+		1F29F6421B115EF500F476AF /* MultipleErrorTypesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F29F6411B115EF500F476AF /* MultipleErrorTypesTests.swift */; };
+		1F29F6431B115EF500F476AF /* MultipleErrorTypesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F29F6411B115EF500F476AF /* MultipleErrorTypesTests.swift */; };
 		1F46DEDA199EDF1000F97868 /* SwiftTask.h in Headers */ = {isa = PBXBuildFile; fileRef = 1F46DED9199EDF1000F97868 /* SwiftTask.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1F46DEFB199EDF8100F97868 /* SwiftTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEFA199EDF8100F97868 /* SwiftTask.swift */; };
 		1F46DEFD199EE2C200F97868 /* _TestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEFC199EE2C200F97868 /* _TestCase.swift */; };
@@ -46,6 +48,7 @@
 /* Begin PBXFileReference section */
 		1F20250119ADA8FD00DE0495 /* BasicTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasicTests.swift; sourceTree = "<group>"; };
 		1F218D5A1AFC3FFD00C849FF /* RemoveHandlerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemoveHandlerTests.swift; sourceTree = "<group>"; };
+		1F29F6411B115EF500F476AF /* MultipleErrorTypesTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MultipleErrorTypesTests.swift; sourceTree = "<group>"; };
 		1F46DED4199EDF1000F97868 /* SwiftTask.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftTask.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F46DED8199EDF1000F97868 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1F46DED9199EDF1000F97868 /* SwiftTask.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftTask.h; sourceTree = "<group>"; };
@@ -161,6 +164,7 @@
 				485C31F01A1D619A00040DA3 /* TypeInferenceTests.swift */,
 				1F218D5A1AFC3FFD00C849FF /* RemoveHandlerTests.swift */,
 				1F5FA35619A374E600975FB9 /* AlamofireTests.swift */,
+				1F29F6411B115EF500F476AF /* MultipleErrorTypesTests.swift */,
 				1F46DEE1199EDF1000F97868 /* Supporting Files */,
 			);
 			path = SwiftTaskTests;
@@ -366,6 +370,7 @@
 				1FF52EB41A4C395A00B4BA28 /* _InterruptableTask.swift in Sources */,
 				1F218D5B1AFC3FFD00C849FF /* RemoveHandlerTests.swift in Sources */,
 				1F6A8CA319A4E4F200369A5D /* SwiftTaskTests.swift in Sources */,
+				1F29F6421B115EF500F476AF /* MultipleErrorTypesTests.swift in Sources */,
 				1F4C76A41AD8CF40004E47C1 /* AlamofireTests.swift in Sources */,
 				485C31F11A1D619A00040DA3 /* TypeInferenceTests.swift in Sources */,
 				48511C5B19C17563002FE03C /* RetainCycleTests.swift in Sources */,
@@ -381,6 +386,7 @@
 				4822F0DD19D00B2300F5F572 /* BasicTests.swift in Sources */,
 				1F218D5C1AFC3FFD00C849FF /* RemoveHandlerTests.swift in Sources */,
 				1FF52EB51A4C395A00B4BA28 /* _InterruptableTask.swift in Sources */,
+				1F29F6431B115EF500F476AF /* MultipleErrorTypesTests.swift in Sources */,
 				1F4C76A51AD8CF41004E47C1 /* AlamofireTests.swift in Sources */,
 				485C31F21A1D619A00040DA3 /* TypeInferenceTests.swift in Sources */,
 				4822F0DC19D00B2300F5F572 /* _TestCase.swift in Sources */,
