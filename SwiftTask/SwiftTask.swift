@@ -470,13 +470,13 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
     ///
     /// - e.g. task.success { value -> NextTaskType in ... }
     ///
-    public func success<Progress2, Value2>(successClosure: Value -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
+    public func success<Progress2, Value2, Error2>(successClosure: Value -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, Error>
     {
         var dummyCanceller: Canceller? = nil
         return self.success(&dummyCanceller, successClosure)
     }
     
-    public func success<Progress2, Value2, C: Canceller>(inout canceller: C?, _ successClosure: Value -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
+    public func success<Progress2, Value2, Error2, C: Canceller>(inout canceller: C?, _ successClosure: Value -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, Error>
     {
         return Task<Progress2, Value2, Error> { [unowned self] newMachine, progress, fulfill, _reject, configure in
             
@@ -581,8 +581,8 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
 
 // MARK: - Helper
 
-internal func _bindInnerTask<Progress2, Value2, Error>(
-    innerTask: Task<Progress2, Value2, Error>,
+internal func _bindInnerTask<Progress2, Value2, Error, Error2>(
+    innerTask: Task<Progress2, Value2, Error2>,
     newMachine: _StateMachine<Progress2, Value2, Error>,
     progress: Task<Progress2, Value2, Error>.ProgressHandler,
     fulfill: Task<Progress2, Value2, Error>.FulfillHandler,
@@ -595,7 +595,10 @@ internal func _bindInnerTask<Progress2, Value2, Error>(
             fulfill(innerTask.value!)
             return
         case .Rejected, .Cancelled:
-            _reject(innerTask.errorInfo!)
+            let (error2, isCancelled) = innerTask.errorInfo!
+            
+            // NOTE: innerTask's `error2` will be treated as `nil` if not same type as outerTask's `Error` type
+            _reject((error2 as? Error, isCancelled))
             return
         default:
             break
@@ -603,12 +606,15 @@ internal func _bindInnerTask<Progress2, Value2, Error>(
     
     innerTask.progress { _, progressValue in
         progress(progressValue)
-    }.then { (value: Value2?, errorInfo: Task<Progress2, Value2, Error>.ErrorInfo?) -> Void in
+    }.then { (value: Value2?, errorInfo2: Task<Progress2, Value2, Error2>.ErrorInfo?) -> Void in
         if let value = value {
             fulfill(value)
         }
-        else if let errorInfo = errorInfo {
-            _reject(errorInfo)
+        else if let errorInfo2 = errorInfo2 {
+            let (error2, isCancelled) = errorInfo2
+            
+            // NOTE: innerTask's `error2` will be treated as `nil` if not same type as outerTask's `Error` type
+            _reject((error2 as? Error, isCancelled))
         }
     }
     
