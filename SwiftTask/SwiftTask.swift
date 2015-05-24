@@ -398,7 +398,7 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
     ///
     /// - e.g. task.then { value, errorInfo -> NextTaskType in ... }
     ///
-    public func then<Progress2, Value2>(thenClosure: (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
+    public func then<Progress2, Value2, Error2>(thenClosure: (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, Error2>
     {
         var dummyCanceller: Canceller? = nil
         return self.then(&dummyCanceller, thenClosure)
@@ -410,9 +410,9 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
     // - `let canceller = Canceller(); task1.then(&canceller) {...}; canceller.cancel();`
     // - `let task2 = task1.then {...}; task2.cancel();`
     //
-    public func then<Progress2, Value2, C: Canceller>(inout canceller: C?, _ thenClosure: (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error>) -> Task<Progress2, Value2, Error>
+    public func then<Progress2, Value2, Error2, C: Canceller>(inout canceller: C?, _ thenClosure: (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, Error2>
     {
-        return Task<Progress2, Value2, Error> { [unowned self, weak canceller] newMachine, progress, fulfill, _reject, configure in
+        return Task<Progress2, Value2, Error2> { [unowned self, weak canceller] newMachine, progress, fulfill, _reject, configure in
             
             //
             // NOTE: 
