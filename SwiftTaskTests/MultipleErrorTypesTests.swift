@@ -83,4 +83,31 @@ class MultipleErrorTypesTests: _TestCase
         
         self.wait()
     }
+    
+    func testMultipleErrorTypes_success()
+    {
+        var expect = self.expectationWithDescription(__FUNCTION__)
+        
+        self._task1(success: true)
+            .success { value -> Task2 in
+                
+                println("task1.success")
+                self.flow += [3]
+                
+                return self._task2(success: true)
+                
+            }
+            .success { value -> Void in
+                
+                println("task1.success.success (task2 should end at this point)")
+                self.flow += [6]
+                
+                XCTAssertEqual(self.flow, Array(1...6), "Tasks should flow in order from 1 to 6.")
+                expect.fulfill()
+                
+            }
+        
+        self.wait()
+    }
+    
 }
