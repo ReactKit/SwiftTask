@@ -521,15 +521,15 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
     /// - e.g. task.failure { errorInfo -> NextTaskType in ... }
     /// - e.g. task.failure { error, isCancelled -> NextTaskType in ... }
     ///
-    public func failure<Progress2>(failureClosure: ErrorInfo -> Task<Progress2, Value, Error>) -> Task<Progress2, Value, Error>
+    public func failure<Progress2, Error2>(failureClosure: ErrorInfo -> Task<Progress2, Value, Error2>) -> Task<Progress2, Value, Error2>
     {
         var dummyCanceller: Canceller? = nil
         return self.failure(&dummyCanceller, failureClosure)
     }
     
-    public func failure<Progress2, C: Canceller>(inout canceller: C?, _ failureClosure: ErrorInfo -> Task<Progress2, Value, Error>) -> Task<Progress2, Value, Error>
+    public func failure<Progress2, Error2, C: Canceller>(inout canceller: C?, _ failureClosure: ErrorInfo -> Task<Progress2, Value, Error2>) -> Task<Progress2, Value, Error2>
     {
-        return Task<Progress2, Value, Error> { [unowned self] newMachine, progress, fulfill, _reject, configure in
+        return Task<Progress2, Value, Error2> { [unowned self] newMachine, progress, fulfill, _reject, configure in
             
             let selfMachine = self._machine
             
