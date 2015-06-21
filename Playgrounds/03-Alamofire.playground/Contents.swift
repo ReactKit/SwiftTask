@@ -30,7 +30,7 @@ XCPSetExecutionShouldContinueIndefinitely()
 // define task
 let task = AlamofireTask { progress, fulfill, reject, configure in
     
-    let request = Alamofire.download(.GET, "http://httpbin.org/stream/100", Request.suggestedDownloadDestination(directory: .DocumentDirectory, domain: .UserDomainMask))
+    let request = Alamofire.download(.GET, URLString: "http://httpbin.org/stream/100", destination: Request.suggestedDownloadDestination(directory: .DocumentDirectory, domain: .UserDomainMask))
         
     request
         .progress { (bytesWritten, totalBytesWritten, totalBytesExpectedToWrite) in

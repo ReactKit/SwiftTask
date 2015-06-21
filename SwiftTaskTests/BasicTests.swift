@@ -7,7 +7,7 @@
 //
 
 import SwiftTask
-import Async
+//import Async
 import XCTest
 
 class BasicTests: _TestCase
@@ -16,8 +16,7 @@ class BasicTests: _TestCase
     {
         typealias Task = SwiftTask.Task<Float, String, ErrorString>
         
-        var expect = self.expectationWithDescription(__FUNCTION__)
-        var progressCount = 0
+        let expect = self.expectationWithDescription(__FUNCTION__)
         
         // define task
         let task = Task { progress, fulfill, reject, configure in
@@ -39,7 +38,7 @@ class BasicTests: _TestCase
         
         task.progress { oldProgress, newProgress in
             
-            println("progress = \(newProgress)")
+            print("progress = \(newProgress)")
             
         }.success { value -> String in  // `task.success {...}` = JavaScript's `promise.then(onFulfilled)`
             
@@ -53,7 +52,7 @@ class BasicTests: _TestCase
             
         }.then { value, errorInfo -> Task in // `task.then {...}` = JavaScript's `promise.then(onFulfilled, onRejected)`
             
-            println("value = \(value)") // either "Now OK" or "Now RECOVERED"
+            print("value = \(value)") // either "Now OK" or "Now RECOVERED"
             
             XCTAssertTrue(value!.hasPrefix("Now"))
             XCTAssertTrue(errorInfo == nil)
@@ -62,7 +61,7 @@ class BasicTests: _TestCase
             
         }.then { value, errorInfo -> Void in
                 
-            println("errorInfo = \(errorInfo)")
+            print("errorInfo = \(errorInfo)")
             
             XCTAssertTrue(value == nil)
             XCTAssertEqual(errorInfo!.error!, "ABORT")

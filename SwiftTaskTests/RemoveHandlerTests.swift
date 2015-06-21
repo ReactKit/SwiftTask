@@ -7,7 +7,7 @@
 //
 
 import SwiftTask
-import Async
+//import Async
 import XCTest
 
 class RemoveHandlerTests: _TestCase
@@ -16,7 +16,7 @@ class RemoveHandlerTests: _TestCase
     {
         typealias Task = SwiftTask.Task<Float, String, ErrorString>
         
-        var expect = self.expectationWithDescription(__FUNCTION__)
+        let expect = self.expectationWithDescription(__FUNCTION__)
         
         var latestProgressValue: Float?
         var canceller: AutoCanceller? = nil
@@ -30,12 +30,12 @@ class RemoveHandlerTests: _TestCase
             }
         }.progress { oldProgress, newProgress in
             
-            println("progress1 = \(newProgress)")
+            print("progress1 = \(newProgress)")
             latestProgressValue = newProgress
         
         }.progress(&canceller) { oldProgress, newProgress in
             
-            println("progress2 = \(newProgress)")
+            print("progress2 = \(newProgress)")
             XCTFail("Should never reach here because this progress-handler will be removed soon.")
             
         }.then { value, errorInfo -> Void in
@@ -60,7 +60,7 @@ class RemoveHandlerTests: _TestCase
     {
         typealias Task = SwiftTask.Task<Float, String, ErrorString>
 
-        var expect = self.expectationWithDescription(__FUNCTION__)
+        let expect = self.expectationWithDescription(__FUNCTION__)
         var canceller: AutoCanceller? = nil
         
         // define task
@@ -78,7 +78,7 @@ class RemoveHandlerTests: _TestCase
         
         }.then(&canceller) { value, errorInfo -> String in
             
-            println("Should never reach here")
+            print("Should never reach here")
             
             XCTFail("Should never reach here because this then-handler will be removed soon.")
             
@@ -86,8 +86,8 @@ class RemoveHandlerTests: _TestCase
             
         }.then { value, errorInfo -> Void in
             
-            println("value = \(value)")
-            println("errorInfo = \(errorInfo)")
+            print("value = \(value)")
+            print("errorInfo = \(errorInfo)")
             
             XCTAssertTrue(value == nil)
             XCTAssertTrue(errorInfo != nil)

@@ -69,10 +69,10 @@ internal final class _Atomic<T>
     }
 }
 
-extension _Atomic: Printable
+extension _Atomic: CustomStringConvertible
 {
     internal var description: String
     {
-        return toString(self.rawValue)
+        return String(self.rawValue)
     }
 }

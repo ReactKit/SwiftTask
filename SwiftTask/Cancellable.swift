@@ -18,7 +18,7 @@ public protocol Cancellable
     // but two overloaded methods are required for SwiftTask ver 3.x API compatibility.
     //
     func cancel() -> Bool
-    func cancel(#error: Error) -> Bool
+    func cancel(error error: Error) -> Bool
 }
 
 public class Canceller: Cancellable
@@ -35,7 +35,7 @@ public class Canceller: Cancellable
         return self.cancel(error: ())
     }
     
-    public func cancel(#error: Void) -> Bool
+    public func cancel(error error: Void) -> Bool
     {
         if let cancelHandler = self.cancelHandler {
             self.cancelHandler = nil

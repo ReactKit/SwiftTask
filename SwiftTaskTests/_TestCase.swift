@@ -7,7 +7,7 @@
 //
 
 import SwiftTask
-import Async
+//import Async
 import XCTest
 
 typealias ErrorString = String
@@ -17,19 +17,19 @@ class _TestCase: XCTestCase
     override func setUp()
     {
         super.setUp()
-        println("\n\n\n")
+        print("\n\n\n")
     }
     
     override func tearDown()
     {
-        println("\n\n\n")
+        print("\n\n\n")
         super.tearDown()
     }
     
-    func wait(_ timeout: NSTimeInterval = 3)
+    func wait(timeout: NSTimeInterval = 3)
     {
         self.waitForExpectationsWithTimeout(timeout) { error in
-            println("wait error = \(error)")
+            print("wait error = \(error)")
         }
     }
     

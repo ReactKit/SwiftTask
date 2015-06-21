@@ -280,8 +280,8 @@ internal struct _Handlers<T>: SequenceType
         self.elements.removeAll(keepCapacity: keepCapacity)
     }
     
-    internal func generate() -> GeneratorOf<T>
+    internal func generate() -> AnyGenerator<T>
     {
-        return GeneratorOf(self.elements.map { $0.value }.generate())
+        return anyGenerator(self.elements.map { $0.value }.generate())
     }
 }

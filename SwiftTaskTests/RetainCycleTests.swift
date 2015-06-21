@@ -54,7 +54,7 @@ class RetainCycleTests: _TestCase
     
     func testPlayer_completionAsArgument_notConfigured()
     {
-        var expect = self.expectationWithDescription(__FUNCTION__)
+        let expect = self.expectationWithDescription(__FUNCTION__)
         
         //
         // retain cycle:
@@ -98,7 +98,7 @@ class RetainCycleTests: _TestCase
     
     func testPlayer_completionAsArgument_configured()
     {
-        var expect = self.expectationWithDescription(__FUNCTION__)
+        let expect = self.expectationWithDescription(__FUNCTION__)
         
         //
         // retain cycle:
@@ -144,7 +144,7 @@ class RetainCycleTests: _TestCase
     
     func testPlayer_completionAsStoredProperty_notConfigured()
     {
-        var expect = self.expectationWithDescription(__FUNCTION__)
+        let expect = self.expectationWithDescription(__FUNCTION__)
         
         //
         // retain cycle:
@@ -186,7 +186,7 @@ class RetainCycleTests: _TestCase
     
     func testPlayer_completionAsStoredProperty_configured()
     {
-        var expect = self.expectationWithDescription(__FUNCTION__)
+        let expect = self.expectationWithDescription(__FUNCTION__)
         
         //
         // retain cycle:

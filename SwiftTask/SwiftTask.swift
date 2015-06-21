@@ -10,7 +10,7 @@
 import ObjectiveC
 
 // NOTE: nested type inside generic Task class is not allowed in Swift 1.1
-public enum TaskState: String, Printable
+public enum TaskState: String, CustomStringConvertible
 {
     case Paused = "Paused"
     case Running = "Running"
@@ -57,20 +57,25 @@ public class TaskConfiguration
     }
 }
 
-public class Task<Progress, Value, Error>: Cancellable, Printable
+//
+// 2015/06/21 NOTE:
+// `XXXXX` should be renamed to `Error`, but strangely, Xcode7-beta1 will fail compilation if you do so.
+// TODO: radar
+//
+public class Task<Progress, Value, XXXXX>: Cancellable, CustomStringConvertible
 {
     public typealias ProgressTuple = (oldProgress: Progress?, newProgress: Progress)
-    public typealias ErrorInfo = (error: Error?, isCancelled: Bool)
+    public typealias ErrorInfo = (error: XXXXX?, isCancelled: Bool)
     
     public typealias ProgressHandler = (Progress -> Void)
     public typealias FulfillHandler = (Value -> Void)
-    public typealias RejectHandler = (Error -> Void)
+    public typealias RejectHandler = (XXXXX -> Void)
     public typealias Configuration = TaskConfiguration
     
     public typealias PromiseInitClosure = (fulfill: FulfillHandler, reject: RejectHandler) -> Void
     public typealias InitClosure = (progress: ProgressHandler, fulfill: FulfillHandler, reject: RejectHandler, configure: TaskConfiguration) -> Void
     
-    internal typealias _Machine = _StateMachine<Progress, Value, Error>
+    internal typealias _Machine = _StateMachine<Progress, Value, XXXXX>
     
     internal typealias _InitClosure = (machine: _Machine, progress: ProgressHandler, fulfill: FulfillHandler, _reject: _RejectInfoHandler, configure: TaskConfiguration) -> Void
     
@@ -118,13 +123,13 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
     ///
     /// - e.g. Task<P, V, E>(weakified: false, paused: false) { progress, fulfill, reject, configure in ... }
     ///
-    /// :param: weakified Weakifies progress/fulfill/reject handlers to let player (inner asynchronous implementation inside `initClosure`) NOT CAPTURE this created new task. Normally, `weakified = false` should be set to gain "player -> task" retaining, so that task will be automatically deinited when player is deinited. If `weakified = true`, task must be manually retained somewhere else, or it will be immediately deinited.
+    /// - parameter weakified: Weakifies progress/fulfill/reject handlers to let player (inner asynchronous implementation inside `initClosure`) NOT CAPTURE this created new task. Normally, `weakified = false` should be set to gain "player -> task" retaining, so that task will be automatically deinited when player is deinited. If `weakified = true`, task must be manually retained somewhere else, or it will be immediately deinited.
     ///
-    /// :param: paused Flag to invoke `initClosure` immediately or not. If `paused = true`, task's initial state will be `.Paused` and needs to `resume()` in order to start `.Running`. If `paused = false`, `initClosure` will be invoked immediately.
+    /// - parameter paused: Flag to invoke `initClosure` immediately or not. If `paused = true`, task's initial state will be `.Paused` and needs to `resume()` in order to start `.Running`. If `paused = false`, `initClosure` will be invoked immediately.
     ///
-    /// :param: initClosure e.g. { progress, fulfill, reject, configure in ... }. `fulfill(value)` and `reject(error)` handlers must be called inside this closure, where calling `progress(progressValue)` handler is optional. Also as options, `configure.pause`/`configure.resume`/`configure.cancel` closures can be set to gain control from outside e.g. `task.pause()`/`task.resume()`/`task.cancel()`. When using `configure`, make sure to use weak modifier when appropriate to avoid "task -> player" retaining which often causes retain cycle.
+    /// - parameter initClosure: e.g. { progress, fulfill, reject, configure in ... }. `fulfill(value)` and `reject(error)` handlers must be called inside this closure, where calling `progress(progressValue)` handler is optional. Also as options, `configure.pause`/`configure.resume`/`configure.cancel` closures can be set to gain control from outside e.g. `task.pause()`/`task.resume()`/`task.cancel()`. When using `configure`, make sure to use weak modifier when appropriate to avoid "task -> player" retaining which often causes retain cycle.
     ///
-    /// :returns: New task.
+    /// - returns: New task.
     ///
     public init(weakified: Bool, paused: Bool, initClosure: InitClosure)
     {
@@ -134,7 +139,7 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
         
         let _initClosure: _InitClosure = { _, progress, fulfill, _reject, configure in
             // NOTE: don't expose rejectHandler with ErrorInfo (isCancelled) for public init
-            initClosure(progress: progress, fulfill: fulfill, reject: { (error: Error) in _reject(ErrorInfo(error: error, isCancelled: false)) }, configure: configure)
+            initClosure(progress: progress, fulfill: fulfill, reject: { error in _reject(ErrorInfo(error: Optional(error), isCancelled: false)) }, configure: configure)
         }
         
         self.setup(weakified: weakified, paused: paused, _initClosure: _initClosure)
@@ -176,9 +181,9 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
     ///
     /// creates rejected task (non-paused)
     ///
-    /// - e.g. Task<P, V, E>(error: someError)
+    /// - e.g. Task<P, V, E>(error: someXXXXX)
     ///
-    public convenience init(error: Error)
+    public convenience init(error: XXXXX)
     {
         self.init(initClosure: { progress, fulfill, reject, configure in
             reject(error)
@@ -189,12 +194,12 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
     ///
     /// creates promise-like task which only allows fulfill & reject (no progress & configure)
     ///
-    /// - e.g. Task<Any, Value, Error> { fulfill, reject in ... }
+    /// - e.g. Task<Any, Value, XXXXX> { fulfill, reject in ... }
     ///
     public convenience init(promiseInitClosure: PromiseInitClosure)
     {
         self.init(initClosure: { progress, fulfill, reject, configure in
-            promiseInitClosure(fulfill: fulfill, reject: { (error: Error) in reject(error) })
+            promiseInitClosure(fulfill: fulfill, reject: { error in reject(error) })
         })
     }
     
@@ -210,7 +215,7 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
     }
     
     // NOTE: don't use `internal init` for this setup method, or this will be a designated initializer
-    internal func setup(#weakified: Bool, paused: Bool, _initClosure: _InitClosure)
+    internal func setup(weakified weakified: Bool, paused: Bool, _initClosure: _InitClosure)
     {
 //        #if DEBUG
 //            let addr = String(format: "%p", unsafeAddressOf(self))
@@ -293,7 +298,7 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
 //        #endif
         
         // cancel in case machine is still running
-        self._cancel(error: nil)
+        self._cancel(nil)
     }
     
     /// Sets task name (method chainable)
@@ -312,7 +317,7 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
     }
     
     /// Returns new task that is retryable for `maxTryCount-1` times.
-    public func try(maxTryCount: Int) -> Task
+    public func `try`(maxTryCount: Int) -> Task
     {
         if maxTryCount < 2 { return self }
         
@@ -321,7 +326,7 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
             let task = self.progress { _, progressValue in
                 progress(progressValue)
             }.failure { [unowned self] _ -> Task in
-                return self.clone().try(maxTryCount-1) // clone & try recursively
+                return self.clone().`try`(maxTryCount-1) // clone & try recursively
             }
                 
             task.progress { _, progressValue in
@@ -379,16 +384,16 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
     ///
     /// - e.g. task.then { value, errorInfo -> NextValueType in ... }
     ///
-    public func then<Value2>(thenClosure: (Value?, ErrorInfo?) -> Value2) -> Task<Progress, Value2, Error>
+    public func then<Value2>(thenClosure: (Value?, ErrorInfo?) -> Value2) -> Task<Progress, Value2, XXXXX>
     {
         var dummyCanceller: Canceller? = nil
         return self.then(&dummyCanceller, thenClosure)
     }
     
-    public func then<Value2, C: Canceller>(inout canceller: C?, _ thenClosure: (Value?, ErrorInfo?) -> Value2) -> Task<Progress, Value2, Error>
+    public func then<Value2, C: Canceller>(inout canceller: C?, _ thenClosure: (Value?, ErrorInfo?) -> Value2) -> Task<Progress, Value2, XXXXX>
     {
-        return self.then(&canceller) { (value: Value?, errorInfo: ErrorInfo?) -> Task<Progress, Value2, Error> in
-            return Task<Progress, Value2, Error>(value: thenClosure(value, errorInfo))
+        return self.then(&canceller) { (value, errorInfo) -> Task<Progress, Value2, XXXXX> in
+            return Task<Progress, Value2, XXXXX>(value: thenClosure(value, errorInfo))
         }
     }
     
@@ -452,16 +457,16 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
     ///
     /// - e.g. task.success { value -> NextValueType in ... }
     ///
-    public func success<Value2>(successClosure: Value -> Value2) -> Task<Progress, Value2, Error>
+    public func success<Value2>(successClosure: Value -> Value2) -> Task<Progress, Value2, XXXXX>
     {
         var dummyCanceller: Canceller? = nil
         return self.success(&dummyCanceller, successClosure)
     }
     
-    public func success<Value2, C: Canceller>(inout canceller: C?, _ successClosure: Value -> Value2) -> Task<Progress, Value2, Error>
+    public func success<Value2, C: Canceller>(inout canceller: C?, _ successClosure: Value -> Value2) -> Task<Progress, Value2, XXXXX>
     {
-        return self.success(&canceller) { (value: Value) -> Task<Progress, Value2, Error> in
-            return Task<Progress, Value2, Error>(value: successClosure(value))
+        return self.success(&canceller) { (value: Value) -> Task<Progress, Value2, XXXXX> in
+            return Task<Progress, Value2, XXXXX>(value: successClosure(value))
         }
     }
     
@@ -470,15 +475,15 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
     ///
     /// - e.g. task.success { value -> NextTaskType in ... }
     ///
-    public func success<Progress2, Value2, Error2>(successClosure: Value -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, Error>
+    public func success<Progress2, Value2, Error2>(successClosure: Value -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, XXXXX>
     {
         var dummyCanceller: Canceller? = nil
         return self.success(&dummyCanceller, successClosure)
     }
     
-    public func success<Progress2, Value2, Error2, C: Canceller>(inout canceller: C?, _ successClosure: Value -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, Error>
+    public func success<Progress2, Value2, Error2, C: Canceller>(inout canceller: C?, _ successClosure: Value -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, XXXXX>
     {
-        return Task<Progress2, Value2, Error> { [unowned self] newMachine, progress, fulfill, _reject, configure in
+        return Task<Progress2, Value2, XXXXX> { [unowned self] newMachine, progress, fulfill, _reject, configure in
             
             let selfMachine = self._machine
             
@@ -559,35 +564,35 @@ public class Task<Progress, Value, Error>: Cancellable, Printable
     //
     // NOTE: 
     // To conform to `Cancellable`, this method is needed in replace of:
-    // - `public func cancel(error: Error? = nil) -> Bool`
-    // - `public func cancel(_ error: Error? = nil) -> Bool` (segfault in Swift 1.2)
+    // - `public func cancel(error: XXXXX? = nil) -> Bool`
+    // - `public func cancel(_ error: XXXXX? = nil) -> Bool` (segfault in Swift 1.2)
     //
     public func cancel() -> Bool
     {
         return self.cancel(error: nil)
     }
     
-    public func cancel(#error: Error?) -> Bool
+    public func cancel(error error: XXXXX?) -> Bool
     {
-        return self._cancel(error: error)
+        return self._cancel(error)
     }
     
-    internal func _cancel(error: Error? = nil) -> Bool
+    internal func _cancel(error: XXXXX? = nil) -> Bool
     {
-        return self._machine.handleCancel(error: error)
+        return self._machine.handleCancel(error)
     }
     
 }
 
 // MARK: - Helper
 
-internal func _bindInnerTask<Progress2, Value2, Error, Error2>(
+internal func _bindInnerTask<Progress2, Value2, XXXXX, Error2>(
     innerTask: Task<Progress2, Value2, Error2>,
-    newMachine: _StateMachine<Progress2, Value2, Error>,
-    progress: Task<Progress2, Value2, Error>.ProgressHandler,
-    fulfill: Task<Progress2, Value2, Error>.FulfillHandler,
-    _reject: Task<Progress2, Value2, Error>._RejectInfoHandler,
-    configure: TaskConfiguration
+    _ newMachine: _StateMachine<Progress2, Value2, XXXXX>,
+    _ progress: Task<Progress2, Value2, XXXXX>.ProgressHandler,
+    _ fulfill: Task<Progress2, Value2, XXXXX>.FulfillHandler,
+    _ _reject: Task<Progress2, Value2, XXXXX>._RejectInfoHandler,
+    _ configure: TaskConfiguration
     )
 {
     switch innerTask.state {
@@ -597,8 +602,8 @@ internal func _bindInnerTask<Progress2, Value2, Error, Error2>(
         case .Rejected, .Cancelled:
             let (error2, isCancelled) = innerTask.errorInfo!
             
-            // NOTE: innerTask's `error2` will be treated as `nil` if not same type as outerTask's `Error` type
-            _reject((error2 as? Error, isCancelled))
+            // NOTE: innerTask's `error2` will be treated as `nil` if not same type as outerTask's `XXXXX` type
+            _reject((error2 as? XXXXX, isCancelled))
             return
         default:
             break
@@ -613,8 +618,8 @@ internal func _bindInnerTask<Progress2, Value2, Error, Error2>(
         else if let errorInfo2 = errorInfo2 {
             let (error2, isCancelled) = errorInfo2
             
-            // NOTE: innerTask's `error2` will be treated as `nil` if not same type as outerTask's `Error` type
-            _reject((error2 as? Error, isCancelled))
+            // NOTE: innerTask's `error2` will be treated as `nil` if not same type as outerTask's `XXXXX` type
+            _reject((error2 as? XXXXX, isCancelled))
         }
     }
     
@@ -637,9 +642,9 @@ extension Task
 {
     public typealias BulkProgress = (completedCount: Int, totalCount: Int)
     
-    public class func all(tasks: [Task]) -> Task<BulkProgress, [Value], Error>
+    public class func all(tasks: [Task]) -> Task<BulkProgress, [Value], XXXXX>
     {
-        return Task<BulkProgress, [Value], Error> { machine, progress, fulfill, _reject, configure in
+        return Task<BulkProgress, [Value], XXXXX> { machine, progress, fulfill, _reject, configure in
             
             var completedCount = 0
             let totalCount = tasks.count
@@ -686,7 +691,7 @@ extension Task
     
     public class func any(tasks: [Task]) -> Task
     {
-        return Task<Progress, Value, Error> { machine, progress, fulfill, _reject, configure in
+        return Task<Progress, Value, XXXXX> { machine, progress, fulfill, _reject, configure in
             
             var completedCount = 0
             var rejectedCount = 0
@@ -712,7 +717,7 @@ extension Task
                     rejectedCount++
                     
                     if rejectedCount == totalCount {
-                        var isAnyCancelled = (tasks.filter { task in task.state == .Cancelled }.count > 0)
+                        let isAnyCancelled = (tasks.filter { task in task.state == .Cancelled }.count > 0)
                         
                         let errorInfo = ErrorInfo(error: nil, isCancelled: isAnyCancelled)  // NOTE: Task.any error returns nil (spec)
                         _reject(errorInfo)
@@ -730,9 +735,9 @@ extension Task
     
     /// Returns new task which performs all given tasks and stores only fulfilled values.
     /// This new task will NEVER be internally rejected.
-    public class func some(tasks: [Task]) -> Task<BulkProgress, [Value], Error>
+    public class func some(tasks: [Task]) -> Task<BulkProgress, [Value], XXXXX>
     {
-        return Task<BulkProgress, [Value], Error> { machine, progress, fulfill, _reject, configure in
+        return Task<BulkProgress, [Value], XXXXX> { machine, progress, fulfill, _reject, configure in
             
             var completedCount = 0
             let totalCount = tasks.count
@@ -803,5 +808,5 @@ infix operator ~ { associativity left }
 /// e.g. (task ~ 3).then { ... }
 public func ~ <P, V, E>(task: Task<P, V, E>, tryCount: Int) -> Task<P, V, E>
 {
-    return task.try(tryCount)
+    return task.`try`(tryCount)
 }

@@ -16,11 +16,11 @@ class AlamofireTests: _TestCase
 
     func testFulfill()
     {
-        var expect = self.expectationWithDescription(__FUNCTION__)
+        let expect = self.expectationWithDescription(__FUNCTION__)
         
         let task = Task<Progress, String, NSError> { progress, fulfill, reject, configure in
             
-            request(.GET, "http://httpbin.org/get", parameters: ["foo": "bar"])
+            request(.GET, URLString: "http://httpbin.org/get", parameters: ["foo": "bar"])
             .response { (request, response, data, error) in
                 
                 if let error = error {
@@ -46,13 +46,13 @@ class AlamofireTests: _TestCase
     
     func testReject()
     {
-        var expect = self.expectationWithDescription(__FUNCTION__)
+        let expect = self.expectationWithDescription(__FUNCTION__)
         
         let task = Task<Progress, String?, NSError> { progress, fulfill, reject, configure in
             
             let dummyURLString = "http://xxx-swift-task.org/get"
             
-            request(.GET, dummyURLString, parameters: ["foo": "bar"])
+            request(.GET, URLString: dummyURLString, parameters: ["foo": "bar"])
             .response { (request, response, data, error) in
                 
                 if let error = error {
@@ -61,7 +61,7 @@ class AlamofireTests: _TestCase
                 }
                 
                 if response?.statusCode >= 300 {
-                    reject(NSError())
+                    reject(NSError(domain: "", code: 0, userInfo: nil))
                 }
                 
                 fulfill("OK")
@@ -86,12 +86,12 @@ class AlamofireTests: _TestCase
     
     func testProgress()
     {
-        var expect = self.expectationWithDescription(__FUNCTION__)
+        let expect = self.expectationWithDescription(__FUNCTION__)
         
         // define task
         let task = Task<Progress, String, NSError> { progress, fulfill, reject, configure in
             
-            download(.GET, "http://httpbin.org/stream/100", Request.suggestedDownloadDestination(directory: .DocumentDirectory, domain: .UserDomainMask))
+            download(.GET, URLString: "http://httpbin.org/stream/100", destination: Request.suggestedDownloadDestination(directory: .DocumentDirectory, domain: .UserDomainMask))
                 
             .progress { (bytesWritten, totalBytesWritten, totalBytesExpectedToWrite) in
                 
@@ -115,10 +115,10 @@ class AlamofireTests: _TestCase
         // set progress & then
         task.progress { _, progress in
             
-            println("bytesWritten = \(progress.bytesWritten)")
-            println("totalBytesWritten = \(progress.totalBytesWritten)")
-            println("totalBytesExpectedToWrite = \(progress.totalBytesExpectedToWrite)")
-            println()
+            print("bytesWritten = \(progress.bytesWritten)")
+            print("totalBytesWritten = \(progress.totalBytesWritten)")
+            print("totalBytesExpectedToWrite = \(progress.totalBytesExpectedToWrite)")
+            print("")
             
         }.then { value, errorInfo -> Void in
             expect.fulfill()
@@ -129,8 +129,8 @@ class AlamofireTests: _TestCase
     
     func testNSProgress()
     {
-        var expect = self.expectationWithDescription(__FUNCTION__)
-        var nsProgress = NSProgress(totalUnitCount: 100)
+        let expect = self.expectationWithDescription(__FUNCTION__)
+        let nsProgress = NSProgress(totalUnitCount: 100)
         
         // define task
         let task = Task<Progress, String, NSError> { progress, fulfill, reject, configure in
@@ -138,7 +138,7 @@ class AlamofireTests: _TestCase
             nsProgress.becomeCurrentWithPendingUnitCount(50)
             
             // NOTE: test with url which returns totalBytesExpectedToWrite != -1
-            download(.GET, "http://httpbin.org/bytes/1024", Request.suggestedDownloadDestination(directory: .DocumentDirectory, domain: .UserDomainMask))
+            download(.GET, URLString: "http://httpbin.org/bytes/1024", destination: Request.suggestedDownloadDestination(directory: .DocumentDirectory, domain: .UserDomainMask))
             
             .response { (request, response, data, error) in
                 
@@ -176,11 +176,11 @@ class AlamofireTests: _TestCase
     //
     func testCancel()
     {
-        var expect = self.expectationWithDescription(__FUNCTION__)
+        let expect = self.expectationWithDescription(__FUNCTION__)
         
         let task = Task<Progress, String?, NSError> { progress, fulfill, reject, configure in
             
-            let downloadRequst = download(.GET, "http://httpbin.org/stream/100", Request.suggestedDownloadDestination(directory: .DocumentDirectory, domain: .UserDomainMask))
+            let downloadRequst = download(.GET, URLString: "http://httpbin.org/stream/100", destination: Request.suggestedDownloadDestination(directory: .DocumentDirectory, domain: .UserDomainMask))
 
             .response { (request, response, data, error) in
                 

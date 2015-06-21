@@ -7,12 +7,12 @@
 //
 
 import SwiftTask
-import Async
+//import Async
 import XCTest
 
 class MultipleErrorTypesTests: _TestCase
 {
-    enum MyEnum: Printable
+    enum MyEnum: CustomStringConvertible
     {
         case Default
         var description: String { return "MyEnumDefault" }
@@ -26,14 +26,14 @@ class MultipleErrorTypesTests: _TestCase
     var flow = [Int]()
     
     // delayed task + counting flow 1 & 2
-    func _task1(#ok: Bool) -> Task1
+    func _task1(ok ok: Bool) -> Task1
     {
         return Task1 { progress, fulfill, reject, configure in
-            println("[task1] start")
+            print("[task1] start")
             self.flow += [1]
             
             Async.main(after: 0.1) {
-                println("[task1] end")
+                print("[task1] end")
                 self.flow += [2]
                 
                 ok ? fulfill("OK") : reject("NG")
@@ -43,14 +43,14 @@ class MultipleErrorTypesTests: _TestCase
     }
     
     // delayed task + counting flow 4 & 5
-    func _task2(#ok: Bool) -> Task2
+    func _task2(ok ok: Bool) -> Task2
     {
         return Task2 { progress, fulfill, reject, configure in
-            println("[task2] start")
+            print("[task2] start")
             self.flow += [4]
             
             Async.main(after: 0.1) {
-                println("[task2] end")
+                print("[task2] end")
                 self.flow += [5]
                 
                 ok ? fulfill(.Default) : reject(.Default)
@@ -61,12 +61,12 @@ class MultipleErrorTypesTests: _TestCase
     
     func testMultipleErrorTypes_then()
     {
-        var expect = self.expectationWithDescription(__FUNCTION__)
+        let expect = self.expectationWithDescription(__FUNCTION__)
         
         self._task1(ok: true)
             .then { value, errorInfo -> Task2 in
                 
-                println("task1.then")
+                print("task1.then")
                 self.flow += [3]
                 
                 return self._task2(ok: true)
@@ -74,7 +74,7 @@ class MultipleErrorTypesTests: _TestCase
             }
             .then { value, errorInfo -> Void in
                 
-                println("task1.then.then (task2 should end at this point)")
+                print("task1.then.then (task2 should end at this point)")
                 self.flow += [6]
                 
                 XCTAssertEqual(self.flow, Array(1...6), "Tasks should flow in order from 1 to 6.")
@@ -87,12 +87,12 @@ class MultipleErrorTypesTests: _TestCase
     
     func testMultipleErrorTypes_success()
     {
-        var expect = self.expectationWithDescription(__FUNCTION__)
+        let expect = self.expectationWithDescription(__FUNCTION__)
         
         self._task1(ok: true)
             .success { value -> Task2 in
                 
-                println("task1.success")
+                print("task1.success")
                 self.flow += [3]
                 
                 return self._task2(ok: true)
@@ -100,7 +100,7 @@ class MultipleErrorTypesTests: _TestCase
             }
             .success { value -> Void in
                 
-                println("task1.success.success (task2 should end at this point)")
+                print("task1.success.success (task2 should end at this point)")
                 self.flow += [6]
                 
                 XCTAssertEqual(self.flow, Array(1...6), "Tasks should flow in order from 1 to 6.")
@@ -113,12 +113,12 @@ class MultipleErrorTypesTests: _TestCase
 
     func testMultipleErrorTypes_success_differentErrorType()
     {
-        var expect = self.expectationWithDescription(__FUNCTION__)
+        let expect = self.expectationWithDescription(__FUNCTION__)
         
         self._task1(ok: true)
             .success { value -> Task2 in
                 
-                println("task1.success")
+                print("task1.success")
                 self.flow += [3]
                 
                 //
@@ -132,7 +132,7 @@ class MultipleErrorTypesTests: _TestCase
             }
             .then { value, errorInfo -> Void in
                 
-                println("task1.success.success (task2 should end at this point)")
+                print("task1.success.success (task2 should end at this point)")
                 self.flow += [6]
                 
                 XCTAssertEqual(self.flow, Array(1...6), "Tasks should flow in order from 1 to 6.")
@@ -151,12 +151,12 @@ class MultipleErrorTypesTests: _TestCase
     
     func testMultipleErrorTypes_success_differentErrorType_conversion()
     {
-        var expect = self.expectationWithDescription(__FUNCTION__)
+        let expect = self.expectationWithDescription(__FUNCTION__)
         
         self._task1(ok: true)
             .success { value -> Task<Void, MyEnum, String> in
                 
-                println("task1.success")
+                print("task1.success")
                 self.flow += [3]
                 
                 //
@@ -171,7 +171,7 @@ class MultipleErrorTypesTests: _TestCase
             }
             .then { value, errorInfo -> Void in
                 
-                println("task1.success.success (task2 should end at this point)")
+                print("task1.success.success (task2 should end at this point)")
                 self.flow += [6]
                 
                 XCTAssertEqual(self.flow, Array(1...6), "Tasks should flow in order from 1 to 6.")
@@ -191,12 +191,12 @@ class MultipleErrorTypesTests: _TestCase
 
     func testMultipleErrorTypes_failure()
     {
-        var expect = self.expectationWithDescription(__FUNCTION__)
+        let expect = self.expectationWithDescription(__FUNCTION__)
         
         self._task1(ok: false)
             .failure { errorInfo -> Task<Dummy, String /* must be task1's value type to recover */, Dummy> in
                 
-                println("task1.failure")
+                print("task1.failure")
                 self.flow += [3]
                 
                 //
@@ -210,7 +210,7 @@ class MultipleErrorTypesTests: _TestCase
             }
             .failure { errorInfo -> String /* must be task1's value type to recover */ in
                 
-                println("task1.failure.failure (task2 should end at this point)")
+                print("task1.failure.failure (task2 should end at this point)")
                 self.flow += [6]
                 
                 XCTAssertEqual(self.flow, Array(1...6), "Tasks should flow in order from 1 to 6.")
