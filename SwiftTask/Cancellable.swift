@@ -10,7 +10,7 @@ import Foundation
 
 public protocol Cancellable
 {
-    typealias Error
+    typealias _Error
     
     //
     // NOTE:
@@ -18,7 +18,7 @@ public protocol Cancellable
     // but two overloaded methods are required for SwiftTask ver 3.x API compatibility.
     //
     func cancel() -> Bool
-    func cancel(error error: Error) -> Bool
+    func cancel(error error: _Error) -> Bool
 }
 
 public class Canceller: Cancellable
