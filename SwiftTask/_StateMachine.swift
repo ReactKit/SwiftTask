@@ -46,13 +46,13 @@ internal class _StateMachine<Progress, Value, Error>
     internal func addProgressTupleHandler(inout token: _HandlerToken?, _ progressTupleHandler: ProgressTupleHandler) -> Bool
     {
         self._lock.lock()
+        defer { self._lock.unlock() }
+        
         if self.state.rawValue == .Running || self.state.rawValue == .Paused {
             token = self._progressTupleHandlers.append(progressTupleHandler)
-            self._lock.unlock()
             return token != nil
         }
         else {
-            self._lock.unlock()
             return false
         }
     }
@@ -60,13 +60,13 @@ internal class _StateMachine<Progress, Value, Error>
     internal func removeProgressTupleHandler(handlerToken: _HandlerToken?) -> Bool
     {
         self._lock.lock()
+        defer { self._lock.unlock() }
+        
         if let handlerToken = handlerToken {
             let removedHandler = self._progressTupleHandlers.remove(handlerToken)
-            self._lock.unlock()
             return removedHandler != nil
         }
         else {
-            self._lock.unlock()
             return false
         }
     }
@@ -74,13 +74,13 @@ internal class _StateMachine<Progress, Value, Error>
     internal func addCompletionHandler(inout token: _HandlerToken?, _ completionHandler: Void -> Void) -> Bool
     {
         self._lock.lock()
+        defer { self._lock.unlock() }
+        
         if self.state.rawValue == .Running || self.state.rawValue == .Paused {
             token = self._completionHandlers.append(completionHandler)
-            self._lock.unlock()
             return token != nil
         }
         else {
-            self._lock.unlock()
             return false
         }
     }
@@ -88,13 +88,13 @@ internal class _StateMachine<Progress, Value, Error>
     internal func removeCompletionHandler(handlerToken: _HandlerToken?) -> Bool
     {
         self._lock.lock()
+        defer { self._lock.unlock() }
+        
         if let handlerToken = handlerToken {
             let removedHandler = self._completionHandlers.remove(handlerToken)
-            self._lock.unlock()
             return removedHandler != nil
         }
         else {
-            self._lock.unlock()
             return false
         }
     }
@@ -102,6 +102,8 @@ internal class _StateMachine<Progress, Value, Error>
     internal func handleProgress(progress: Progress)
     {
         self._lock.lock()
+        defer { self._lock.unlock() }
+        
         if self.state.rawValue == .Running {
             
             let oldProgress = self.progress.rawValue
@@ -114,53 +116,45 @@ internal class _StateMachine<Progress, Value, Error>
             for handler in self._progressTupleHandlers {
                 handler(oldProgress: oldProgress, newProgress: progress)
             }
-            self._lock.unlock()
-        }
-        else {
-            self._lock.unlock()
         }
     }
     
     internal func handleFulfill(value: Value)
     {
         self._lock.lock()
+        defer { self._lock.unlock() }
+        
         let (_, updated) = self.state.tryUpdate { $0 == .Running ? (.Fulfilled, true) : ($0, false) }
         if updated {
             self.value.rawValue = value
             self._finish()
-            self._lock.unlock()
-        }
-        else {
-            self._lock.unlock()
         }
     }
     
     internal func handleRejectInfo(errorInfo: ErrorInfo)
     {
         self._lock.lock()
+        defer { self._lock.unlock() }
+        
         let toState = errorInfo.isCancelled ? TaskState.Cancelled : .Rejected
         let (_, updated) = self.state.tryUpdate { $0 == .Running || $0 == .Paused ? (toState, true) : ($0, false) }
         if updated {
             self.errorInfo.rawValue = errorInfo
             self._finish()
-            self._lock.unlock()
-        }
-        else {
-            self._lock.unlock()
         }
     }
     
     internal func handlePause() -> Bool
     {
         self._lock.lock()
+        defer { self._lock.unlock() }
+        
         let (_, updated) = self.state.tryUpdate { $0 == .Running ? (.Paused, true) : ($0, false) }
         if updated {
             self.configuration.pause?()
-            self._lock.unlock()
             return true
         }
         else {
-            self._lock.unlock()
             return false
         }
     }
@@ -168,6 +162,7 @@ internal class _StateMachine<Progress, Value, Error>
     internal func handleResume() -> Bool
     {
         self._lock.lock()
+        
         if let initResumeClosure = self.initResumeClosure.update({ _ in nil }) {
             
             self.state.rawValue = .Running
@@ -211,15 +206,15 @@ internal class _StateMachine<Progress, Value, Error>
     internal func handleCancel(error: Error? = nil) -> Bool
     {
         self._lock.lock()
+        defer { self._lock.unlock() }
+        
         let (_, updated) = self.state.tryUpdate { $0 == .Running || $0 == .Paused ? (.Cancelled, true) : ($0, false) }
         if updated {
             self.errorInfo.rawValue = ErrorInfo(error: error, isCancelled: true)
             self._finish()
-            self._lock.unlock()
             return true
         }
         else {
-            self._lock.unlock()
             return false
         }
     }
