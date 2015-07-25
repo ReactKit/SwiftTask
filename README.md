@@ -1,4 +1,4 @@
-SwiftTask
+SwiftTask [![Circle CI](https://circleci.com/gh/ReactKit/SwiftTask/tree/swift%2F1.2.svg?style=svg)](https://circleci.com/gh/ReactKit/SwiftTask/tree/swift%2F1.2)
 =========
 
 [Promise](http://www.html5rocks.com/en/tutorials/es6/promises/) + progress + pause + cancel + retry for Swift.
