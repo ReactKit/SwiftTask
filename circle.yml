@@ -1,0 +1,22 @@
+machine:
+  xcode:
+    version: "6.3.1"
+
+test:
+  override:
+    - set -o pipefail &&
+      xcodebuild
+        -scheme "SwiftTask-OSX"
+        clean build test |
+      tee $CIRCLE_ARTIFACTS/xcode_raw-OSX.log |
+      xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results-OSX.xml
+      
+    - set -o pipefail &&
+      xcodebuild
+        CODE_SIGNING_REQUIRED=NO
+        CODE_SIGN_IDENTITY=
+        PROVISIONING_PROFILE=
+        -scheme "SwiftTask-iOS"
+        clean build test |
+      tee $CIRCLE_ARTIFACTS/xcode_raw-iOS.log |
+      xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results-iOS.xml
