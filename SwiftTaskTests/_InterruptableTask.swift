@@ -7,8 +7,7 @@
 //
 
 import SwiftTask
-//import Async
-
+import Async
 typealias _InterruptableTask = Task<Int, String, String>
 
 /// 1. Invokes `progressCount/2` progresses at t=0.2

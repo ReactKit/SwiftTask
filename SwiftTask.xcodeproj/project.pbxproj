@@ -17,6 +17,8 @@
 		1F46DEFD199EE2C200F97868 /* _TestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEFC199EE2C200F97868 /* _TestCase.swift */; };
 		1F4C76A41AD8CF40004E47C1 /* AlamofireTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F5FA35619A374E600975FB9 /* AlamofireTests.swift */; };
 		1F4C76A51AD8CF41004E47C1 /* AlamofireTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F5FA35619A374E600975FB9 /* AlamofireTests.swift */; };
+		1F4C7AD71B7CD27200DEB1AE /* Async.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F4C7AD61B7CD27100DEB1AE /* Async.framework */; };
+		1F4C7AD91B7CD27600DEB1AE /* Async.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F4C7AD81B7CD27600DEB1AE /* Async.framework */; };
 		1F6A8CA319A4E4F200369A5D /* SwiftTaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEE3199EDF1000F97868 /* SwiftTaskTests.swift */; };
 		1FB3B8F31B0A194F00F78900 /* _Atomic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FB3B8F21B0A194F00F78900 /* _Atomic.swift */; };
 		1FB3B8F41B0A194F00F78900 /* _Atomic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FB3B8F21B0A194F00F78900 /* _Atomic.swift */; };
@@ -24,8 +26,6 @@
 		1FCF71161AD8CD38007079C2 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FCF71151AD8CD38007079C2 /* Alamofire.framework */; };
 		1FD7197B1AFE387C00BC38C4 /* Cancellable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FD7197A1AFE387C00BC38C4 /* Cancellable.swift */; };
 		1FD7197C1AFE387C00BC38C4 /* Cancellable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FD7197A1AFE387C00BC38C4 /* Cancellable.swift */; };
-		1FE79EDB1B36F329008569AA /* Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FE79E561B36F329008569AA /* Async.swift */; };
-		1FE79EDC1B36F329008569AA /* Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FE79E561B36F329008569AA /* Async.swift */; };
 		1FF52EB41A4C395A00B4BA28 /* _InterruptableTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF52EB31A4C395A00B4BA28 /* _InterruptableTask.swift */; };
 		1FF52EB51A4C395A00B4BA28 /* _InterruptableTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF52EB31A4C395A00B4BA28 /* _InterruptableTask.swift */; };
 		4822F0DC19D00B2300F5F572 /* _TestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEFC199EE2C200F97868 /* _TestCase.swift */; };
@@ -57,14 +57,13 @@
 		1F46DEE3199EDF1000F97868 /* SwiftTaskTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftTaskTests.swift; sourceTree = "<group>"; };
 		1F46DEFA199EDF8100F97868 /* SwiftTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftTask.swift; sourceTree = "<group>"; };
 		1F46DEFC199EE2C200F97868 /* _TestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = _TestCase.swift; sourceTree = "<group>"; };
+		1F4C7AD61B7CD27100DEB1AE /* Async.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Async.framework; path = ../Carthage/Checkouts/Async/build/Debug/Async.framework; sourceTree = "<group>"; };
+		1F4C7AD81B7CD27600DEB1AE /* Async.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Async.framework; path = "../Carthage/Checkouts/Async/build/Debug-iphoneos/Async.framework"; sourceTree = "<group>"; };
 		1F5FA35619A374E600975FB9 /* AlamofireTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlamofireTests.swift; sourceTree = "<group>"; };
 		1FB3B8F21B0A194F00F78900 /* _Atomic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = _Atomic.swift; sourceTree = "<group>"; };
 		1FCF71111AD8CD2B007079C2 /* Alamofire.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Alamofire.framework; path = "../Carthage/Checkouts/Alamofire/build/Debug-iphoneos/Alamofire.framework"; sourceTree = "<group>"; };
-		1FCF71131AD8CD2F007079C2 /* Async.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Async.framework; path = "../Carthage/Checkouts/Async/build/Debug-iphoneos/Async.framework"; sourceTree = "<group>"; };
 		1FCF71151AD8CD38007079C2 /* Alamofire.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Alamofire.framework; path = ../Carthage/Checkouts/Alamofire/build/Debug/Alamofire.framework; sourceTree = "<group>"; };
-		1FCF71171AD8CD3C007079C2 /* Async.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Async.framework; path = ../Carthage/Checkouts/Async/build/Debug/Async.framework; sourceTree = "<group>"; };
 		1FD7197A1AFE387C00BC38C4 /* Cancellable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cancellable.swift; sourceTree = "<group>"; };
-		1FE79E561B36F329008569AA /* Async.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Async.swift; sourceTree = "<group>"; };
 		1FF52EB31A4C395A00B4BA28 /* _InterruptableTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = _InterruptableTask.swift; sourceTree = "<group>"; };
 		4822F0D019D00ABF00F5F572 /* SwiftTask-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SwiftTask-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		48511C5A19C17563002FE03C /* RetainCycleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RetainCycleTests.swift; sourceTree = "<group>"; };
@@ -86,6 +85,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1F4C7AD71B7CD27200DEB1AE /* Async.framework in Frameworks */,
 				1FCF71161AD8CD38007079C2 /* Alamofire.framework in Frameworks */,
 				48A1E8221A366F9C007619EB /* SwiftTask.framework in Frameworks */,
 			);
@@ -95,6 +95,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1F4C7AD91B7CD27600DEB1AE /* Async.framework in Frameworks */,
 				1FCF71121AD8CD2B007079C2 /* Alamofire.framework in Frameworks */,
 				48A1E8231A366FA8007619EB /* SwiftTask.framework in Frameworks */,
 			);
@@ -155,7 +156,6 @@
 		1F46DEE0199EDF1000F97868 /* SwiftTaskTests */ = {
 			isa = PBXGroup;
 			children = (
-				1FE79E521B36F329008569AA /* Async */,
 				1FF52EB31A4C395A00B4BA28 /* _InterruptableTask.swift */,
 				1F46DEFC199EE2C200F97868 /* _TestCase.swift */,
 				1F20250119ADA8FD00DE0495 /* BasicTests.swift */,
@@ -173,23 +173,14 @@
 		1F46DEE1199EDF1000F97868 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				1FCF71171AD8CD3C007079C2 /* Async.framework */,
+				1F4C7AD81B7CD27600DEB1AE /* Async.framework */,
+				1F4C7AD61B7CD27100DEB1AE /* Async.framework */,
 				1FCF71151AD8CD38007079C2 /* Alamofire.framework */,
-				1FCF71131AD8CD2F007079C2 /* Async.framework */,
 				1FCF71111AD8CD2B007079C2 /* Alamofire.framework */,
 				1F46DEE2199EDF1000F97868 /* Info.plist */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
-		};
-		1FE79E521B36F329008569AA /* Async */ = {
-			isa = PBXGroup;
-			children = (
-				1FE79E561B36F329008569AA /* Async.swift */,
-			);
-			name = Async;
-			path = Carthage/Checkouts/Async;
-			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXGroup section */
 
@@ -378,7 +369,6 @@
 			files = (
 				1F20250219ADA8FD00DE0495 /* BasicTests.swift in Sources */,
 				1FF52EB41A4C395A00B4BA28 /* _InterruptableTask.swift in Sources */,
-				1FE79EDB1B36F329008569AA /* Async.swift in Sources */,
 				1F218D5B1AFC3FFD00C849FF /* RemoveHandlerTests.swift in Sources */,
 				1F6A8CA319A4E4F200369A5D /* SwiftTaskTests.swift in Sources */,
 				1F29F6421B115EF500F476AF /* MultipleErrorTypesTests.swift in Sources */,
@@ -395,7 +385,6 @@
 			files = (
 				4822F0DE19D00B2300F5F572 /* SwiftTaskTests.swift in Sources */,
 				4822F0DD19D00B2300F5F572 /* BasicTests.swift in Sources */,
-				1FE79EDC1B36F329008569AA /* Async.swift in Sources */,
 				1F218D5C1AFC3FFD00C849FF /* RemoveHandlerTests.swift in Sources */,
 				1FF52EB51A4C395A00B4BA28 /* _InterruptableTask.swift in Sources */,
 				1F29F6431B115EF500F476AF /* MultipleErrorTypesTests.swift in Sources */,

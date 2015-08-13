@@ -18,6 +18,13 @@
       location = "group:Carthage/Checkouts"
       name = "Checkouts">
       <Group
+         location = "group:Async"
+         name = "Async">
+         <FileRef
+            location = "group:Async.xcodeproj">
+         </FileRef>
+      </Group>
+      <Group
          location = "group:Alamofire"
          name = "Alamofire">
          <FileRef

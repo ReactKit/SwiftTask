@@ -7,7 +7,7 @@
 //
 
 import SwiftTask
-//import Async
+import Async
 import XCTest
 
 class MultipleErrorTypesTests: _TestCase

@@ -7,7 +7,7 @@
 //
 
 import SwiftTask
-//import Async
+import Async
 import XCTest
 
 typealias ErrorString = String
