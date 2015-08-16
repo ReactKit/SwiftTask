@@ -1514,4 +1514,81 @@ class SwiftTaskTests: _TestCase
         
         self.wait()
     }
+    
+    //--------------------------------------------------
+    // MARK: - Zip
+    //--------------------------------------------------
+    
+    /// zip fulfilled test
+    func testZip_success()
+    {
+        // NOTE: this is async test
+        if !self.isAsync { return }
+        
+        let expect = self.expectationWithDescription(__FUNCTION__)
+        
+        let task1 = _interruptableTask(progressCount: 5, finalState: .Fulfilled)
+        let task2 = _interruptableTask(progressCount: 5, finalState: .Fulfilled)
+            .convert(progress: { "\($0)"}, value: { ($0, $0.characters.count as Int) }, error: { ($0, $0.characters.count as Int) })    // change Task type using `convert()`
+        
+        let zipTask = task1.zip(task2)
+        
+        zipTask.progress { (oldProgress, newProgress) in
+            
+            print("newProgress = \(newProgress)")
+            
+        }.then { value, errorInfo -> Void in
+            
+            print("success = \(value)")
+            
+            XCTAssertTrue(errorInfo == nil, "`zipTask` always fulfills.")
+            
+            XCTAssertEqual(value!.0, "OK")
+            XCTAssertEqual(value!.1.0, "OK")
+            XCTAssertEqual(value!.1.1, 2)
+//            XCTAssertEqual(value, ("OK", ("OK", 2)))  // doesn't work in Xcode7-beta5
+            
+            expect.fulfill()
+                
+        }
+        
+        self.wait()
+    }
+    
+    /// zip fulfilled test
+    func testZip_failure()
+    {
+        // NOTE: this is async test
+        if !self.isAsync { return }
+        
+        let expect = self.expectationWithDescription(__FUNCTION__)
+        
+        let task1 = _interruptableTask(progressCount: 5, finalState: .Rejected)
+        let task2 = _interruptableTask(progressCount: 5, finalState: .Rejected)
+            .convert(progress: { "\($0)"}, value: { ($0, $0.characters.count as Int) }, error: { ($0, $0.characters.count as Int) })    // change Task type using `convert()`
+        
+        let zipTask = task2.zip(task1)
+        
+        zipTask.progress { (oldProgress, newProgress) in
+            
+            print("newProgress = \(newProgress)")
+        
+        }.then { value, errorInfo -> Void in
+            
+            print("errorInfo = \(errorInfo)")
+            
+            XCTAssertTrue(value == nil, "`zipTask` always rejects.")
+            
+            let error1 = errorInfo!.error!.0
+            let error2 = errorInfo!.error!.1
+            
+            XCTAssertFalse(error1 == nil && error2 == nil, "`errorInfo!.error` should only have 1 inner error.")
+            XCTAssertFalse(error1 != nil && error2 != nil, "`errorInfo!.error` should only have 1 inner error.")
+            
+            expect.fulfill()
+                
+        }
+        
+        self.wait()
+    }
 }

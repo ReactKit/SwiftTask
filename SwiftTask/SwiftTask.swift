@@ -631,7 +631,73 @@ internal func _bindInnerTask<Progress2, Value2, Error, Error2>(
     }
 }
 
+private func _toAny<A>(a: A) -> Any
+{
+    return a
+}
+
+extension Task
+{
+    /// converts Task<P, V, E> to Task<V2, V2, E2>
+    public func convert<Progress2, Value2, Error2>(progress toP2: Progress -> Progress2, value toV2: Value -> Value2, error toE2: Error -> Error2) -> Task<Progress2, Value2, Error2>
+    {
+        return Task<Progress2, Value2, Error2> { machine, progress, fulfill, _reject, configure in
+            configure.pause = { self.pause() }
+            configure.resume = { self.resume() }
+            configure.cancel = { self.cancel() }
+
+            self.progress { _, p in
+                progress(toP2(p))
+            }.then { value, errorInfo -> Void in
+                if let value = value {
+                    fulfill(toV2(value))
+                }
+                else if let errorInfo = errorInfo {
+                    let (error, isCancelled) = errorInfo
+                    _reject((error.map(toE2), isCancelled))
+                }
+            }
+        }
+    }
+}
+
 // MARK: - Multiple Tasks
+
+extension Task
+{
+    /// combines 2 tasks into one which fulfills when both tasks are fulfilled
+    public func zip<Progress2, Value2, Error2>(task2: Task<Progress2, Value2, Error2>) -> Task<(Progress?, Progress2?), (Value, Value2), (Error?, Error2?)>
+    {
+        return Task<(Progress?, Progress2?), (Value, Value2), (Error?, Error2?)> { machine, progress, fulfill, _reject, configure in
+            
+            let t1 = self.convert(progress: _toAny, value: _toAny, error: _toAny)
+            let t2 = task2.convert(progress: _toAny, value: _toAny, error: _toAny)
+            let zipTask = Task<Any, Any, Any>.all([t1, t2])
+            
+            configure.pause = { zipTask.pause() }
+            configure.resume = { zipTask.resume() }
+            configure.cancel = { zipTask.cancel() }
+            
+            t1.progress { _, p in
+                if t2.value == nil && t2.errorInfo == nil {
+                    progress((p as? Progress, t2.progress as? Progress2))
+                }
+            }
+            t2.progress { _, p in
+                if t1.value == nil && t1.errorInfo == nil {
+                    progress((t1.progress as? Progress, p as? Progress2))
+                }
+            }
+            
+            zipTask.success { (valueTuple: [Any]) -> Void in
+                fulfill((valueTuple[0] as! Value, valueTuple[1] as! Value2))
+            }.failure { _, isCancelled -> Void in
+                _reject((error: (t1.errorInfo?.error as? Error, t2.errorInfo?.error as? Error2), isCancelled: isCancelled))
+            }
+            
+        }.name("\(self.name)-zip(\(task2.name))")
+    }
+}
 
 extension Task
 {
