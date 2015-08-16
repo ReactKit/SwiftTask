@@ -1,0 +1,33 @@
+machine:
+  xcode:
+    version: "6.3.1"
+
+general:
+  branches:
+    ignore:
+      - swift/2.0
+
+checkout:
+  post:
+    - git submodule update --init --recursive
+
+test:
+  override:
+    - set -o pipefail &&
+      xcodebuild
+        -workspace "SwiftTask.xcworkspace"
+        -scheme "SwiftTask-OSX"
+        clean build test |
+      tee $CIRCLE_ARTIFACTS/xcode_raw-OSX.log |
+      xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results-OSX.xml
+      
+    - set -o pipefail &&
+      xcodebuild
+        CODE_SIGNING_REQUIRED=NO
+        CODE_SIGN_IDENTITY=
+        PROVISIONING_PROFILE=
+        -workspace "SwiftTask.xcworkspace"
+        -scheme "SwiftTask-iOS"
+        clean build test |
+      tee $CIRCLE_ARTIFACTS/xcode_raw-iOS.log |
+      xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results-iOS.xml
