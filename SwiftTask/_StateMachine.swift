@@ -124,8 +124,8 @@ internal class _StateMachine<Progress, Value, Error>
         self._lock.lock()
         defer { self._lock.unlock() }
         
-        let (_, updated) = self.state.tryUpdate { $0 == .Running ? (.Fulfilled, true) : ($0, false) }
-        if updated {
+        let newState = self.state.updateIf { $0 == TaskState.Running ? .Fulfilled : nil }
+        if let _ = newState {
             self.value.rawValue = value
             self._finish()
         }
@@ -137,8 +137,8 @@ internal class _StateMachine<Progress, Value, Error>
         defer { self._lock.unlock() }
         
         let toState = errorInfo.isCancelled ? TaskState.Cancelled : .Rejected
-        let (_, updated) = self.state.tryUpdate { $0 == .Running || $0 == .Paused ? (toState, true) : ($0, false) }
-        if updated {
+        let newState = self.state.updateIf { $0 == TaskState.Running || $0 == .Paused ? toState : nil }
+        if let _ = newState {
             self.errorInfo.rawValue = errorInfo
             self._finish()
         }
@@ -149,8 +149,8 @@ internal class _StateMachine<Progress, Value, Error>
         self._lock.lock()
         defer { self._lock.unlock() }
         
-        let (_, updated) = self.state.tryUpdate { $0 == .Running ? (.Paused, true) : ($0, false) }
-        if updated {
+        let newState = self.state.updateIf { $0 == TaskState.Running ? .Paused : nil }
+        if let _ = newState {
             self.configuration.pause?()
             return true
         }
@@ -193,8 +193,8 @@ internal class _StateMachine<Progress, Value, Error>
     
     private func _handleResume() -> Bool
     {
-        let (_, updated) = self.state.tryUpdate { $0 == .Paused ? (.Running, true) : ($0, false) }
-        if updated {
+        let newState = self.state.updateIf { $0 == TaskState.Paused ? .Running : nil }
+        if let _ = newState {
             self.configuration.resume?()
             return true
         }
@@ -208,8 +208,8 @@ internal class _StateMachine<Progress, Value, Error>
         self._lock.lock()
         defer { self._lock.unlock() }
         
-        let (_, updated) = self.state.tryUpdate { $0 == .Running || $0 == .Paused ? (.Cancelled, true) : ($0, false) }
-        if updated {
+        let newState = self.state.updateIf { $0 == TaskState.Running || $0 == .Paused ? .Cancelled : nil }
+        if let _ = newState {
             self.errorInfo.rawValue = ErrorInfo(error: error, isCancelled: true)
             self._finish()
             return true

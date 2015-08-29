@@ -13,49 +13,42 @@ internal final class _Atomic<T>
     private var _spinlock = OS_SPINLOCK_INIT
     private var _rawValue: T
     
-    internal var rawValue: T
-    {
-        get {
-            self._lock()
-            let rawValue = self._rawValue
-            self._unlock()
-            
-            return rawValue
-        }
-        
-        set(newValue) {
-            self._lock()
-            self._rawValue = newValue
-            self._unlock()
-        }
-    }
-    
     internal init(_ rawValue: T)
     {
         self._rawValue = rawValue
     }
     
-    internal func update(f: T -> T) -> T
+    internal func withRawValue<U>(@noescape f: T -> U) -> U
     {
         self._lock()
-        let oldValue = self._rawValue
-        self._rawValue = f(oldValue)
-        self._unlock()
+        defer { self._unlock() }
         
-        return oldValue
+        return f(self._rawValue)
     }
     
-    internal func tryUpdate(f: T -> (T, Bool)) -> (T, Bool)
+    internal func update(@noescape f: T -> T) -> T
+    {
+        return self.updateIf { f($0) }!
+    }
+    
+    internal func updateIf(@noescape f: T -> T?) -> T?
+    {
+        return self.modify { value in f(value).map { ($0, value) } }
+    }
+    
+    internal func modify<U>(@noescape f: T -> (T, U)?) -> U?
     {
         self._lock()
-        let oldValue = self._rawValue
-        let (newValue, shouldUpdate) = f(oldValue)
-        if shouldUpdate {
-            self._rawValue = newValue
-        }
-        self._unlock()
+        defer { self._unlock() }
         
-        return (oldValue, shouldUpdate)
+        let oldValue = self._rawValue
+        if let (newValue, retValue) = f(oldValue) {
+            self._rawValue = newValue
+            return retValue
+        }
+        else {
+            return nil
+        }
     }
     
     private func _lock()
@@ -66,6 +59,31 @@ internal final class _Atomic<T>
     private func _unlock()
     {
         withUnsafeMutablePointer(&self._spinlock, OSSpinLockUnlock)
+    }
+}
+
+extension _Atomic: RawRepresentable
+{
+    internal convenience init(rawValue: T)
+    {
+        self.init(rawValue)
+    }
+    
+    internal var rawValue: T
+    {
+        get {
+            self._lock()
+            defer { self._unlock() }
+            
+            return self._rawValue
+        }
+        
+        set(newValue) {
+            self._lock()
+            defer { self._unlock() }
+            
+            self._rawValue = newValue
+        }
     }
 }
 
