@@ -25,7 +25,7 @@ class TypeInferenceTests: _TestCase
             XCTFail("Because of preceding failure-recovering, this failure should never be performed (just added for type-inference test)")
             return ["You", "shall", "not", "pass"]
         }.then { value, errorInfo -> String in
-            return " ".join(value!)
+            return value!.joinWithSeparator(" ")
         }.then { value, errorInfo -> Void in
             XCTAssertEqual(value!, "Looks good to me")
             return
