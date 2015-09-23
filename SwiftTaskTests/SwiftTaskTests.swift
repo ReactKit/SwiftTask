@@ -791,9 +791,9 @@ class SwiftTaskTests: _TestCase
                 }
             }
             
-        }.`try`(maxTryCount).failure { errorInfo -> String in
+        }.retry(maxTryCount-1).failure { errorInfo -> String in
             
-            XCTFail("Should never reach here because `task.retry(\(maxTryCount))` will be fulfilled on retry[\(fulfilledTryCount)] even though retry[1...\(fulfilledTryCount-1)] will be rejected.")
+            XCTFail("Should never reach here because `task.retry(\(maxTryCount-1))` will be fulfilled at `fulfilledTryCount` try even though previous retries will be rejected.")
             
             return "DUMMY"
             
@@ -825,7 +825,7 @@ class SwiftTaskTests: _TestCase
                 reject("ERROR \(actualTryCount)")
             }
             
-        }.`try`(maxTryCount).failure { error, isCancelled -> String in
+        }.retry(maxTryCount-1).failure { error, isCancelled -> String in
             
             XCTAssertEqual(error!, "ERROR \(actualTryCount)")
             XCTAssertFalse(isCancelled)
@@ -867,7 +867,7 @@ class SwiftTaskTests: _TestCase
                 }
             }
             
-        }.`try`(maxTryCount).progress { _ in
+        }.retry(maxTryCount-1).progress { _ in
             
             progressCount++
             
@@ -927,7 +927,7 @@ class SwiftTaskTests: _TestCase
                 return
             }
             
-        }.`try`(maxTryCount)
+        }.retry(maxTryCount-1)
         
         retryableTask.success { value -> Void in
             
@@ -979,7 +979,7 @@ class SwiftTaskTests: _TestCase
             
         }
             
-        let retryableTask = task.`try`(maxTryCount)
+        let retryableTask = task.retry(maxTryCount-1)
             
         retryableTask.success { value -> Void in
             

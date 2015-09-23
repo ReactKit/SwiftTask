@@ -311,17 +311,17 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
         return clonedTask
     }
     
-    /// Returns new task that is retryable for `maxTryCount-1` times.
-    public func `try`(maxTryCount: Int) -> Task
+    /// Returns new task that is retryable for `maxRetryCount (= maxTryCount-1)` times.
+    public func retry(maxRetryCount: Int) -> Task
     {
-        if maxTryCount < 2 { return self }
+        if maxRetryCount < 1 { return self }
         
         return Task { machine, progress, fulfill, _reject, configure in
             
             let task = self.progress { _, progressValue in
                 progress(progressValue)
             }.failure { [unowned self] _ -> Task in
-                return self.clone().`try`(maxTryCount-1) // clone & try recursively
+                return self.clone().retry(maxRetryCount-1) // clone & try recursively
             }
                 
             task.progress { _, progressValue in
@@ -345,7 +345,7 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
                 self.cancel()
             }
             
-        }.name("\(self.name)-try(\(maxTryCount))")
+        }.name("\(self.name)-try(\(maxRetryCount))")
     }
     
     ///
@@ -790,18 +790,4 @@ extension Task
             task.resume()
         }
     }
-}
-
-//--------------------------------------------------
-// MARK: - Custom Operators
-// + - * / % = < > ! & | ^ ~ .
-//--------------------------------------------------
-
-infix operator ~ { associativity left }
-
-/// abbreviation for `try()`
-/// e.g. (task ~ 3).then { ... }
-public func ~ <P, V, E>(task: Task<P, V, E>, tryCount: Int) -> Task<P, V, E>
-{
-    return task.`try`(tryCount)
 }
