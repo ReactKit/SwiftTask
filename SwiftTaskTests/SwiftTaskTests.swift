@@ -767,7 +767,7 @@ class SwiftTaskTests: _TestCase
     // MARK: - Try
     //--------------------------------------------------
     
-    func testTry_success()
+    func testRetry_success()
     {
         // NOTE: this is async test
         if !self.isAsync { return }
@@ -809,7 +809,7 @@ class SwiftTaskTests: _TestCase
         XCTAssertEqual(actualTryCount, fulfilledTryCount, "`actualTryCount` should be stopped at `fulfilledTryCount`, not `maxTryCount`.")
     }
     
-    func testTry_failure()
+    func testRetry_failure()
     {
         // NOTE: this is async test
         if !self.isAsync { return }
@@ -841,7 +841,7 @@ class SwiftTaskTests: _TestCase
         XCTAssertEqual(actualTryCount, maxTryCount, "`actualTryCount` should reach `maxTryCount` because task keeps rejected and never fulfilled.")
     }
     
-    func testTry_progress()
+    func testRetry_progress()
     {
         // NOTE: this is async test
         if !self.isAsync { return }
@@ -887,7 +887,7 @@ class SwiftTaskTests: _TestCase
         XCTAssertEqual(progressCount, maxTryCount)
     }
     
-    func testTry_pauseResume()
+    func testRetry_pauseResume()
     {
         // NOTE: this is async test
         if !self.isAsync { return }
@@ -952,7 +952,7 @@ class SwiftTaskTests: _TestCase
         XCTAssertEqual(actualTryCount, maxTryCount)
     }
     
-    func testTry_cancel()
+    func testRetry_cancel()
     {
         // NOTE: this is async test
         if !self.isAsync { return }
