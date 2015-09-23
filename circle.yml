@@ -1,11 +1,6 @@
 machine:
   xcode:
-    version: "6.3.1"
-
-general:
-  branches:
-    ignore:
-      - swift/2.0
+    version: "7.0"
 
 checkout:
   post:
