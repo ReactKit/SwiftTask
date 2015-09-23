@@ -1,4 +1,4 @@
-SwiftTask [![Circle CI](https://circleci.com/gh/ReactKit/SwiftTask/tree/swift%2F1.2.svg?style=svg)](https://circleci.com/gh/ReactKit/SwiftTask/tree/swift%2F1.2)
+SwiftTask [![Circle CI](https://circleci.com/gh/ReactKit/SwiftTask/tree/swift%2F2.0.svg?style=svg)](https://circleci.com/gh/ReactKit/SwiftTask/tree/swift%2F2.0)
 =========
 
 [Promise](http://www.html5rocks.com/en/tutorials/es6/promises/) + progress + pause + cancel + retry for Swift.
@@ -108,20 +108,17 @@ task.progress { (oldProgress: Progress?, newProgress: Progress) in
 
 ### Retry-able
 
-From ver 2.1.0, `Task` is **retryable** for multiple times by using `try()` method ([Pull Request #9](https://github.com/ReactKit/SwiftTask/pull/9)).
-For example, `task.try(n)` will retry at most `n-1` times if `task` keeps rejected, and `task.try(1)` is obviously same as `task` itself having no retries.
+`Task` can retry for multiple times by using `retry()` method.
+For example, `task.retry(n)` will retry at most `n` times (total tries = `n+1`) if `task` keeps rejected, and `task.retry(0)` is obviously same as `task` itself having no retries.
 
 This feature is extremely useful for unstable tasks e.g. network connection.
 By implementing *retryable* from `SwiftTask`'s side, similar code is no longer needed for `player` (inner logic) class.
 
 ```swift
-task.try(3).progress { ... }.success { ...
+task.retry(2).progress { ... }.success { ...
     // this closure will be called even when task is rejected for 1st & 2nd try
     // but finally fulfilled in 3rd try.
 }
-
-// shorthand
-(task ~ 3).then { ... }
 ```
 
 For more examples, please see XCTest cases.
