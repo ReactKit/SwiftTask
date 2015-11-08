@@ -286,4 +286,4 @@ See [Retry-able section](#retry-able).
 
 ## Licence
 
-[MIT](https://github.com/ReactKit/SwiftTask/blob/master/LICENSE)
+[MIT](LICENSE)
