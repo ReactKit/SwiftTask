@@ -463,7 +463,7 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     
     ///
     /// success (fulfilled) + closure returning nothing
-    /// used as transpalent (i.e. it doesn't affect passed Task) handler.
+    /// used as transparent (i.e. it doesn't affect passed Task) handler.
     ///
     /// - e.g. task.success { value -> Void in ... }
     ///
@@ -476,6 +476,7 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     public func success<C: Canceller>(inout canceller: C?, _ successClosure: Value -> Void) -> Task
     {
         return self.success(&canceller) { (value: Value) -> Task in
+            successClosure(value)
             return Task(value: value)
         }
     }
@@ -531,7 +532,7 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     
     ///
     /// failure (rejected or cancelled) + closure returning nothing
-    /// used as transpalent (i.e. it doesn't affect passed Task) handler.
+    /// used as transparent (i.e. it doesn't affect passed Task) handler.
     ///
     /// - e.g. task.failure { errorInfo -> Void in ... }
     /// - e.g. task.failure { error, isCancelled -> Void in ... }
@@ -546,6 +547,7 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     public func failure<C: Canceller>(inout canceller: C?, _ failureClosure: ErrorInfo -> Void) -> Task
     {
         return self.failure(&canceller) { (errorInfo: ErrorInfo) -> Task in
+            failureClosure(errorInfo)
             return Task(errorInfo: errorInfo)
         }
     }
