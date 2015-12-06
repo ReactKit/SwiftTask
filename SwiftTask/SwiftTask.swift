@@ -548,10 +548,15 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     
     public func on(success success: Value -> Void = { _ in }, failure: ErrorInfo -> Void = { _ in }) -> Self
     {
+        var dummyCanceller: Canceller? = nil
+        return self.on(&dummyCanceller, success: success, failure: failure)
+    }
+    
+    public func on<C: Canceller>(inout canceller: C?, success: Value -> Void = { _ in }, failure: ErrorInfo -> Void = { _ in }) -> Self
+    {
         let selfMachine = self._machine
         
-        var dummyCanceller: Canceller? = nil
-        self._then(&dummyCanceller) {
+        self._then(&canceller) {
             if let value = selfMachine.value.rawValue {
                 success(value)
             }
