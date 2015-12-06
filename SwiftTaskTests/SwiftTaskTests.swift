@@ -423,6 +423,57 @@ class SwiftTaskTests: _TestCase
     }
     
     //--------------------------------------------------
+    // MARK: - On
+    //--------------------------------------------------
+    
+    func testOn_success()
+    {
+        let expect = self.expectationWithDescription(__FUNCTION__)
+        
+        Task<(), String, ErrorString> { progress, fulfill, reject, configure in
+            
+            self.perform {
+                fulfill("OK")
+            }
+            
+        }.on(success: { value in
+            
+            XCTAssertEqual(value, "OK")
+            expect.fulfill()
+            
+        }).on(failure: { error, isCancelled in
+            XCTFail("Should never reach here.")
+        })
+        
+        self.wait()
+    }
+    
+    func testOn_failure()
+    {
+        let expect = self.expectationWithDescription(__FUNCTION__)
+        
+        Task<(), String, ErrorString> { progress, fulfill, reject, configure in
+            
+            self.perform {
+                reject("NG")
+            }
+            
+            }.on(success: { value in
+                
+                XCTFail("Should never reach here.")
+                
+            }).on(failure: { error, isCancelled in
+                
+                XCTAssertEqual(error!, "NG")
+                XCTAssertFalse(isCancelled)
+                expect.fulfill()
+                
+            })
+        
+        self.wait()
+    }
+    
+    //--------------------------------------------------
     // MARK: - Progress
     //--------------------------------------------------
     

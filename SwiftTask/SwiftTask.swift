@@ -198,20 +198,6 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
         })
     }
     
-    ///
-    /// creates rejected task with ErrorInfo
-    ///
-    /// - e.g. Task<P, V, E>(errorInfo: someErrorInfo)
-    ///
-    internal convenience init(errorInfo: ErrorInfo)
-    {
-        self.init(_initClosure: { machine, progress, fulfill, _reject, configure in
-            _reject(errorInfo)
-        })
-        
-        self.name = "RejectedTask"
-    }
-    
     /// internal-init for accessing `machine` inside `_initClosure`
     /// (NOTE: _initClosure has _RejectInfoHandler as argument)
     internal init(weakified: Bool = false, paused: Bool = false, _initClosure: _InitClosure)
@@ -369,13 +355,13 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     ///
     /// NOTE: `oldProgress` is always nil when `weakified = true`
     ///
-    public func progress(progressClosure: ProgressTuple -> Void) -> Task
+    public func progress(progressClosure: ProgressTuple -> Void) -> Self
     {
         var dummyCanceller: Canceller? = nil
         return self.progress(&dummyCanceller, progressClosure)
     }
     
-    public func progress<C: Canceller>(inout canceller: C?, _ progressClosure: ProgressTuple -> Void) -> Task
+    public func progress<C: Canceller>(inout canceller: C?, _ progressClosure: ProgressTuple -> Void) -> Self
     {
         var token: _HandlerToken? = nil
         self._machine.addProgressTupleHandler(&token, progressClosure)
@@ -462,26 +448,6 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     }
     
     ///
-    /// success (fulfilled) + closure returning nothing
-    /// used as transparent (i.e. it doesn't affect passed Task) handler.
-    ///
-    /// - e.g. task.success { value -> Void in ... }
-    ///
-    public func success(successClosure: Value -> Void) -> Task
-    {
-        var dummyCanceller: Canceller? = nil
-        return self.success(&dummyCanceller, successClosure)
-    }
-    
-    public func success<C: Canceller>(inout canceller: C?, _ successClosure: Value -> Void) -> Task
-    {
-        return self.success(&canceller) { (value: Value) -> Task in
-            successClosure(value)
-            return Task(value: value)
-        }
-    }
-    
-    ///
     /// success (fulfilled) + closure returning **value**
     ///
     /// - e.g. task.success { value -> NextValueType in ... }
@@ -531,28 +497,6 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     }
     
     ///
-    /// failure (rejected or cancelled) + closure returning nothing
-    /// used as transparent (i.e. it doesn't affect passed Task) handler.
-    ///
-    /// - e.g. task.failure { errorInfo -> Void in ... }
-    /// - e.g. task.failure { error, isCancelled -> Void in ... }
-    ///
-    
-    public func failure(failureClosure: ErrorInfo -> Void) -> Task
-    {
-        var dummyCanceller: Canceller? = nil
-        return self.failure(&dummyCanceller, failureClosure)
-    }
-    
-    public func failure<C: Canceller>(inout canceller: C?, _ failureClosure: ErrorInfo -> Void) -> Task
-    {
-        return self.failure(&canceller) { (errorInfo: ErrorInfo) -> Task in
-            failureClosure(errorInfo)
-            return Task(errorInfo: errorInfo)
-        }
-    }
-
-    ///
     /// failure (rejected or cancelled) + closure returning **value**
     ///
     /// - e.g. task.failure { errorInfo -> NextValueType in ... }
@@ -600,6 +544,23 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
             }
             
         }.name("\(self.name)-failure")
+    }
+    
+    public func on(success success: Value -> Void = { _ in }, failure: ErrorInfo -> Void = { _ in }) -> Self
+    {
+        let selfMachine = self._machine
+        
+        var dummyCanceller: Canceller? = nil
+        self._then(&dummyCanceller) {
+            if let value = selfMachine.value.rawValue {
+                success(value)
+            }
+            else if let errorInfo = selfMachine.errorInfo.rawValue {
+                failure(errorInfo)
+            }
+        }
+        
+        return self
     }
     
     public func pause() -> Bool
