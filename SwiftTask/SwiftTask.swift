@@ -546,22 +546,22 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
         }.name("\(self.name)-failure")
     }
     
-    public func on(success success: Value -> Void = { _ in }, failure: ErrorInfo -> Void = { _ in }) -> Self
+    public func on(success success: (Value -> Void)? = nil, failure: (ErrorInfo -> Void)? = nil) -> Self
     {
         var dummyCanceller: Canceller? = nil
         return self.on(&dummyCanceller, success: success, failure: failure)
     }
     
-    public func on<C: Canceller>(inout canceller: C?, success: Value -> Void = { _ in }, failure: ErrorInfo -> Void = { _ in }) -> Self
+    public func on<C: Canceller>(inout canceller: C?, success: (Value -> Void)? = nil, failure: (ErrorInfo -> Void)? = nil) -> Self
     {
         let selfMachine = self._machine
         
         self._then(&canceller) {
             if let value = selfMachine.value.rawValue {
-                success(value)
+                success?(value)
             }
             else if let errorInfo = selfMachine.errorInfo.rawValue {
-                failure(errorInfo)
+                failure?(errorInfo)
             }
         }
         
