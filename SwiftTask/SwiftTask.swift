@@ -114,17 +114,17 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     }
     
     ///
-    /// Creates a new task.
+    /// Create a new task.
     ///
     /// - e.g. Task<P, V, E>(weakified: false, paused: false) { progress, fulfill, reject, configure in ... }
     ///
-    /// - parameter weakified: Weakifies progress/fulfill/reject handlers to let player (inner asynchronous implementation inside `initClosure`) NOT CAPTURE this created new task. Normally, `weakified = false` should be set to gain "player -> task" retaining, so that task will be automatically deinited when player is deinited. If `weakified = true`, task must be manually retained somewhere else, or it will be immediately deinited.
+    /// - Parameter weakified: Weakifies progress/fulfill/reject handlers to let player (inner asynchronous implementation inside `initClosure`) NOT CAPTURE this created new task. Normally, `weakified = false` should be set to gain "player -> task" retaining, so that task will be automatically deinited when player is deinited. If `weakified = true`, task must be manually retained somewhere else, or it will be immediately deinited.
     ///
-    /// - parameter paused: Flag to invoke `initClosure` immediately or not. If `paused = true`, task's initial state will be `.Paused` and needs to `resume()` in order to start `.Running`. If `paused = false`, `initClosure` will be invoked immediately.
+    /// - Parameter paused: Flag to invoke `initClosure` immediately or not. If `paused = true`, task's initial state will be `.Paused` and needs to `resume()` in order to start `.Running`. If `paused = false`, `initClosure` will be invoked immediately.
     ///
-    /// - parameter initClosure: e.g. { progress, fulfill, reject, configure in ... }. `fulfill(value)` and `reject(error)` handlers must be called inside this closure, where calling `progress(progressValue)` handler is optional. Also as options, `configure.pause`/`configure.resume`/`configure.cancel` closures can be set to gain control from outside e.g. `task.pause()`/`task.resume()`/`task.cancel()`. When using `configure`, make sure to use weak modifier when appropriate to avoid "task -> player" retaining which often causes retain cycle.
+    /// - Parameter initClosure: e.g. { progress, fulfill, reject, configure in ... }. `fulfill(value)` and `reject(error)` handlers must be called inside this closure, where calling `progress(progressValue)` handler is optional. Also as options, `configure.pause`/`configure.resume`/`configure.cancel` closures can be set to gain control from outside e.g. `task.pause()`/`task.resume()`/`task.cancel()`. When using `configure`, make sure to use weak modifier when appropriate to avoid "task -> player" retaining which often causes retain cycle.
     ///
-    /// - returns: New task.
+    /// - Returns: New task.
     ///
     public init(weakified: Bool, paused: Bool, initClosure: InitClosure)
     {
@@ -141,7 +141,7 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     }
     
     ///
-    /// creates a new task without weakifying progress/fulfill/reject handlers
+    /// Create a new task without weakifying progress/fulfill/reject handlers
     ///
     /// - e.g. Task<P, V, E>(paused: false) { progress, fulfill, reject, configure in ... }
     ///
@@ -151,7 +151,7 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     }
     
     ///
-    /// creates a new task without weakifying progress/fulfill/reject handlers (non-paused)
+    /// Create a new task without weakifying progress/fulfill/reject handlers (non-paused)
     ///
     /// - e.g. Task<P, V, E> { progress, fulfill, reject, configure in ... }
     ///
@@ -161,7 +161,7 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     }
     
     ///
-    /// creates fulfilled task (non-paused)
+    /// Create fulfilled task (non-paused)
     ///
     /// - e.g. Task<P, V, E>(value: someValue)
     ///
@@ -174,7 +174,7 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     }
     
     ///
-    /// creates rejected task (non-paused)
+    /// Create rejected task (non-paused)
     ///
     /// - e.g. Task<P, V, E>(error: someError)
     ///
@@ -187,7 +187,7 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     }
     
     ///
-    /// creates promise-like task which only allows fulfill & reject (no progress & configure)
+    /// Create promise-like task which only allows fulfill & reject (no progress & configure)
     ///
     /// - e.g. Task<Any, Value, Error> { fulfill, reject in ... }
     ///
@@ -353,15 +353,16 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     ///
     /// - e.g. task.progress { oldProgress, newProgress in ... }
     ///
-    /// NOTE: `oldProgress` is always nil when `weakified = true`
+    /// - Note: `oldProgress` is always nil when `weakified = true`
+    /// - Returns: Self (same `Task`)
     ///
-    public func progress(progressClosure: ProgressTuple -> Void) -> Task
+    public func progress(progressClosure: ProgressTuple -> Void) -> Self
     {
         var dummyCanceller: Canceller? = nil
         return self.progress(&dummyCanceller, progressClosure)
     }
     
-    public func progress<C: Canceller>(inout canceller: C?, _ progressClosure: ProgressTuple -> Void) -> Task
+    public func progress<C: Canceller>(inout canceller: C?, _ progressClosure: ProgressTuple -> Void) -> Self
     {
         var token: _HandlerToken? = nil
         self._machine.addProgressTupleHandler(&token, progressClosure)
@@ -374,10 +375,12 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     }
     
     ///
-    /// then (fulfilled & rejected) + closure returning **value** 
-    /// (a.k.a. `map` in functional programming term)
+    /// `then` (fulfilled & rejected) + closure returning **value**.
+    /// (similar to `map` in functional programming)
     ///
     /// - e.g. task.then { value, errorInfo -> NextValueType in ... }
+    ///
+    /// - Returns: New `Task`
     ///
     public func then<Value2>(thenClosure: (Value?, ErrorInfo?) -> Value2) -> Task<Progress, Value2, Error>
     {
@@ -393,10 +396,12 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     }
     
     ///
-    /// then (fulfilled & rejected) + closure returning **task**
-    /// (a.k.a. `flatMap` in functional programming term)
+    /// `then` (fulfilled & rejected) + closure returning **task**.
+    /// (similar to `flatMap` in functional programming)
     ///
     /// - e.g. task.then { value, errorInfo -> NextTaskType in ... }
+    ///
+    /// - Returns: New `Task`
     ///
     public func then<Progress2, Value2, Error2>(thenClosure: (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, Error2>
     {
@@ -410,6 +415,8 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     // - `let canceller = Canceller(); task1.then(&canceller) {...}; canceller.cancel();`
     // - `let task2 = task1.then {...}; task2.cancel();`
     //
+    /// - Returns: New `Task`
+    ///
     public func then<Progress2, Value2, Error2, C: Canceller>(inout canceller: C?, _ thenClosure: (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, Error2>
     {
         return Task<Progress2, Value2, Error2> { [unowned self, weak canceller] newMachine, progress, fulfill, _reject, configure in
@@ -448,9 +455,12 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     }
     
     ///
-    /// success (fulfilled) + closure returning **value**
+    /// `success` (fulfilled) + closure returning **value**.
+    /// (synonym for `map` in functional programming)
     ///
     /// - e.g. task.success { value -> NextValueType in ... }
+    ///
+    /// - Returns: New `Task`
     ///
     public func success<Value2>(successClosure: Value -> Value2) -> Task<Progress, Value2, Error>
     {
@@ -466,9 +476,12 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     }
     
     ///
-    /// success (fulfilled) + closure returning **task**
+    /// `success` (fulfilled) + closure returning **task**
+    /// (synonym for `flatMap` in functional programming)
     ///
     /// - e.g. task.success { value -> NextTaskType in ... }
+    ///
+    /// - Returns: New `Task`
     ///
     public func success<Progress2, Value2, Error2>(successClosure: Value -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, Error>
     {
@@ -497,10 +510,13 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     }
     
     ///
-    /// failure (rejected or cancelled) + closure returning **value**
+    /// `failure` (rejected or cancelled) + closure returning **value**.
+    /// (synonym for `mapError` in functional programming)
     ///
     /// - e.g. task.failure { errorInfo -> NextValueType in ... }
     /// - e.g. task.failure { error, isCancelled -> NextValueType in ... }
+    ///
+    /// - Returns: New `Task`
     ///
     public func failure(failureClosure: ErrorInfo -> Value) -> Task
     {
@@ -516,10 +532,13 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     }
 
     ///
-    /// failure (rejected or cancelled) + closure returning **task**
+    /// `failure` (rejected or cancelled) + closure returning **task**.
+    /// (synonym for `flatMapError` in functional programming)
     ///
     /// - e.g. task.failure { errorInfo -> NextTaskType in ... }
     /// - e.g. task.failure { error, isCancelled -> NextTaskType in ... }
+    ///
+    /// - Returns: New `Task`
     ///
     public func failure<Progress2, Error2>(failureClosure: ErrorInfo -> Task<Progress2, Value, Error2>) -> Task<Progress2, Value, Error2>
     {
@@ -546,11 +565,41 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
         }.name("\(self.name)-failure")
     }
     
+    ///
+    /// Add side-effects after completion.
+    ///
+    /// - Note: This method doesn't create new task, so it has better performance over `then()`/`success()`/`failure()`.
+    /// - Returns: Self (same `Task`)
+    ///
+    public func on(success success: (Value -> Void)? = nil, failure: (ErrorInfo -> Void)? = nil) -> Self
+    {
+        var dummyCanceller: Canceller? = nil
+        return self.on(&dummyCanceller, success: success, failure: failure)
+    }
+    
+    public func on<C: Canceller>(inout canceller: C?, success: (Value -> Void)? = nil, failure: (ErrorInfo -> Void)? = nil) -> Self
+    {
+        let selfMachine = self._machine
+        
+        self._then(&canceller) {
+            if let value = selfMachine.value.rawValue {
+                success?(value)
+            }
+            else if let errorInfo = selfMachine.errorInfo.rawValue {
+                failure?(errorInfo)
+            }
+        }
+        
+        return self
+    }
+    
+    /// Pause task.
     public func pause() -> Bool
     {
         return self._machine.handlePause()
     }
     
+    /// Resume task.
     public func resume() -> Bool
     {
         return self._machine.handleResume()
@@ -562,11 +611,13 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     // - `public func cancel(error: Error? = nil) -> Bool`
     // - `public func cancel(_ error: Error? = nil) -> Bool` (segfault in Swift 1.2)
     //
+    /// Cancel task.
     public func cancel() -> Bool
     {
         return self.cancel(error: nil)
     }
     
+    /// Cancel task.
     public func cancel(error error: Error?) -> Bool
     {
         return self._cancel(error)
