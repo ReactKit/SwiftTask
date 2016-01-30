@@ -21,11 +21,10 @@
 		1F4C7AD91B7CD27600DEB1AE /* Async.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F4C7AD81B7CD27600DEB1AE /* Async.framework */; };
 		1F6A8CA319A4E4F200369A5D /* SwiftTaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEE3199EDF1000F97868 /* SwiftTaskTests.swift */; };
 		1FB3B8F31B0A194F00F78900 /* _Atomic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FB3B8F21B0A194F00F78900 /* _Atomic.swift */; };
-		1FB3B8F41B0A194F00F78900 /* _Atomic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FB3B8F21B0A194F00F78900 /* _Atomic.swift */; };
+		1FB3B8F71C5CF2CA00C1A479 /* SwiftTask.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F46DED4199EDF1000F97868 /* SwiftTask.framework */; };
 		1FCF71121AD8CD2B007079C2 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FCF71111AD8CD2B007079C2 /* Alamofire.framework */; };
 		1FCF71161AD8CD38007079C2 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FCF71151AD8CD38007079C2 /* Alamofire.framework */; };
 		1FD7197B1AFE387C00BC38C4 /* Cancellable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FD7197A1AFE387C00BC38C4 /* Cancellable.swift */; };
-		1FD7197C1AFE387C00BC38C4 /* Cancellable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FD7197A1AFE387C00BC38C4 /* Cancellable.swift */; };
 		1FF52EB41A4C395A00B4BA28 /* _InterruptableTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF52EB31A4C395A00B4BA28 /* _InterruptableTask.swift */; };
 		1FF52EB51A4C395A00B4BA28 /* _InterruptableTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF52EB31A4C395A00B4BA28 /* _InterruptableTask.swift */; };
 		4822F0DC19D00B2300F5F572 /* _TestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEFC199EE2C200F97868 /* _TestCase.swift */; };
@@ -36,14 +35,26 @@
 		485C31F11A1D619A00040DA3 /* TypeInferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485C31F01A1D619A00040DA3 /* TypeInferenceTests.swift */; };
 		485C31F21A1D619A00040DA3 /* TypeInferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485C31F01A1D619A00040DA3 /* TypeInferenceTests.swift */; };
 		487858241B09701F0022E56A /* _RecursiveLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 487858231B09701F0022E56A /* _RecursiveLock.swift */; };
-		487858251B09701F0022E56A /* _RecursiveLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 487858231B09701F0022E56A /* _RecursiveLock.swift */; };
 		48A1E8221A366F9C007619EB /* SwiftTask.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F46DED4199EDF1000F97868 /* SwiftTask.framework */; };
-		48A1E8231A366FA8007619EB /* SwiftTask.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48CD5A0C19AEE3570042B9F1 /* SwiftTask.framework */; };
 		48B58D7B1A6F255E0068E18C /* _StateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48B58D7A1A6F255E0068E18C /* _StateMachine.swift */; };
-		48B58D7C1A6F255E0068E18C /* _StateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48B58D7A1A6F255E0068E18C /* _StateMachine.swift */; };
-		48CD5A3C19AEEBDF0042B9F1 /* SwiftTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEFA199EDF8100F97868 /* SwiftTask.swift */; };
-		48CD5A4619AEEC2E0042B9F1 /* SwiftTask.h in Headers */ = {isa = PBXBuildFile; fileRef = 1F46DED9199EDF1000F97868 /* SwiftTask.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1FB3B8F31C5CF2C100C1A479 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1F46DECB199EDF1000F97868 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1F46DED3199EDF1000F97868;
+			remoteInfo = SwiftTask;
+		};
+		1FB3B8F51C5CF2C800C1A479 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1F46DECB199EDF1000F97868 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1F46DED3199EDF1000F97868;
+			remoteInfo = SwiftTask;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		1F20250119ADA8FD00DE0495 /* BasicTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasicTests.swift; sourceTree = "<group>"; };
@@ -65,12 +76,17 @@
 		1FCF71151AD8CD38007079C2 /* Alamofire.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Alamofire.framework; path = ../Carthage/Checkouts/Alamofire/build/Debug/Alamofire.framework; sourceTree = "<group>"; };
 		1FD7197A1AFE387C00BC38C4 /* Cancellable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cancellable.swift; sourceTree = "<group>"; };
 		1FF52EB31A4C395A00B4BA28 /* _InterruptableTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = _InterruptableTask.swift; sourceTree = "<group>"; };
+		1FFADCCF1C5CE950000B66BE /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
+		1FFADCD01C5CE950000B66BE /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		1FFADCD11C5CE950000B66BE /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
+		1FFADCDC1C5CEC1B000B66BE /* UniversalFramework_Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = UniversalFramework_Base.xcconfig; sourceTree = "<group>"; };
+		1FFADCDD1C5CEC1B000B66BE /* UniversalFramework_Framework.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = UniversalFramework_Framework.xcconfig; sourceTree = "<group>"; };
+		1FFADCDE1C5CEC1B000B66BE /* UniversalFramework_Test.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = UniversalFramework_Test.xcconfig; sourceTree = "<group>"; };
 		4822F0D019D00ABF00F5F572 /* SwiftTask-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SwiftTask-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		48511C5A19C17563002FE03C /* RetainCycleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RetainCycleTests.swift; sourceTree = "<group>"; };
 		485C31F01A1D619A00040DA3 /* TypeInferenceTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TypeInferenceTests.swift; sourceTree = "<group>"; };
 		487858231B09701F0022E56A /* _RecursiveLock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = _RecursiveLock.swift; sourceTree = "<group>"; };
 		48B58D7A1A6F255E0068E18C /* _StateMachine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = _StateMachine.swift; sourceTree = "<group>"; };
-		48CD5A0C19AEE3570042B9F1 /* SwiftTask.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftTask.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,9 +101,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				48A1E8221A366F9C007619EB /* SwiftTask.framework in Frameworks */,
 				1F4C7AD71B7CD27200DEB1AE /* Async.framework in Frameworks */,
 				1FCF71161AD8CD38007079C2 /* Alamofire.framework in Frameworks */,
-				48A1E8221A366F9C007619EB /* SwiftTask.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -95,16 +111,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1FB3B8F71C5CF2CA00C1A479 /* SwiftTask.framework in Frameworks */,
 				1F4C7AD91B7CD27600DEB1AE /* Async.framework in Frameworks */,
 				1FCF71121AD8CD2B007079C2 /* Alamofire.framework in Frameworks */,
-				48A1E8231A366FA8007619EB /* SwiftTask.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		48CD5A0819AEE3570042B9F1 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -114,6 +123,7 @@
 		1F46DECA199EDF1000F97868 = {
 			isa = PBXGroup;
 			children = (
+				1FFADCD21C5CE956000B66BE /* Configurations */,
 				1F46DED6199EDF1000F97868 /* SwiftTask */,
 				1F46DEE0199EDF1000F97868 /* SwiftTaskTests */,
 				1F46DED5199EDF1000F97868 /* Products */,
@@ -125,7 +135,6 @@
 			children = (
 				1F46DED4199EDF1000F97868 /* SwiftTask.framework */,
 				1F46DEDF199EDF1000F97868 /* SwiftTask-OSXTests.xctest */,
-				48CD5A0C19AEE3570042B9F1 /* SwiftTask.framework */,
 				4822F0D019D00ABF00F5F572 /* SwiftTask-iOSTests.xctest */,
 			);
 			name = Products;
@@ -182,6 +191,37 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		1FFADCCE1C5CE950000B66BE /* project xcconfigs */ = {
+			isa = PBXGroup;
+			children = (
+				1FFADCCF1C5CE950000B66BE /* Base.xcconfig */,
+				1FFADCD01C5CE950000B66BE /* Debug.xcconfig */,
+				1FFADCD11C5CE950000B66BE /* Release.xcconfig */,
+			);
+			name = "project xcconfigs";
+			path = Configurations;
+			sourceTree = "<group>";
+		};
+		1FFADCD21C5CE956000B66BE /* Configurations */ = {
+			isa = PBXGroup;
+			children = (
+				1FFADCCE1C5CE950000B66BE /* project xcconfigs */,
+				1FFADCD91C5CEC1B000B66BE /* mrackwitz/xcconfigs (for target) */,
+			);
+			name = Configurations;
+			sourceTree = "<group>";
+		};
+		1FFADCD91C5CEC1B000B66BE /* mrackwitz/xcconfigs (for target) */ = {
+			isa = PBXGroup;
+			children = (
+				1FFADCDC1C5CEC1B000B66BE /* UniversalFramework_Base.xcconfig */,
+				1FFADCDD1C5CEC1B000B66BE /* UniversalFramework_Framework.xcconfig */,
+				1FFADCDE1C5CEC1B000B66BE /* UniversalFramework_Test.xcconfig */,
+			);
+			name = "mrackwitz/xcconfigs (for target)";
+			path = Carthage/Checkouts/xcconfigs;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -193,20 +233,12 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		48CD5A0919AEE3570042B9F1 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				48CD5A4619AEEC2E0042B9F1 /* SwiftTask.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		1F46DED3199EDF1000F97868 /* SwiftTask-OSX */ = {
+		1F46DED3199EDF1000F97868 /* SwiftTask */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1F46DEE7199EDF1000F97868 /* Build configuration list for PBXNativeTarget "SwiftTask-OSX" */;
+			buildConfigurationList = 1F46DEE7199EDF1000F97868 /* Build configuration list for PBXNativeTarget "SwiftTask" */;
 			buildPhases = (
 				1F46DECF199EDF1000F97868 /* Sources */,
 				1F46DED0199EDF1000F97868 /* Frameworks */,
@@ -217,7 +249,7 @@
 			);
 			dependencies = (
 			);
-			name = "SwiftTask-OSX";
+			name = SwiftTask;
 			productName = SwiftTask;
 			productReference = 1F46DED4199EDF1000F97868 /* SwiftTask.framework */;
 			productType = "com.apple.product-type.framework";
@@ -233,6 +265,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				1FB3B8F41C5CF2C100C1A479 /* PBXTargetDependency */,
 			);
 			name = "SwiftTask-OSXTests";
 			productName = SwiftTaskTests;
@@ -250,29 +283,12 @@
 			buildRules = (
 			);
 			dependencies = (
+				1FB3B8F61C5CF2C800C1A479 /* PBXTargetDependency */,
 			);
 			name = "SwiftTask-iOSTests";
 			productName = "SwiftTask-iOS2Tests";
 			productReference = 4822F0D019D00ABF00F5F572 /* SwiftTask-iOSTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		48CD5A0B19AEE3570042B9F1 /* SwiftTask-iOS */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 48CD5A2019AEE3570042B9F1 /* Build configuration list for PBXNativeTarget "SwiftTask-iOS" */;
-			buildPhases = (
-				48CD5A0719AEE3570042B9F1 /* Sources */,
-				48CD5A0819AEE3570042B9F1 /* Frameworks */,
-				48CD5A0919AEE3570042B9F1 /* Headers */,
-				48CD5A0A19AEE3570042B9F1 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = "SwiftTask-iOS";
-			productName = "SwiftTask-iOS";
-			productReference = 48CD5A0C19AEE3570042B9F1 /* SwiftTask.framework */;
-			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
 
@@ -293,9 +309,6 @@
 					4822F0CF19D00ABF00F5F572 = {
 						CreatedOnToolsVersion = 6.0.1;
 					};
-					48CD5A0B19AEE3570042B9F1 = {
-						CreatedOnToolsVersion = 6.0;
-					};
 				};
 			};
 			buildConfigurationList = 1F46DECE199EDF1000F97868 /* Build configuration list for PBXProject "SwiftTask" */;
@@ -311,9 +324,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				1F46DED3199EDF1000F97868 /* SwiftTask-OSX */,
+				1F46DED3199EDF1000F97868 /* SwiftTask */,
 				1F46DEDE199EDF1000F97868 /* SwiftTask-OSXTests */,
-				48CD5A0B19AEE3570042B9F1 /* SwiftTask-iOS */,
 				4822F0CF19D00ABF00F5F572 /* SwiftTask-iOSTests */,
 			);
 		};
@@ -335,13 +347,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		4822F0CE19D00ABF00F5F572 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		48CD5A0A19AEE3570042B9F1 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -395,23 +400,25 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		48CD5A0719AEE3570042B9F1 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				48CD5A3C19AEEBDF0042B9F1 /* SwiftTask.swift in Sources */,
-				1FD7197C1AFE387C00BC38C4 /* Cancellable.swift in Sources */,
-				48B58D7C1A6F255E0068E18C /* _StateMachine.swift in Sources */,
-				1FB3B8F41B0A194F00F78900 /* _Atomic.swift in Sources */,
-				487858251B09701F0022E56A /* _RecursiveLock.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1FB3B8F41C5CF2C100C1A479 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1F46DED3199EDF1000F97868 /* SwiftTask */;
+			targetProxy = 1FB3B8F31C5CF2C100C1A479 /* PBXContainerItemProxy */;
+		};
+		1FB3B8F61C5CF2C800C1A479 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1F46DED3199EDF1000F97868 /* SwiftTask */;
+			targetProxy = 1FB3B8F51C5CF2C800C1A479 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		1F46DEE5199EDF1000F97868 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1FFADCD01C5CE950000B66BE /* Debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
@@ -427,15 +434,12 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -447,12 +451,9 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_SWIFT_FLAGS = "-DDEBUG";
-				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -461,6 +462,7 @@
 		};
 		1F46DEE6199EDF1000F97868 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1FFADCD11C5CE950000B66BE /* Release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
@@ -476,8 +478,6 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -490,10 +490,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MTL_ENABLE_DEBUG_INFO = NO;
-				SDKROOT = iphoneos;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -501,63 +498,50 @@
 		};
 		1F46DEE8199EDF1000F97868 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1FFADCDD1C5CEC1B000B66BE /* UniversalFramework_Framework.xcconfig */;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ENABLE_MODULES = YES;
-				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = SwiftTask/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.inamiy.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(PROJECT_NAME)";
-				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
 		1F46DEE9199EDF1000F97868 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1FFADCDD1C5CEC1B000B66BE /* UniversalFramework_Framework.xcconfig */;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ENABLE_MODULES = YES;
-				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = SwiftTask/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.inamiy.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(PROJECT_NAME)";
-				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
 		};
 		1F46DEEB199EDF1000F97868 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1FFADCDE1C5CEC1B000B66BE /* UniversalFramework_Test.xcconfig */;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(DEVELOPER_FRAMEWORKS_DIR)",
-					"$(inherited)",
-				);
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = SwiftTaskTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.inamiy.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -567,14 +551,10 @@
 		};
 		1F46DEEC199EDF1000F97868 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1FFADCDE1C5CEC1B000B66BE /* UniversalFramework_Test.xcconfig */;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(DEVELOPER_FRAMEWORKS_DIR)",
-					"$(inherited)",
-				);
 				INFOPLIST_FILE = SwiftTaskTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.inamiy.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -584,18 +564,14 @@
 		};
 		4822F0DA19D00ABF00F5F572 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1FFADCDE1C5CEC1B000B66BE /* UniversalFramework_Test.xcconfig */;
 			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = SwiftTaskTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.inamiy.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -604,62 +580,13 @@
 		};
 		4822F0DB19D00ABF00F5F572 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1FFADCDE1C5CEC1B000B66BE /* UniversalFramework_Test.xcconfig */;
 			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
 				INFOPLIST_FILE = SwiftTaskTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.inamiy.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		48CD5A1C19AEE3570042B9F1 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				APPLICATION_EXTENSION_API_ONLY = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = SwiftTask/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.inamiy.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = "$(PROJECT_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		48CD5A1D19AEE3570042B9F1 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				APPLICATION_EXTENSION_API_ONLY = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = SwiftTask/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.inamiy.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = "$(PROJECT_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -676,7 +603,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1F46DEE7199EDF1000F97868 /* Build configuration list for PBXNativeTarget "SwiftTask-OSX" */ = {
+		1F46DEE7199EDF1000F97868 /* Build configuration list for PBXNativeTarget "SwiftTask" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1F46DEE8199EDF1000F97868 /* Debug */,
@@ -699,15 +626,6 @@
 			buildConfigurations = (
 				4822F0DA19D00ABF00F5F572 /* Debug */,
 				4822F0DB19D00ABF00F5F572 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		48CD5A2019AEE3570042B9F1 /* Build configuration list for PBXNativeTarget "SwiftTask-iOS" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				48CD5A1C19AEE3570042B9F1 /* Debug */,
-				48CD5A1D19AEE3570042B9F1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

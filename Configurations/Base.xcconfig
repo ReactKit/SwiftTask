@@ -1,0 +1,13 @@
+//
+//  Base.xcconfig
+//  SwiftTask
+//
+//  Created by Yasuhiro Inami on 2016-01-30.
+//  Copyright © 2015 Yasuhiro Inami. All rights reserved.
+//
+
+CODE_SIGN_IDENTITY[sdk=iphoneos*] = iPhone Developer;
+MACOSX_DEPLOYMENT_TARGET = 10.9;
+IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+WATCHOS_DEPLOYMENT_TARGET = 2.0;
+TVOS_DEPLOYMENT_TARGET = 9.0;
