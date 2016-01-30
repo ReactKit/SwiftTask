@@ -1,17 +1,17 @@
 machine:
   xcode:
-    version: "7.1"
+    version: "7.2"
 
 checkout:
   post:
+    - git submodule sync
     - git submodule update --init --recursive
 
 test:
   override:
     - set -o pipefail &&
       xcodebuild
-        -workspace "SwiftTask.xcworkspace"
-        -scheme "SwiftTask-OSX"
+        -scheme "SwiftTask"
         clean build |
       tee $CIRCLE_ARTIFACTS/xcode_raw-OSX.log |
       xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results-OSX.xml
@@ -21,8 +21,9 @@ test:
         CODE_SIGNING_REQUIRED=NO
         CODE_SIGN_IDENTITY=
         PROVISIONING_PROFILE=
-        -workspace "SwiftTask.xcworkspace"
-        -scheme "SwiftTask-iOS"
+        -sdk iphonesimulator
+        -destination 'platform=iOS Simulator,OS=9.0,name=iPhone 6'
+        -scheme "SwiftTask"
         clean build |
       tee $CIRCLE_ARTIFACTS/xcode_raw-iOS.log |
       xcpretty --color --report junit --output $CIRCLE_TEST_REPORTS/xcode/results-iOS.xml

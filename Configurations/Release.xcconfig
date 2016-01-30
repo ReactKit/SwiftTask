@@ -1,0 +1,11 @@
+//
+//  Release.xcconfig
+//  SwiftTask
+//
+//  Created by Yasuhiro Inami on 2016-01-30.
+//  Copyright © 2015 Yasuhiro Inami. All rights reserved.
+//
+
+#include "Base.xcconfig"
+
+SWIFT_OPTIMIZATION_LEVEL = -Owholemodule;
