@@ -1575,7 +1575,7 @@ class SwiftTaskTests: _TestCase
         let task2 = Task<Float, Int, NSError?> { fulfill, reject in fulfill(1) }
         let task3 = Task<Float, Double, NSError?> { fulfill, reject in fulfill(1.1) }
         
-        Task<Float, (String, Int), NSError>.when((task1, task2, task3)).success { (string, int, double) -> Void in
+        Task<Float, (String, Int, Double), NSError>.when((task1, task2, task3)).success { (string, int, double) -> Void in
             XCTAssertEqual(string, "Success")
             XCTAssertEqual(int, 1)
             XCTAssertEqual(double, 1.1)
@@ -1589,7 +1589,7 @@ class SwiftTaskTests: _TestCase
         let task2 = Task<Float, Int, String> { fulfill, reject in fulfill(1) }
         let task3 = Task<Float, Double, String> { fulfill, reject in  reject("Rejected") }
         
-        Task<Float, (String, Int), NSError>.when((task1, task2, task3)).success { (string, int, double) -> Void in
+        Task<Float, (String, Int, Double), String>.when((task1, task2, task3)).success { (string, int, double) -> Void in
             XCTFail()
             }.failure { (error, isCancelled) -> Void in
                 XCTAssertEqual(error, "Rejected")
