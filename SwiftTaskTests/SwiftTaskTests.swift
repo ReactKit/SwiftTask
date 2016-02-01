@@ -1565,4 +1565,34 @@ class SwiftTaskTests: _TestCase
         
         self.wait()
     }
+    
+    //--------------------------------------------------
+    // MARK: - When
+    //--------------------------------------------------
+   
+    func testWhen_success() {
+        let task1 = Task<Float, String, NSError?> { fulfill, reject in fulfill("Success") }
+        let task2 = Task<Float, Int, NSError?> { fulfill, reject in fulfill(1) }
+        let task3 = Task<Float, Double, NSError?> { fulfill, reject in fulfill(1.1) }
+        
+        Task<Float, (String, Int), NSError>.when((task1, task2, task3)).success { (string, int, double) -> Void in
+            XCTAssertEqual(string, "Success")
+            XCTAssertEqual(int, 1)
+            XCTAssertEqual(double, 1.1)
+            }.failure { _ in
+                XCTFail()
+        }
+    }
+    
+    func testWhen_failure() {
+        let task1 = Task<Float, String, String> { fulfill, reject in fulfill("Success") }
+        let task2 = Task<Float, Int, String> { fulfill, reject in fulfill(1) }
+        let task3 = Task<Float, Double, String> { fulfill, reject in  reject("Rejected") }
+        
+        Task<Float, (String, Int), NSError>.when((task1, task2, task3)).success { (string, int, double) -> Void in
+            XCTFail()
+            }.failure { (error, isCancelled) -> Void in
+                XCTAssertEqual(error, "Rejected")
+        }
+    }
 }
