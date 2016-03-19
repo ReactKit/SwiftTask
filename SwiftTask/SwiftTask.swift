@@ -690,6 +690,10 @@ extension Task
     
     public class func all(tasks: [Task]) -> Task<BulkProgress, [Value], Error>
     {
+        guard !tasks.isEmpty else {
+            return Task<BulkProgress, [Value], Error>(value: [])
+        }
+
         return Task<BulkProgress, [Value], Error> { machine, progress, fulfill, _reject, configure in
             
             var completedCount = 0
@@ -737,6 +741,8 @@ extension Task
     
     public class func any(tasks: [Task]) -> Task
     {
+        precondition(!tasks.isEmpty, "`Task.any(tasks)` with empty `tasks` should not be called. It will never be fulfilled or rejected.")
+
         return Task<Progress, Value, Error> { machine, progress, fulfill, _reject, configure in
             
             var completedCount = 0
@@ -783,6 +789,10 @@ extension Task
     /// This new task will NEVER be internally rejected.
     public class func some(tasks: [Task]) -> Task<BulkProgress, [Value], Error>
     {
+        guard !tasks.isEmpty else {
+            return Task<BulkProgress, [Value], Error>(value: [])
+        }
+
         return Task<BulkProgress, [Value], Error> { machine, progress, fulfill, _reject, configure in
             
             var completedCount = 0
