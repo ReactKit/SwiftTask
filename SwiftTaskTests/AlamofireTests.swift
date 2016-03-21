@@ -16,7 +16,7 @@ class AlamofireTests: _TestCase
 
     func testFulfill()
     {
-        let expect = self.expectationWithDescription(__FUNCTION__)
+        let expect = self.expectationWithDescription(#function)
         
         let task = Task<Progress, String, NSError> { progress, fulfill, reject, configure in
             
@@ -46,7 +46,7 @@ class AlamofireTests: _TestCase
     
     func testReject()
     {
-        let expect = self.expectationWithDescription(__FUNCTION__)
+        let expect = self.expectationWithDescription(#function)
         
         let task = Task<Progress, String?, NSError> { progress, fulfill, reject, configure in
             
@@ -86,7 +86,7 @@ class AlamofireTests: _TestCase
     
     func testProgress()
     {
-        let expect = self.expectationWithDescription(__FUNCTION__)
+        let expect = self.expectationWithDescription(#function)
         
         // define task
         let task = Task<Progress, String, NSError> { progress, fulfill, reject, configure in
@@ -129,7 +129,7 @@ class AlamofireTests: _TestCase
     
     func testNSProgress()
     {
-        let expect = self.expectationWithDescription(__FUNCTION__)
+        let expect = self.expectationWithDescription(#function)
         let nsProgress = NSProgress(totalUnitCount: 100)
         
         // define task
@@ -176,7 +176,7 @@ class AlamofireTests: _TestCase
     //
     func testCancel()
     {
-        let expect = self.expectationWithDescription(__FUNCTION__)
+        let expect = self.expectationWithDescription(#function)
         
         let task = Task<Progress, String?, NSError> { progress, fulfill, reject, configure in
             

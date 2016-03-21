@@ -704,7 +704,7 @@ extension Task
                 task.success { (value: Value) -> Void in
                     
                     lock.lock()
-                    completedCount++
+                    completedCount += 1
                     
                     let progressTuple = BulkProgress(completedCount: completedCount, totalCount: totalCount)
                     progress(progressTuple)
@@ -754,7 +754,7 @@ extension Task
                 task.success { (value: Value) -> Void in
                     
                     lock.lock()
-                    completedCount++
+                    completedCount += 1
                     
                     if completedCount == 1 {
                         fulfill(value)
@@ -766,7 +766,7 @@ extension Task
                 }.failure { (errorInfo: ErrorInfo) -> Void in
                     
                     lock.lock()
-                    rejectedCount++
+                    rejectedCount += 1
                     
                     if rejectedCount == totalCount {
                         let isAnyCancelled = (tasks.filter { task in task.state == .Cancelled }.count > 0)
@@ -803,7 +803,7 @@ extension Task
                 task.then { (value: Value?, errorInfo: ErrorInfo?) -> Void in
                     
                     lock.lock()
-                    completedCount++
+                    completedCount += 1
                     
                     let progressTuple = BulkProgress(completedCount: completedCount, totalCount: totalCount)
                     progress(progressTuple)

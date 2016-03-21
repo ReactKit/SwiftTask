@@ -262,7 +262,7 @@ internal struct _Handlers<T>: SequenceType
     
     internal mutating func remove(token: _HandlerToken) -> T?
     {
-        for var i = 0; i < self.elements.count; i++ {
+        for i in 0..<self.elements.count {
             if self.elements[i].key == token.key {
                 return self.elements.removeAtIndex(i).value
             }
@@ -277,6 +277,6 @@ internal struct _Handlers<T>: SequenceType
     
     internal func generate() -> AnyGenerator<T>
     {
-        return anyGenerator(self.elements.map { $0.value }.generate())
+        return AnyGenerator(self.elements.map { $0.value }.generate())
     }
 }
