@@ -16,7 +16,7 @@ class BasicTests: _TestCase
     {
         typealias Task = SwiftTask.Task<Float, String, ErrorString>
         
-        let expect = self.expectationWithDescription(__FUNCTION__)
+        let expect = self.expectationWithDescription(#function)
         
         // define task
         let task = Task { progress, fulfill, reject, configure in

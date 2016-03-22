@@ -10,7 +10,7 @@ import Foundation
 
 public protocol Cancellable
 {
-    typealias _Error
+    associatedtype _Error
     
     //
     // NOTE:
