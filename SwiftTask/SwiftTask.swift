@@ -831,6 +831,56 @@ extension Task
         }.name("Task.some")
     }
     
+    private func toAnyTask() -> Task<Progress, AnyObject, Error>
+    {
+        return self.then{ (value, failureInfo) -> Task<Progress, AnyObject, Error> in
+            if let value = value as? AnyObject {
+                return Task<Progress, AnyObject ,Error>(value: value)
+            }
+            if let error = failureInfo?.error {
+                return Task<Progress, AnyObject, Error>(error: error)
+            }
+            fatalError()
+        }
+    }
+    
+    public class func when<Progress, Error, V, V2>(tasks: (Task<Progress, V, Error>, Task<Progress, V2, Error>)) -> Task<BulkProgress, (V, V2), Error>
+    {
+        return Task<BulkProgress, (V, V2), Error> { progress, fulfill, reject, _ in
+            Task<Progress, AnyObject, Error>.all([tasks.0.toAnyTask(), tasks.1.toAnyTask()]).success { values in
+                guard   let v1 = values[0] as? V,
+                    let v2 = values[1] as? V2 else {
+                        fatalError()
+                }
+                fulfill((v1, v2))
+                }.failure { error, _ in
+                    guard let error = error else { return }
+                    reject(error)
+                }.progress { (oldProgress, newProgress) -> Void in
+                    progress(newProgress)
+                }.name("Task.when")
+        }
+    }
+    
+    public class func when<Progress, Error, V, V2, V3>(tasks: (Task<Progress, V, Error>, Task<Progress, V2, Error>, Task<Progress, V3, Error>)) -> Task<BulkProgress, (V, V2, V3), Error>
+    {
+        return Task<BulkProgress, (V, V2, V3), Error> { progress, fulfill, reject, _ in
+            Task<Progress, AnyObject, Error>.all([tasks.0.toAnyTask(), tasks.1.toAnyTask(), tasks.2.toAnyTask()]).success { values in
+                guard   let v1 = values[0] as? V,
+                    let v2 = values[1] as? V2,
+                    let v3 = values[2] as? V3 else {
+                        fatalError()
+                }
+                fulfill((v1, v2, v3))
+                }.failure { error, _ in
+                    guard let error = error else { return }
+                    reject(error)
+                }.progress { (oldProgress, newProgress) -> Void in
+                    progress(newProgress)
+                }.name("Task.when")
+        }
+    }
+    
     public class func cancelAll(tasks: [Task])
     {
         for task in tasks {
