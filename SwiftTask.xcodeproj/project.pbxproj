@@ -27,6 +27,8 @@
 		1FD7197B1AFE387C00BC38C4 /* Cancellable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FD7197A1AFE387C00BC38C4 /* Cancellable.swift */; };
 		1FF52EB41A4C395A00B4BA28 /* _InterruptableTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF52EB31A4C395A00B4BA28 /* _InterruptableTask.swift */; };
 		1FF52EB51A4C395A00B4BA28 /* _InterruptableTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF52EB31A4C395A00B4BA28 /* _InterruptableTask.swift */; };
+		1FF95CB01CDD8F8D00899FEA /* MultipleTasksTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF95CAF1CDD8F8D00899FEA /* MultipleTasksTests.swift */; };
+		1FF95CB11CDD8F8D00899FEA /* MultipleTasksTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF95CAF1CDD8F8D00899FEA /* MultipleTasksTests.swift */; };
 		4822F0DC19D00B2300F5F572 /* _TestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEFC199EE2C200F97868 /* _TestCase.swift */; };
 		4822F0DD19D00B2300F5F572 /* BasicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F20250119ADA8FD00DE0495 /* BasicTests.swift */; };
 		4822F0DE19D00B2300F5F572 /* SwiftTaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEE3199EDF1000F97868 /* SwiftTaskTests.swift */; };
@@ -76,6 +78,7 @@
 		1FCF71151AD8CD38007079C2 /* Alamofire.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Alamofire.framework; path = ../Carthage/Checkouts/Alamofire/build/Debug/Alamofire.framework; sourceTree = "<group>"; };
 		1FD7197A1AFE387C00BC38C4 /* Cancellable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cancellable.swift; sourceTree = "<group>"; };
 		1FF52EB31A4C395A00B4BA28 /* _InterruptableTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = _InterruptableTask.swift; sourceTree = "<group>"; };
+		1FF95CAF1CDD8F8D00899FEA /* MultipleTasksTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MultipleTasksTests.swift; sourceTree = "<group>"; };
 		1FFADCCF1C5CE950000B66BE /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
 		1FFADCD01C5CE950000B66BE /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		1FFADCD11C5CE950000B66BE /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
@@ -174,6 +177,7 @@
 				1F218D5A1AFC3FFD00C849FF /* RemoveHandlerTests.swift */,
 				1F5FA35619A374E600975FB9 /* AlamofireTests.swift */,
 				1F29F6411B115EF500F476AF /* MultipleErrorTypesTests.swift */,
+				1FF95CAF1CDD8F8D00899FEA /* MultipleTasksTests.swift */,
 				1F46DEE1199EDF1000F97868 /* Supporting Files */,
 			);
 			path = SwiftTaskTests;
@@ -375,6 +379,7 @@
 				1F20250219ADA8FD00DE0495 /* BasicTests.swift in Sources */,
 				1FF52EB41A4C395A00B4BA28 /* _InterruptableTask.swift in Sources */,
 				1F218D5B1AFC3FFD00C849FF /* RemoveHandlerTests.swift in Sources */,
+				1FF95CB01CDD8F8D00899FEA /* MultipleTasksTests.swift in Sources */,
 				1F6A8CA319A4E4F200369A5D /* SwiftTaskTests.swift in Sources */,
 				1F29F6421B115EF500F476AF /* MultipleErrorTypesTests.swift in Sources */,
 				1F4C76A41AD8CF40004E47C1 /* AlamofireTests.swift in Sources */,
@@ -391,6 +396,7 @@
 				4822F0DE19D00B2300F5F572 /* SwiftTaskTests.swift in Sources */,
 				4822F0DD19D00B2300F5F572 /* BasicTests.swift in Sources */,
 				1F218D5C1AFC3FFD00C849FF /* RemoveHandlerTests.swift in Sources */,
+				1FF95CB11CDD8F8D00899FEA /* MultipleTasksTests.swift in Sources */,
 				1FF52EB51A4C395A00B4BA28 /* _InterruptableTask.swift in Sources */,
 				1F29F6431B115EF500F476AF /* MultipleErrorTypesTests.swift in Sources */,
 				1F4C76A51AD8CF41004E47C1 /* AlamofireTests.swift in Sources */,
