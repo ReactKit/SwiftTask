@@ -116,6 +116,43 @@ class MultipleTasksTests: _TestCase
         
         self.wait()
     }
+    
+    func testMultipleTasksTests_success1_failure2_success3_wrapped()
+    {
+        let expect = self.expectationWithDescription(#function)
+        
+        var flow = [Int]()
+        
+        let task1 = { Task<(), Value1, Error1>(value: .Default).on(success: { _ in flow.append(1) }) }
+        let wrapped1 = wrappedErrorTask(task1, f: WrappedError.ByTask1)
+        
+        let task2 = { Task<(), Value2, Error2>(error: .Default).on(success: { _ in flow.append(2) }) }
+        let wrapped2 = wrappedErrorTask(task2, f: WrappedError.ByTask2)
+        
+        let task3 = { Task<(), Value3, Error3>(value: .Default).on(success: { _ in flow.append(3) }) }
+        let wrapped3 = wrappedErrorTask(task3, f: WrappedError.ByTask3)
+        
+        XCTAssertEqual(flow, [])
+        
+        wrapped1()
+            .success { _ in
+                wrapped2()
+            }
+            .success { _ in
+                wrapped3()
+            }
+            .on(failure: { error, isCancelled in
+                guard case let .Some(.ByTask2(error2)) = error else {
+                    XCTFail("Wrong WrappedError.")
+                    return
+                }
+                XCTAssertEqual(error2, Error2.Default)
+                XCTAssertEqual(flow, [1])
+                expect.fulfill()
+            })
+        
+        self.wait()
+    }
 }
 
 extension Task
@@ -133,4 +170,10 @@ extension Task
             }
         }
     }
+}
+
+private func wrappedErrorTask<P,V,E>(task: () -> Task<P,V,E>, f: E -> WrappedError) -> () -> Task<P,V,WrappedError> {
+        return {
+            task()._mapError(f)
+        }
 }
