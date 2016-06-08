@@ -699,6 +699,7 @@ extension Task
             var completedCount = 0
             let totalCount = tasks.count
             let lock = _RecursiveLock()
+            let cancelled = _Atomic(false)
             
             for task in tasks {
                 task.success { (value: Value) -> Void in
@@ -721,20 +722,27 @@ extension Task
                     lock.unlock()
                     
                 }.failure { (errorInfo: ErrorInfo) -> Void in
-                    
-                    lock.lock()
-                    _reject(errorInfo)
-                    
-                    for task in tasks {
-                        task.cancel()
+
+                    let changed = cancelled.updateIf { $0 == false ? true : nil }
+                    if changed != nil {
+                        lock.lock()
+                        _reject(errorInfo)
+
+                        for task in tasks {
+                            task.cancel()
+                        }
+                        lock.unlock()
                     }
-                    lock.unlock()
                 }
             }
             
             configure.pause = { self.pauseAll(tasks); return }
             configure.resume = { self.resumeAll(tasks); return }
-            configure.cancel = { self.cancelAll(tasks); return }
+            configure.cancel = {
+                if !cancelled.rawValue {
+                    self.cancelAll(tasks);
+                }
+            }
             
         }.name("Task.all")
     }
