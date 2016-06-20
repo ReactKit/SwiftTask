@@ -35,7 +35,7 @@ class _TestCase: XCTestCase
     
     var isAsync: Bool { return false }
     
-    func perform(closure: Void -> Void)
+    func perform(closure: () -> Void)
     {
         if self.isAsync {
             Async.main(after: 0.01, block: closure)

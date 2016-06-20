@@ -18,7 +18,7 @@ internal final class _Atomic<T>
         self._rawValue = rawValue
     }
     
-    internal func withRawValue<U>(@noescape f: T -> U) -> U
+    internal func withRawValue<U>(_ f: @noescape (T) -> U) -> U
     {
         self._lock()
         defer { self._unlock() }
@@ -26,17 +26,17 @@ internal final class _Atomic<T>
         return f(self._rawValue)
     }
     
-    internal func update(@noescape f: T -> T) -> T
+    internal func update(_ f: @noescape (T) -> T) -> T
     {
         return self.updateIf { f($0) }!
     }
     
-    internal func updateIf(@noescape f: T -> T?) -> T?
+    internal func updateIf(_ f: @noescape (T) -> T?) -> T?
     {
         return self.modify { value in f(value).map { ($0, value) } }
     }
     
-    internal func modify<U>(@noescape f: T -> (T, U)?) -> U?
+    internal func modify<U>(_ f: @noescape (T) -> (T, U)?) -> U?
     {
         self._lock()
         defer { self._unlock() }

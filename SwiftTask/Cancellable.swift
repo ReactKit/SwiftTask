@@ -12,30 +12,19 @@ public protocol Cancellable
 {
     associatedtype _Error
     
-    //
-    // NOTE:
-    // Single `func cancel(error: Error) -> Bool` is preferred (as first implemented in 8a22ed5),
-    // but two overloaded methods are required for SwiftTask ver 3.x API compatibility.
-    //
-    func cancel() -> Bool
-    func cancel(error error: _Error) -> Bool
+    func cancel(error: _Error) -> Bool
 }
 
 public class Canceller: Cancellable
 {
-    private var cancelHandler: (Void -> Void)?
+    private var cancelHandler: (() -> Void)?
     
-    public required init(cancelHandler: Void -> Void)
+    public required init(cancelHandler: () -> Void)
     {
         self.cancelHandler = cancelHandler
     }
     
-    public func cancel() -> Bool
-    {
-        return self.cancel(error: ())
-    }
-    
-    public func cancel(error error: Void) -> Bool
+    @discardableResult public func cancel(error: Void = ()) -> Bool
     {
         if let cancelHandler = self.cancelHandler {
             self.cancelHandler = nil

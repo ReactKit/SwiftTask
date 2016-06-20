@@ -11,7 +11,7 @@ import XCTest
 
 class Player
 {
-    var completionHandler: (Void -> Void)?
+    var completionHandler: (() -> Void)?
     
     init()
     {
@@ -23,7 +23,7 @@ class Player
 //        println("[deinit] \(self)")
     }
     
-    func doSomething(completion: (Void -> Void)? = nil)
+    func doSomething(completion: (() -> Void)? = nil)
     {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 100_000_000), dispatch_get_main_queue()) { /*[weak self] in */
             
