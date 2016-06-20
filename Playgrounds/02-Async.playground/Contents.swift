@@ -26,7 +26,7 @@ XCPSetExecutionShouldContinueIndefinitely()
 func asyncTask(value: String) -> MyTask
 {
     return MyTask { progress, fulfill, reject, configure in
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 100_000_000), dispatch_get_main_queue()) {
+        DispatchQueue.main.after(when: .now() + 0.001) {
             fulfill(value)
         }
     }
