@@ -26,9 +26,9 @@ class _TestCase: XCTestCase
         super.tearDown()
     }
     
-    func wait(timeout: NSTimeInterval = 3)
+    func wait(_ timeout: TimeInterval = 3)
     {
-        self.waitForExpectationsWithTimeout(timeout) { error in
+        self.waitForExpectations(withTimeout: timeout) { error in
             print("wait error = \(error)")
         }
     }

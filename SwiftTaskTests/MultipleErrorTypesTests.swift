@@ -26,7 +26,7 @@ class MultipleErrorTypesTests: _TestCase
     var flow = [Int]()
     
     // delayed task + counting flow 1 & 2
-    func _task1(ok ok: Bool) -> Task1
+    func _task1(ok: Bool) -> Task1
     {
         return Task1 { progress, fulfill, reject, configure in
             print("[task1] start")
@@ -43,7 +43,7 @@ class MultipleErrorTypesTests: _TestCase
     }
     
     // delayed task + counting flow 4 & 5
-    func _task2(ok ok: Bool) -> Task2
+    func _task2(ok: Bool) -> Task2
     {
         return Task2 { progress, fulfill, reject, configure in
             print("[task2] start")
@@ -61,7 +61,7 @@ class MultipleErrorTypesTests: _TestCase
     
     func testMultipleErrorTypes_then()
     {
-        let expect = self.expectationWithDescription(#function)
+        let expect = self.expectation(withDescription: #function)
         
         self._task1(ok: true)
             .then { value, errorInfo -> Task2 in
@@ -87,7 +87,7 @@ class MultipleErrorTypesTests: _TestCase
     
     func testMultipleErrorTypes_success()
     {
-        let expect = self.expectationWithDescription(#function)
+        let expect = self.expectation(withDescription: #function)
         
         self._task1(ok: true)
             .success { value -> Task2 in
@@ -113,7 +113,7 @@ class MultipleErrorTypesTests: _TestCase
 
     func testMultipleErrorTypes_success_differentErrorType()
     {
-        let expect = self.expectationWithDescription(#function)
+        let expect = self.expectation(withDescription: #function)
         
         self._task1(ok: true)
             .success { value -> Task2 in
@@ -151,7 +151,7 @@ class MultipleErrorTypesTests: _TestCase
     
     func testMultipleErrorTypes_success_differentErrorType_conversion()
     {
-        let expect = self.expectationWithDescription(#function)
+        let expect = self.expectation(withDescription: #function)
         
         self._task1(ok: true)
             .success { value -> Task<Void, MyEnum, String> in
@@ -191,7 +191,7 @@ class MultipleErrorTypesTests: _TestCase
 
     func testMultipleErrorTypes_failure()
     {
-        let expect = self.expectationWithDescription(#function)
+        let expect = self.expectation(withDescription: #function)
         
         self._task1(ok: false)
             .failure { errorInfo -> Task<Dummy, String /* must be task1's value type to recover */, Dummy> in
