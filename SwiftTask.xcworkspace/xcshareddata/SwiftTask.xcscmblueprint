@@ -1,0 +1,44 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "DF9A3E2A3372F2EF94714F47B19B6C0DCBBF4AB9",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "67620B5EFA902936DF04070AF595B76AB0333747" : 0,
+    "8CCFBC236B2D99F3320873838535AF1EA5422AB1" : 0,
+    "2DDF1D4E528EDA8D8E5AF503BA5680A30604BD70" : 0,
+    "DF9A3E2A3372F2EF94714F47B19B6C0DCBBF4AB9" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "7E8DD0F4-4FF2-4828-A975-A2138CA295EF",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "67620B5EFA902936DF04070AF595B76AB0333747" : "SwiftTask\/Carthage\/Checkouts\/Alamofire\/",
+    "8CCFBC236B2D99F3320873838535AF1EA5422AB1" : "SwiftTask\/Carthage\/Checkouts\/Async\/",
+    "2DDF1D4E528EDA8D8E5AF503BA5680A30604BD70" : "SwiftTask\/Carthage\/Checkouts\/xcconfigs\/",
+    "DF9A3E2A3372F2EF94714F47B19B6C0DCBBF4AB9" : "SwiftTask\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "SwiftTask",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "SwiftTask.xcworkspace",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/mrackwitz\/xcconfigs.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "2DDF1D4E528EDA8D8E5AF503BA5680A30604BD70"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/Alamofire\/Alamofire.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "67620B5EFA902936DF04070AF595B76AB0333747"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/duemunk\/Async.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "8CCFBC236B2D99F3320873838535AF1EA5422AB1"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/jordanekay\/SwiftTask",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "DF9A3E2A3372F2EF94714F47B19B6C0DCBBF4AB9"
+    }
+  ]
+}

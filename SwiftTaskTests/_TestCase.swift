@@ -26,16 +26,16 @@ class _TestCase: XCTestCase
         super.tearDown()
     }
     
-    func wait(timeout: NSTimeInterval = 3)
+    func wait(_ timeout: TimeInterval = 3)
     {
-        self.waitForExpectationsWithTimeout(timeout) { error in
+        self.waitForExpectations(withTimeout: timeout) { error in
             print("wait error = \(error)")
         }
     }
     
     var isAsync: Bool { return false }
     
-    func perform(closure: Void -> Void)
+    func perform(closure: () -> Void)
     {
         if self.isAsync {
             Async.main(after: 0.01, block: closure)

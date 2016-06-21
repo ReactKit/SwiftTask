@@ -34,7 +34,7 @@ class MultipleTasksTests: _TestCase
 {
     func testMultipleTasksTests_success1_success2_success3()
     {
-        let expect = self.expectationWithDescription(#function)
+        let expect = self.expectation(withDescription: #function)
 
         var flow = [Int]()
 
@@ -59,7 +59,7 @@ class MultipleTasksTests: _TestCase
 
     func testMultipleTasksTests_success1_success2_failure3()
     {
-        let expect = self.expectationWithDescription(#function)
+        let expect = self.expectation(withDescription: #function)
 
         var flow = [Int]()
 
@@ -75,7 +75,7 @@ class MultipleTasksTests: _TestCase
                 task3()._mapError(WrappedError.ByTask3)
             }
             .on(failure: { error, isCancelled in
-                guard case let .Some(.ByTask3(error3)) = error else {
+                guard case let .some(.ByTask3(error3)) = error else {
                     XCTFail("Wrong WrappedError.")
                     return
                 }
@@ -89,7 +89,7 @@ class MultipleTasksTests: _TestCase
 
     func testMultipleTasksTests_success1_failure2_success3()
     {
-        let expect = self.expectationWithDescription(#function)
+        let expect = self.expectation(withDescription: #function)
 
         var flow = [Int]()
 
@@ -105,7 +105,7 @@ class MultipleTasksTests: _TestCase
                 task3()._mapError(WrappedError.ByTask3)
             }
             .on(failure: { error, isCancelled in
-                guard case let .Some(.ByTask2(error2)) = error else {
+                guard case let .some(.ByTask2(error2)) = error else {
                     XCTFail("Wrong WrappedError.")
                     return
                 }
@@ -119,7 +119,7 @@ class MultipleTasksTests: _TestCase
     
     func testMultipleTasksTests_success1_failure2_success3_wrapped()
     {
-        let expect = self.expectationWithDescription(#function)
+        let expect = self.expectation(withDescription: #function)
         
         var flow = [Int]()
         
@@ -142,7 +142,7 @@ class MultipleTasksTests: _TestCase
                 wrapped3()
             }
             .on(failure: { error, isCancelled in
-                guard case let .Some(.ByTask2(error2)) = error else {
+                guard case let .some(.ByTask2(error2)) = error else {
                     XCTFail("Wrong WrappedError.")
                     return
                 }
@@ -158,7 +158,7 @@ class MultipleTasksTests: _TestCase
 extension Task
 {
     /// Converts `Task<..., Error>` to `Task<..., WrappedError>`.
-    private func _mapError(f: Error -> WrappedError) -> Task<Progress, Value, WrappedError>
+    private func _mapError(_ f: (Error) -> WrappedError) -> Task<Progress, Value, WrappedError>
     {
         return self.failure { error, isCancelled -> Task<Progress, Value, WrappedError> in
             if let error = error {
@@ -172,7 +172,7 @@ extension Task
     }
 }
 
-private func wrappedErrorTask<P,V,E>(task: () -> Task<P,V,E>, f: E -> WrappedError) -> () -> Task<P,V,WrappedError> {
+private func wrappedErrorTask<P,V,E>(_ task: () -> Task<P,V,E>, f: (E) -> WrappedError) -> () -> Task<P,V,WrappedError> {
         return {
             task()._mapError(f)
         }

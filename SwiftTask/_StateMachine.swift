@@ -30,10 +30,10 @@ internal class _StateMachine<Progress, Value, Error>
     
     /// wrapper closure for `_initClosure` to invoke only once when started `.Running`,
     /// and will be set to `nil` afterward
-    internal var initResumeClosure: _Atomic<(Void -> Void)?> = _Atomic(nil)
+    internal var initResumeClosure: _Atomic<(() -> Void)?> = _Atomic(nil)
     
     private lazy var _progressTupleHandlers = _Handlers<ProgressTupleHandler>()
-    private lazy var _completionHandlers = _Handlers<Void -> Void>()
+    private lazy var _completionHandlers = _Handlers<() -> Void>()
     
     private var _lock = _RecursiveLock()
     
@@ -43,7 +43,7 @@ internal class _StateMachine<Progress, Value, Error>
         self.state = _Atomic(paused ? .Paused : .Running)
     }
     
-    internal func addProgressTupleHandler(inout token: _HandlerToken?, _ progressTupleHandler: ProgressTupleHandler) -> Bool
+    @discardableResult internal func addProgressTupleHandler(_ token: inout _HandlerToken?, _ progressTupleHandler: ProgressTupleHandler) -> Bool
     {
         self._lock.lock()
         defer { self._lock.unlock() }
@@ -57,7 +57,7 @@ internal class _StateMachine<Progress, Value, Error>
         }
     }
     
-    internal func removeProgressTupleHandler(handlerToken: _HandlerToken?) -> Bool
+    @discardableResult internal func removeProgressTupleHandler(_ handlerToken: _HandlerToken?) -> Bool
     {
         self._lock.lock()
         defer { self._lock.unlock() }
@@ -71,7 +71,7 @@ internal class _StateMachine<Progress, Value, Error>
         }
     }
     
-    internal func addCompletionHandler(inout token: _HandlerToken?, _ completionHandler: Void -> Void) -> Bool
+    @discardableResult internal func addCompletionHandler(_ token: inout _HandlerToken?, _ completionHandler: () -> Void) -> Bool
     {
         self._lock.lock()
         defer { self._lock.unlock() }
@@ -85,7 +85,7 @@ internal class _StateMachine<Progress, Value, Error>
         }
     }
     
-    internal func removeCompletionHandler(handlerToken: _HandlerToken?) -> Bool
+    @discardableResult internal func removeCompletionHandler(_ handlerToken: _HandlerToken?) -> Bool
     {
         self._lock.lock()
         defer { self._lock.unlock() }
@@ -99,7 +99,7 @@ internal class _StateMachine<Progress, Value, Error>
         }
     }
     
-    internal func handleProgress(progress: Progress)
+    internal func handleProgress(_ progress: Progress)
     {
         self._lock.lock()
         defer { self._lock.unlock() }
@@ -119,7 +119,7 @@ internal class _StateMachine<Progress, Value, Error>
         }
     }
     
-    internal func handleFulfill(value: Value)
+    internal func handleFulfill(_ value: Value)
     {
         self._lock.lock()
         defer { self._lock.unlock() }
@@ -131,7 +131,7 @@ internal class _StateMachine<Progress, Value, Error>
         }
     }
     
-    internal func handleRejectInfo(errorInfo: ErrorInfo)
+    internal func handleRejectInfo(_ errorInfo: ErrorInfo)
     {
         self._lock.lock()
         defer { self._lock.unlock() }
@@ -203,7 +203,7 @@ internal class _StateMachine<Progress, Value, Error>
         }
     }
     
-    internal func handleCancel(error: Error? = nil) -> Bool
+    internal func handleCancel(_ error: Error? = nil) -> Bool
     {
         self._lock.lock()
         defer { self._lock.unlock() }
@@ -244,14 +244,14 @@ internal struct _HandlerToken
     internal let key: Int
 }
 
-internal struct _Handlers<T>: SequenceType
+internal struct _Handlers<T>: Sequence
 {
     internal typealias KeyValue = (key: Int, value: T)
     
     private var currentKey: Int = 0
     private var elements = [KeyValue]()
     
-    internal mutating func append(value: T) -> _HandlerToken
+    internal mutating func append(_ value: T) -> _HandlerToken
     {
         self.currentKey = self.currentKey &+ 1
         
@@ -260,11 +260,11 @@ internal struct _Handlers<T>: SequenceType
         return _HandlerToken(key: self.currentKey)
     }
     
-    internal mutating func remove(token: _HandlerToken) -> T?
+    internal mutating func remove(_ token: _HandlerToken) -> T?
     {
         for i in 0..<self.elements.count {
             if self.elements[i].key == token.key {
-                return self.elements.removeAtIndex(i).value
+                return self.elements.remove(at: i).value
             }
         }
         return nil
@@ -272,11 +272,11 @@ internal struct _Handlers<T>: SequenceType
     
     internal mutating func removeAll(keepCapacity: Bool = false)
     {
-        self.elements.removeAll(keepCapacity: keepCapacity)
+        self.elements.removeAll(keepingCapacity: keepCapacity)
     }
     
-    internal func generate() -> AnyGenerator<T>
+    internal func makeIterator() -> AnyIterator<T>
     {
-        return AnyGenerator(self.elements.map { $0.value }.generate())
+        return AnyIterator(self.elements.map { $0.value }.makeIterator())
     }
 }

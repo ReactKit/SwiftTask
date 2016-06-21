@@ -16,7 +16,7 @@ class AlamofireTests: _TestCase
 
     func testFulfill()
     {
-        let expect = self.expectationWithDescription(#function)
+        let expect = self.expectation(withDescription: #function)
         
         let task = Task<Progress, String, NSError> { progress, fulfill, reject, configure in
             
@@ -46,7 +46,7 @@ class AlamofireTests: _TestCase
     
     func testReject()
     {
-        let expect = self.expectationWithDescription(#function)
+        let expect = self.expectation(withDescription: #function)
         
         let task = Task<Progress, String?, NSError> { progress, fulfill, reject, configure in
             
@@ -86,12 +86,12 @@ class AlamofireTests: _TestCase
     
     func testProgress()
     {
-        let expect = self.expectationWithDescription(#function)
+        let expect = self.expectation(withDescription: #function)
         
         // define task
         let task = Task<Progress, String, NSError> { progress, fulfill, reject, configure in
             
-            download(.GET, "http://httpbin.org/stream/100", destination: Request.suggestedDownloadDestination(directory: .DocumentDirectory, domain: .UserDomainMask))
+            download(.GET, "http://httpbin.org/stream/100", destination: Request.suggestedDownloadDestination(directory: .documentDirectory, domain: .userDomainMask))
                 
             .progress { (bytesWritten, totalBytesWritten, totalBytesExpectedToWrite) in
                 
@@ -129,16 +129,16 @@ class AlamofireTests: _TestCase
     
     func testNSProgress()
     {
-        let expect = self.expectationWithDescription(#function)
-        let nsProgress = NSProgress(totalUnitCount: 100)
+        let expect = self.expectation(withDescription: #function)
+        let nsProgress = Foundation.Progress(totalUnitCount: 100)
         
         // define task
         let task = Task<Progress, String, NSError> { progress, fulfill, reject, configure in
             
-            nsProgress.becomeCurrentWithPendingUnitCount(50)
+            nsProgress.becomeCurrent(withPendingUnitCount: 50)
             
             // NOTE: test with url which returns totalBytesExpectedToWrite != -1
-            download(.GET, "http://httpbin.org/bytes/1024", destination: Request.suggestedDownloadDestination(directory: .DocumentDirectory, domain: .UserDomainMask))
+            download(.GET, "http://httpbin.org/bytes/1024", destination: Request.suggestedDownloadDestination(directory: .documentDirectory, domain: .userDomainMask))
             
             .response { (request, response, data, error) in
                 
@@ -176,11 +176,11 @@ class AlamofireTests: _TestCase
     //
     func testCancel()
     {
-        let expect = self.expectationWithDescription(#function)
+        let expect = self.expectation(withDescription: #function)
         
         let task = Task<Progress, String?, NSError> { progress, fulfill, reject, configure in
             
-            let downloadRequst = download(.GET, "http://httpbin.org/stream/100", destination: Request.suggestedDownloadDestination(directory: .DocumentDirectory, domain: .UserDomainMask))
+            let downloadRequst = download(.GET, "http://httpbin.org/stream/100", destination: Request.suggestedDownloadDestination(directory: .documentDirectory, domain: .userDomainMask))
 
             .response { (request, response, data, error) in
                 
@@ -217,7 +217,7 @@ class AlamofireTests: _TestCase
         }
         
         // cancel after 1ms
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1_000_000), dispatch_get_main_queue()) {
+        DispatchQueue.main.after(when: .now() + 0.001) {
             
             task.cancel()   // sends no error
             

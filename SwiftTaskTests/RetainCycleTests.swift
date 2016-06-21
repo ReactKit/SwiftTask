@@ -11,7 +11,7 @@ import XCTest
 
 class Player
 {
-    var completionHandler: (Void -> Void)?
+    var completionHandler: (() -> Void)?
     
     init()
     {
@@ -23,9 +23,9 @@ class Player
 //        println("[deinit] \(self)")
     }
     
-    func doSomething(completion: (Void -> Void)? = nil)
+    func doSomething(completion: (() -> Void)? = nil)
     {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 100_000_000), dispatch_get_main_queue()) { /*[weak self] in */
+        DispatchQueue.main.after(when: .now() + 0.001) { /*[weak self] in */
             
             // NOTE: callback (either as argument or stored property) must be captured by dispatch_queue
             
@@ -54,7 +54,7 @@ class RetainCycleTests: _TestCase
     
     func testPlayer_completionAsArgument_notConfigured()
     {
-        let expect = self.expectationWithDescription(#function)
+        let expect = self.expectation(withDescription: #function)
         
         //
         // retain cycle:
@@ -98,7 +98,7 @@ class RetainCycleTests: _TestCase
     
     func testPlayer_completionAsArgument_configured()
     {
-        let expect = self.expectationWithDescription(#function)
+        let expect = self.expectation(withDescription: #function)
         
         //
         // retain cycle:
@@ -144,7 +144,7 @@ class RetainCycleTests: _TestCase
     
     func testPlayer_completionAsStoredProperty_notConfigured()
     {
-        let expect = self.expectationWithDescription(#function)
+        let expect = self.expectation(withDescription: #function)
         
         //
         // retain cycle:
@@ -186,7 +186,7 @@ class RetainCycleTests: _TestCase
     
     func testPlayer_completionAsStoredProperty_configured()
     {
-        let expect = self.expectationWithDescription(#function)
+        let expect = self.expectation(withDescription: #function)
         
         //
         // retain cycle:
