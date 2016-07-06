@@ -491,12 +491,13 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     
     public func success<Progress2, Value2, Error2, C: Canceller>(_ canceller: inout C?, _ successClosure: (Value) -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, Error>
     {
+        var localCanceller = canceller; defer { canceller = localCanceller }
         return Task<Progress2, Value2, Error> { [unowned self] newMachine, progress, fulfill, _reject, configure in
             
             let selfMachine = self._machine
             
             // NOTE: using `self._then()` + `selfMachine` instead of `self.then()` will reduce Task allocation
-            self._then(&canceller) {
+            self._then(&localCanceller) {
                 if let value = selfMachine.value.rawValue {
                     let innerTask = successClosure(value)
                     _bindInnerTask(innerTask, newMachine, progress, fulfill, _reject, configure)
@@ -548,11 +549,12 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     
     public func failure<Progress2, Error2, C: Canceller>(_ canceller: inout C?, _ failureClosure: (ErrorInfo) -> Task<Progress2, Value, Error2>) -> Task<Progress2, Value, Error2>
     {
+        var localCanceller = canceller; defer { canceller = localCanceller }
         return Task<Progress2, Value, Error2> { [unowned self] newMachine, progress, fulfill, _reject, configure in
             
             let selfMachine = self._machine
             
-            self._then(&canceller) {
+            self._then(&localCanceller) {
                 if let value = selfMachine.value.rawValue {
                     fulfill(value)
                 }
