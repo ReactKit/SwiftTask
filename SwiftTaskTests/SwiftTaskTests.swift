@@ -908,7 +908,8 @@ class SwiftTaskTests: _TestCase
                 reject("ERROR \(actualTryCount)")
             }
             
-        }.retry(maxTryCount-1) { () -> Bool in
+        }.retry(maxTryCount-1) { error, isCancelled -> Bool in
+            XCTAssertNotEqual(error!, "ERROR 0", "Should not evaluate retry condition on first try. It is not retry.")
             return actualTryCount < 2
         }.failure { error, isCancelled -> String in
             
