@@ -892,6 +892,40 @@ class SwiftTaskTests: _TestCase
         XCTAssertEqual(actualTryCount, maxTryCount, "`actualTryCount` should reach `maxTryCount` because task keeps rejected and never fulfilled.")
     }
     
+    func testRetry_condition()
+    {
+        // NOTE: this is async test
+        if !self.isAsync { return }
+        
+        let expect = self.expectationWithDescription(#function)
+        let maxTryCount = 4
+        var actualTryCount = 0
+        
+        Task<Float, String, ErrorString> { progress, fulfill, reject, configure in
+            
+            self.perform {
+                actualTryCount += 1
+                reject("ERROR \(actualTryCount)")
+            }
+            
+        }.retry(maxTryCount-1) { () -> Bool in
+            return actualTryCount < 2
+        }.failure { error, isCancelled -> String in
+            
+            XCTAssertEqual(error!, "ERROR 3")
+            XCTAssertFalse(isCancelled)
+            
+            expect.fulfill()
+            
+            return "DUMMY"
+            
+        }
+        
+        self.wait()
+        
+        XCTAssertEqual(actualTryCount, 3)
+    }
+    
     func testRetry_progress()
     {
         // NOTE: this is async test
