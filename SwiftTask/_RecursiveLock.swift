@@ -15,8 +15,8 @@ internal final class _RecursiveLock
     
     internal init()
     {
-        self.mutex = UnsafeMutablePointer<pthread_mutex_t>(allocatingCapacity: 1)
-        self.attribute = UnsafeMutablePointer<pthread_mutexattr_t>(allocatingCapacity: 1)
+        self.mutex = UnsafeMutablePointer<pthread_mutex_t>.allocate(capacity: 1)
+        self.attribute = UnsafeMutablePointer<pthread_mutexattr_t>.allocate(capacity: 1)
         
         pthread_mutexattr_init(self.attribute)
         pthread_mutexattr_settype(self.attribute, PTHREAD_MUTEX_RECURSIVE)
@@ -28,8 +28,8 @@ internal final class _RecursiveLock
         pthread_mutexattr_destroy(self.attribute)
         pthread_mutex_destroy(self.mutex)
         
-        self.attribute.deallocateCapacity(1)
-        self.mutex.deallocateCapacity(1)
+        self.attribute.deallocate(capacity: 1)
+        self.mutex.deallocate(capacity: 1)
     }
     
     internal func lock()
