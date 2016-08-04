@@ -314,14 +314,22 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     /// Returns new task that is retryable for `maxRetryCount (= maxTryCount-1)` times.
     public func retry(maxRetryCount: Int) -> Task
     {
+        return retry(maxRetryCount) { true }
+    }
+    
+    /// Returns new task that is retryable for `maxRetryCount (= maxTryCount-1)` times.
+    /// Predicated condition will evaluate when each retry timing to handle retryable.
+    public func retry(maxRetryCount: Int, condition predicate: () -> Bool) -> Task
+    {
         if maxRetryCount < 1 { return self }
+        if !predicate() { return self }
         
         return Task { machine, progress, fulfill, _reject, configure in
             
             let task = self.progress { _, progressValue in
                 progress(progressValue)
             }.failure { [unowned self] _ -> Task in
-                return self.clone().retry(maxRetryCount-1) // clone & try recursively
+                return self.clone().retry(maxRetryCount-1, condition: predicate) // clone & try recursively
             }
                 
             task.progress { _, progressValue in
