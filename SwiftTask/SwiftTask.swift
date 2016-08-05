@@ -185,6 +185,14 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
         })
         self.name = "RejectedTask"
     }
+
+    private convenience init(_errorInfo: ErrorInfo)
+    {
+        self.init(_initClosure: { _, progress, fulfill, _reject, configure in
+            _reject(_errorInfo)
+        })
+        self.name = "RejectedTask"
+    }
     
     ///
     /// Create promise-like task which only allows fulfill & reject (no progress & configure)
@@ -310,18 +318,24 @@ public class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
         clonedTask.name = "\(self.name)-clone"
         return clonedTask
     }
-    
+
     /// Returns new task that is retryable for `maxRetryCount (= maxTryCount-1)` times.
-    public func retry(maxRetryCount: Int) -> Task
+    /// - Parameter condition: Predicate that will be evaluated on each retry timing.
+    public func retry(maxRetryCount: Int, condition: (ErrorInfo -> Bool) = { _ in true }) -> Task
     {
-        if maxRetryCount < 1 { return self }
-        
+        guard maxRetryCount > 0 else { return self }
+
         return Task { machine, progress, fulfill, _reject, configure in
             
             let task = self.progress { _, progressValue in
                 progress(progressValue)
-            }.failure { [unowned self] _ -> Task in
-                return self.clone().retry(maxRetryCount-1) // clone & try recursively
+            }.failure { [unowned self] errorInfo -> Task in
+                if condition(errorInfo) {
+                    return self.clone().retry(maxRetryCount-1, condition: condition) // clone & try recursively
+                }
+                else {
+                    return Task(_errorInfo: errorInfo)
+                }
             }
                 
             task.progress { _, progressValue in
