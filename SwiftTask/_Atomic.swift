@@ -11,14 +11,14 @@ import Darwin
 internal final class _Atomic<T>
 {
     private var _spinlock = OS_SPINLOCK_INIT
-    private var _rawValue: T
+    fileprivate var _rawValue: T
     
     internal init(_ rawValue: T)
     {
         self._rawValue = rawValue
     }
     
-    internal func withRawValue<U>(_ f: @noescape (T) -> U) -> U
+    internal func withRawValue<U>(_ f: (T) -> U) -> U
     {
         self._lock()
         defer { self._unlock() }
@@ -26,17 +26,17 @@ internal final class _Atomic<T>
         return f(self._rawValue)
     }
     
-    internal func update(_ f: @noescape (T) -> T) -> T
+    internal func update(_ f: (T) -> T) -> T
     {
         return self.updateIf { f($0) }!
     }
     
-    internal func updateIf(_ f: @noescape (T) -> T?) -> T?
+    internal func updateIf(_ f: (T) -> T?) -> T?
     {
         return self.modify { value in f(value).map { ($0, value) } }
     }
     
-    internal func modify<U>(_ f: @noescape (T) -> (T, U)?) -> U?
+    internal func modify<U>(_ f: (T) -> (T, U)?) -> U?
     {
         self._lock()
         defer { self._unlock() }
@@ -51,14 +51,14 @@ internal final class _Atomic<T>
         }
     }
     
-    private func _lock()
+    fileprivate func _lock()
     {
-        withUnsafeMutablePointer(&self._spinlock, OSSpinLockLock)
+        withUnsafeMutablePointer(to: &self._spinlock, OSSpinLockLock)
     }
     
-    private func _unlock()
+    fileprivate func _unlock()
     {
-        withUnsafeMutablePointer(&self._spinlock, OSSpinLockUnlock)
+        withUnsafeMutablePointer(to: &self._spinlock, OSSpinLockUnlock)
     }
 }
 
@@ -91,6 +91,6 @@ extension _Atomic: CustomStringConvertible
 {
     internal var description: String
     {
-        return String(self.rawValue)
+        return String(describing: self.rawValue)
     }
 }

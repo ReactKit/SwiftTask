@@ -71,7 +71,7 @@ internal class _StateMachine<Progress, Value, Error>
         }
     }
     
-    @discardableResult internal func addCompletionHandler(_ token: inout _HandlerToken?, _ completionHandler: () -> Void) -> Bool
+    @discardableResult internal func addCompletionHandler(_ token: inout _HandlerToken?, _ completionHandler: @escaping () -> Void) -> Bool
     {
         self._lock.lock()
         defer { self._lock.unlock() }
