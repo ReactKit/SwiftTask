@@ -19,7 +19,7 @@ public class Canceller: Cancellable
 {
     private var cancelHandler: (() -> Void)?
     
-    public required init(cancelHandler: () -> Void)
+    public required init(cancelHandler: @escaping () -> Void)
     {
         self.cancelHandler = cancelHandler
     }
