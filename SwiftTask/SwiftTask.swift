@@ -67,7 +67,7 @@ open class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     public typealias RejectHandler = (Error) -> Void
     public typealias Configuration = TaskConfiguration
     
-    public typealias PromiseInitClosure = (_ fulfill: FulfillHandler, _ reject: RejectHandler) -> Void
+    public typealias PromiseInitClosure = (_ fulfill: @escaping FulfillHandler, _ reject: @escaping RejectHandler) -> Void
     public typealias InitClosure = (_ progress: @escaping ProgressHandler, _ fulfill: @escaping FulfillHandler, _ reject: @escaping RejectHandler, _ configure: TaskConfiguration) -> Void
     
     internal typealias _Machine = _StateMachine<Progress, Value, Error>
