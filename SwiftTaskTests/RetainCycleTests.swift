@@ -25,7 +25,7 @@ class Player
     
     func doSomething(completion: (() -> Void)? = nil)
     {
-        DispatchQueue.main.after(when: .now() + 0.001) { /*[weak self] in */
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.001) { /*[weak self] in */
             
             // NOTE: callback (either as argument or stored property) must be captured by dispatch_queue
             
@@ -54,7 +54,7 @@ class RetainCycleTests: _TestCase
     
     func testPlayer_completionAsArgument_notConfigured()
     {
-        let expect = self.expectation(withDescription: #function)
+        let expect = self.expectation(description: #function)
         
         //
         // retain cycle:
@@ -98,7 +98,7 @@ class RetainCycleTests: _TestCase
     
     func testPlayer_completionAsArgument_configured()
     {
-        let expect = self.expectation(withDescription: #function)
+        let expect = self.expectation(description: #function)
         
         //
         // retain cycle:
@@ -144,7 +144,7 @@ class RetainCycleTests: _TestCase
     
     func testPlayer_completionAsStoredProperty_notConfigured()
     {
-        let expect = self.expectation(withDescription: #function)
+        let expect = self.expectation(description: #function)
         
         //
         // retain cycle:
@@ -186,7 +186,7 @@ class RetainCycleTests: _TestCase
     
     func testPlayer_completionAsStoredProperty_configured()
     {
-        let expect = self.expectation(withDescription: #function)
+        let expect = self.expectation(description: #function)
         
         //
         // retain cycle:

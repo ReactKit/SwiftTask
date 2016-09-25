@@ -16,7 +16,7 @@ class RemoveHandlerTests: _TestCase
     {
         typealias Task = SwiftTask.Task<Float, String, ErrorString>
         
-        let expect = self.expectation(withDescription: #function)
+        let expect = self.expectation(description: #function)
         
         var latestProgressValue: Float?
         var canceller: AutoCanceller? = nil
@@ -60,7 +60,7 @@ class RemoveHandlerTests: _TestCase
     {
         typealias Task = SwiftTask.Task<Float, String, ErrorString>
 
-        let expect = self.expectation(withDescription: #function)
+        let expect = self.expectation(description: #function)
         var canceller: AutoCanceller? = nil
         
         // define task

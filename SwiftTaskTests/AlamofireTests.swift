@@ -12,18 +12,18 @@ import XCTest
 
 class AlamofireTests: _TestCase
 {
-    typealias Progress = (bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64)
+    typealias Progress = Double
 
     func testFulfill()
     {
-        let expect = self.expectation(withDescription: #function)
+        let expect = self.expectation(description: #function)
         
-        let task = Task<Progress, String, NSError> { progress, fulfill, reject, configure in
-            
-            request(.GET, "http://httpbin.org/get", parameters: ["foo": "bar"])
-            .response { (request, response, data, error) in
+        let task = Task<Progress, String, Error> { progress, fulfill, reject, configure in
+
+            Alamofire.request("http://httpbin.org/get", method: .get, parameters: ["foo": "bar"])
+            .response { response in
                 
-                if let error = error {
+                if let error = response.error {
                     reject(error)
                     return
                 }
@@ -46,21 +46,21 @@ class AlamofireTests: _TestCase
     
     func testReject()
     {
-        let expect = self.expectation(withDescription: #function)
+        let expect = self.expectation(description: #function)
         
-        let task = Task<Progress, String?, NSError> { progress, fulfill, reject, configure in
+        let task = Task<Progress, String?, Error> { progress, fulfill, reject, configure in
             
             let dummyURLString = "http://xxx-swift-task.org/get"
             
-            request(.GET, dummyURLString, parameters: ["foo": "bar"])
-            .response { (request, response, data, error) in
+            Alamofire.request(dummyURLString, method: .get, parameters: ["foo": "bar"])
+            .response { response in
                 
-                if let error = error {
+                if let error = response.error {
                     reject(error)   // pass non-nil error
                     return
                 }
                 
-                if response?.statusCode >= 300 {
+                if let status = response.response?.statusCode, status >= 300 {
                     reject(NSError(domain: "", code: 0, userInfo: nil))
                 }
                 
@@ -74,7 +74,7 @@ class AlamofireTests: _TestCase
             
             XCTFail("Should never reach here.")
             
-        }.failure { (error: NSError?, isCancelled: Bool) -> Void in
+        }.failure { (error: Error?, isCancelled: Bool) -> Void in
             
             XCTAssertTrue(error != nil, "Should receive non-nil error.")
             expect.fulfill()
@@ -86,20 +86,20 @@ class AlamofireTests: _TestCase
     
     func testProgress()
     {
-        let expect = self.expectation(withDescription: #function)
+        let expect = self.expectation(description: #function)
         
         // define task
-        let task = Task<Progress, String, NSError> { progress, fulfill, reject, configure in
+        let task = Task<Progress, String, Error> { progress, fulfill, reject, configure in
             
-            download(.GET, "http://httpbin.org/stream/100", destination: Request.suggestedDownloadDestination(directory: .documentDirectory, domain: .userDomainMask))
+            Alamofire.download("http://httpbin.org/stream/100", method: .get, to: DownloadRequest.suggestedDownloadDestination())
                 
-            .progress { (bytesWritten, totalBytesWritten, totalBytesExpectedToWrite) in
+            .downloadProgress { progress_ in
+
+                progress(progress_.fractionCompleted)
                 
-                progress((bytesWritten, totalBytesWritten, totalBytesExpectedToWrite) as Progress)
+            }.response { response in
                 
-            }.response { (request, response, data, error) in
-                
-                if let error = error {
+                if let error = response.error {
                     reject(error)
                     return
                 }
@@ -113,13 +113,8 @@ class AlamofireTests: _TestCase
         }
         
         // set progress & then
-        task.progress { _, progress in
-            
-            print("bytesWritten = \(progress.bytesWritten)")
-            print("totalBytesWritten = \(progress.totalBytesWritten)")
-            print("totalBytesExpectedToWrite = \(progress.totalBytesExpectedToWrite)")
-            print("")
-            
+        task.progress { _, progress_ in
+            print("progress = \(progress_)")
         }.then { value, errorInfo -> Void in
             expect.fulfill()
         }
@@ -129,20 +124,19 @@ class AlamofireTests: _TestCase
     
     func testNSProgress()
     {
-        let expect = self.expectation(withDescription: #function)
+        let expect = self.expectation(description: #function)
         let nsProgress = Foundation.Progress(totalUnitCount: 100)
         
         // define task
-        let task = Task<Progress, String, NSError> { progress, fulfill, reject, configure in
+        let task = Task<Progress, String, Error> { progress, fulfill, reject, configure in
             
             nsProgress.becomeCurrent(withPendingUnitCount: 50)
             
             // NOTE: test with url which returns totalBytesExpectedToWrite != -1
-            download(.GET, "http://httpbin.org/bytes/1024", destination: Request.suggestedDownloadDestination(directory: .documentDirectory, domain: .userDomainMask))
-            
-            .response { (request, response, data, error) in
+            Alamofire.download("http://httpbin.org/bytes/1024", method: .get, to: DownloadRequest.suggestedDownloadDestination())
+            .response { response in
                 
-                if let error = error {
+                if let error = response.error {
                     reject(error)
                     return
                 }
@@ -176,15 +170,14 @@ class AlamofireTests: _TestCase
     //
     func testCancel()
     {
-        let expect = self.expectation(withDescription: #function)
+        let expect = self.expectation(description: #function)
         
-        let task = Task<Progress, String?, NSError> { progress, fulfill, reject, configure in
+        let task = Task<Progress, String?, Error> { progress, fulfill, reject, configure in
             
-            let downloadRequst = download(.GET, "http://httpbin.org/stream/100", destination: Request.suggestedDownloadDestination(directory: .documentDirectory, domain: .userDomainMask))
-
-            .response { (request, response, data, error) in
+            let downloadRequst = Alamofire.download("http://httpbin.org/stream/100", method: .get, to: DownloadRequest.suggestedDownloadDestination())
+            .response { response in
                 
-                if let error = error {
+                if let error = response.error {
                     reject(error)
                     return
                 }
@@ -207,7 +200,7 @@ class AlamofireTests: _TestCase
             
             XCTFail("Should never reach here because task is cancelled.")
             
-        }.failure { (error: NSError?, isCancelled: Bool) -> Void in
+        }.failure { (error: Error?, isCancelled: Bool) -> Void in
             
             XCTAssertTrue(error == nil, "Should receive nil error via task.cancel().")
             XCTAssertTrue(isCancelled)
@@ -217,7 +210,7 @@ class AlamofireTests: _TestCase
         }
         
         // cancel after 1ms
-        DispatchQueue.main.after(when: .now() + 0.001) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.001) {
             
             task.cancel()   // sends no error
             

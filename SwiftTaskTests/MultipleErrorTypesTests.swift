@@ -61,7 +61,7 @@ class MultipleErrorTypesTests: _TestCase
     
     func testMultipleErrorTypes_then()
     {
-        let expect = self.expectation(withDescription: #function)
+        let expect = self.expectation(description: #function)
         
         self._task1(ok: true)
             .then { value, errorInfo -> Task2 in
@@ -87,7 +87,7 @@ class MultipleErrorTypesTests: _TestCase
     
     func testMultipleErrorTypes_success()
     {
-        let expect = self.expectation(withDescription: #function)
+        let expect = self.expectation(description: #function)
         
         self._task1(ok: true)
             .success { value -> Task2 in
@@ -113,7 +113,7 @@ class MultipleErrorTypesTests: _TestCase
 
     func testMultipleErrorTypes_success_differentErrorType()
     {
-        let expect = self.expectation(withDescription: #function)
+        let expect = self.expectation(description: #function)
         
         self._task1(ok: true)
             .success { value -> Task2 in
@@ -151,7 +151,7 @@ class MultipleErrorTypesTests: _TestCase
     
     func testMultipleErrorTypes_success_differentErrorType_conversion()
     {
-        let expect = self.expectation(withDescription: #function)
+        let expect = self.expectation(description: #function)
         
         self._task1(ok: true)
             .success { value -> Task<Void, MyEnum, String> in
@@ -191,7 +191,7 @@ class MultipleErrorTypesTests: _TestCase
 
     func testMultipleErrorTypes_failure()
     {
-        let expect = self.expectation(withDescription: #function)
+        let expect = self.expectation(description: #function)
         
         self._task1(ok: false)
             .failure { errorInfo -> Task<Dummy, String /* must be task1's value type to recover */, Dummy> in

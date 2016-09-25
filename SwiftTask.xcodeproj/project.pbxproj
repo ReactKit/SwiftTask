@@ -15,8 +15,6 @@
 		1F46DEDA199EDF1000F97868 /* SwiftTask.h in Headers */ = {isa = PBXBuildFile; fileRef = 1F46DED9199EDF1000F97868 /* SwiftTask.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1F46DEFB199EDF8100F97868 /* SwiftTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEFA199EDF8100F97868 /* SwiftTask.swift */; };
 		1F46DEFD199EE2C200F97868 /* _TestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEFC199EE2C200F97868 /* _TestCase.swift */; };
-		1F4C76A41AD8CF40004E47C1 /* AlamofireTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F5FA35619A374E600975FB9 /* AlamofireTests.swift */; };
-		1F4C76A51AD8CF41004E47C1 /* AlamofireTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F5FA35619A374E600975FB9 /* AlamofireTests.swift */; };
 		1F4C7AD71B7CD27200DEB1AE /* Async.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F4C7AD61B7CD27100DEB1AE /* Async.framework */; };
 		1F4C7AD91B7CD27600DEB1AE /* Async.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F4C7AD81B7CD27600DEB1AE /* Async.framework */; };
 		1F6A8CA319A4E4F200369A5D /* SwiftTaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEE3199EDF1000F97868 /* SwiftTaskTests.swift */; };
@@ -123,6 +121,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1F1BFFE21D97DCD9000105EB /* Deprecated */ = {
+			isa = PBXGroup;
+			children = (
+				1F5FA35619A374E600975FB9 /* AlamofireTests.swift */,
+			);
+			name = Deprecated;
+			sourceTree = "<group>";
+		};
 		1F46DECA199EDF1000F97868 = {
 			isa = PBXGroup;
 			children = (
@@ -175,9 +181,9 @@
 				48511C5A19C17563002FE03C /* RetainCycleTests.swift */,
 				485C31F01A1D619A00040DA3 /* TypeInferenceTests.swift */,
 				1F218D5A1AFC3FFD00C849FF /* RemoveHandlerTests.swift */,
-				1F5FA35619A374E600975FB9 /* AlamofireTests.swift */,
 				1F29F6411B115EF500F476AF /* MultipleErrorTypesTests.swift */,
 				1FF95CAF1CDD8F8D00899FEA /* MultipleTasksTests.swift */,
+				1F1BFFE21D97DCD9000105EB /* Deprecated */,
 				1F46DEE1199EDF1000F97868 /* Supporting Files */,
 			);
 			path = SwiftTaskTests;
@@ -384,7 +390,6 @@
 				1FF95CB01CDD8F8D00899FEA /* MultipleTasksTests.swift in Sources */,
 				1F6A8CA319A4E4F200369A5D /* SwiftTaskTests.swift in Sources */,
 				1F29F6421B115EF500F476AF /* MultipleErrorTypesTests.swift in Sources */,
-				1F4C76A41AD8CF40004E47C1 /* AlamofireTests.swift in Sources */,
 				485C31F11A1D619A00040DA3 /* TypeInferenceTests.swift in Sources */,
 				48511C5B19C17563002FE03C /* RetainCycleTests.swift in Sources */,
 				1F46DEFD199EE2C200F97868 /* _TestCase.swift in Sources */,
@@ -401,7 +406,6 @@
 				1FF95CB11CDD8F8D00899FEA /* MultipleTasksTests.swift in Sources */,
 				1FF52EB51A4C395A00B4BA28 /* _InterruptableTask.swift in Sources */,
 				1F29F6431B115EF500F476AF /* MultipleErrorTypesTests.swift in Sources */,
-				1F4C76A51AD8CF41004E47C1 /* AlamofireTests.swift in Sources */,
 				485C31F21A1D619A00040DA3 /* TypeInferenceTests.swift in Sources */,
 				4822F0DC19D00B2300F5F572 /* _TestCase.swift in Sources */,
 				4822F0E019D00B2300F5F572 /* RetainCycleTests.swift in Sources */,
@@ -522,7 +526,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.inamiy.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(PROJECT_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -542,7 +545,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.inamiy.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(PROJECT_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
@@ -556,11 +558,9 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = SwiftTaskTests/Info.plist;
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.inamiy.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
-				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -570,11 +570,9 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = SwiftTaskTests/Info.plist;
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.inamiy.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
-				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
@@ -587,7 +585,6 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = SwiftTaskTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.inamiy.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -599,7 +596,6 @@
 			baseConfigurationReference = 1FFADCDE1C5CEC1B000B66BE /* UniversalFramework_Test.xcconfig */;
 			buildSettings = {
 				INFOPLIST_FILE = SwiftTaskTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.inamiy.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;

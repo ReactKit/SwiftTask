@@ -34,7 +34,7 @@ class MultipleTasksTests: _TestCase
 {
     func testMultipleTasksTests_success1_success2_success3()
     {
-        let expect = self.expectation(withDescription: #function)
+        let expect = self.expectation(description: #function)
 
         var flow = [Int]()
 
@@ -59,7 +59,7 @@ class MultipleTasksTests: _TestCase
 
     func testMultipleTasksTests_success1_success2_failure3()
     {
-        let expect = self.expectation(withDescription: #function)
+        let expect = self.expectation(description: #function)
 
         var flow = [Int]()
 
@@ -89,7 +89,7 @@ class MultipleTasksTests: _TestCase
 
     func testMultipleTasksTests_success1_failure2_success3()
     {
-        let expect = self.expectation(withDescription: #function)
+        let expect = self.expectation(description: #function)
 
         var flow = [Int]()
 
@@ -119,7 +119,7 @@ class MultipleTasksTests: _TestCase
     
     func testMultipleTasksTests_success1_failure2_success3_wrapped()
     {
-        let expect = self.expectation(withDescription: #function)
+        let expect = self.expectation(description: #function)
         
         var flow = [Int]()
         
@@ -158,7 +158,7 @@ class MultipleTasksTests: _TestCase
 extension Task
 {
     /// Converts `Task<..., Error>` to `Task<..., WrappedError>`.
-    private func _mapError(_ f: (Error) -> WrappedError) -> Task<Progress, Value, WrappedError>
+    fileprivate func _mapError(_ f: @escaping (Error) -> WrappedError) -> Task<Progress, Value, WrappedError>
     {
         return self.failure { error, isCancelled -> Task<Progress, Value, WrappedError> in
             if let error = error {
@@ -172,8 +172,8 @@ extension Task
     }
 }
 
-private func wrappedErrorTask<P,V,E>(_ task: () -> Task<P,V,E>, f: (E) -> WrappedError) -> () -> Task<P,V,WrappedError> {
-        return {
-            task()._mapError(f)
-        }
+private func wrappedErrorTask<P,V,E>(_ task: @escaping () -> Task<P,V,E>, f: @escaping (E) -> WrappedError) -> () -> Task<P,V,WrappedError> {
+    return {
+        task()._mapError(f)
+    }
 }

@@ -24,13 +24,6 @@
             location = "group:Async.xcodeproj">
          </FileRef>
       </Group>
-      <Group
-         location = "group:Alamofire"
-         name = "Alamofire">
-         <FileRef
-            location = "group:Alamofire.xcodeproj">
-         </FileRef>
-      </Group>
    </Group>
    <FileRef
       location = "group:SwiftTask.xcodeproj">

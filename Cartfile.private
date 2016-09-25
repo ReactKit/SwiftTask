@@ -1,3 +1,2 @@
-github "Alamofire/Alamofire" "swift3"
-github "duemunk/Async" "feature/Swift_3.0"
+github "duemunk/Async"
 github "mrackwitz/xcconfigs"

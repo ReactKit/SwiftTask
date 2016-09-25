@@ -28,17 +28,17 @@ class _TestCase: XCTestCase
     
     func wait(_ timeout: TimeInterval = 3)
     {
-        self.waitForExpectations(withTimeout: timeout) { error in
+        self.waitForExpectations(timeout: timeout) { error in
             print("wait error = \(error)")
         }
     }
     
     var isAsync: Bool { return false }
     
-    func perform(closure: () -> Void)
+    func perform(closure: @escaping () -> Void)
     {
         if self.isAsync {
-            Async.main(after: 0.01, block: closure)
+            Async.main(after: 0.01, closure)
         }
         else {
             closure()

@@ -1,3 +1,2 @@
-github "Alamofire/Alamofire" "e891699312a5215ad0da9f8322c5da949f90db35"
-github "duemunk/Async" "23d32df500f7ace6ea1526e7433a0fa7004c8d7d"
+github "duemunk/Async" "2.0.0"
 github "mrackwitz/xcconfigs" "3.0"
