@@ -67,7 +67,7 @@ open class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     public typealias RejectHandler = (Error) -> Void
     public typealias Configuration = TaskConfiguration
     
-    public typealias PromiseInitClosure = (_ fulfill: FulfillHandler, _ reject: RejectHandler) -> Void
+    public typealias PromiseInitClosure = (_ fulfill: @escaping FulfillHandler, _ reject: @escaping RejectHandler) -> Void
     public typealias InitClosure = (_ progress: @escaping ProgressHandler, _ fulfill: @escaping FulfillHandler, _ reject: @escaping RejectHandler, _ configure: TaskConfiguration) -> Void
     
     internal typealias _Machine = _StateMachine<Progress, Value, Error>
@@ -356,7 +356,7 @@ open class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     /// - Note: `oldProgress` is always nil when `weakified = true`
     /// - Returns: Self (same `Task`)
     ///
-    @discardableResult public func progress(progressClosure: @escaping (ProgressTuple) -> Void) -> Self
+    @discardableResult public func progress(_ progressClosure: @escaping (ProgressTuple) -> Void) -> Self
     {
         var dummyCanceller: Canceller? = nil
         return self.progress(&dummyCanceller, progressClosure)
@@ -382,7 +382,7 @@ open class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     ///
     /// - Returns: New `Task`
     ///
-    @discardableResult public func then<Value2>(thenClosure: @escaping (Value?, ErrorInfo?) -> Value2) -> Task<Progress, Value2, Error>
+    @discardableResult public func then<Value2>(_ thenClosure: @escaping (Value?, ErrorInfo?) -> Value2) -> Task<Progress, Value2, Error>
     {
         var dummyCanceller: Canceller? = nil
         return self.then(&dummyCanceller, thenClosure)
@@ -403,7 +403,7 @@ open class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     ///
     /// - Returns: New `Task`
     ///
-    public func then<Progress2, Value2, Error2>(thenClosure: @escaping (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, Error2>
+    public func then<Progress2, Value2, Error2>(_ thenClosure: @escaping (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, Error2>
     {
         var dummyCanceller: Canceller? = nil
         return self.then(&dummyCanceller, thenClosure)
@@ -462,7 +462,7 @@ open class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     ///
     /// - Returns: New `Task`
     ///
-    @discardableResult public func success<Value2>(successClosure: @escaping (Value) -> Value2) -> Task<Progress, Value2, Error>
+    @discardableResult public func success<Value2>(_ successClosure: @escaping (Value) -> Value2) -> Task<Progress, Value2, Error>
     {
         var dummyCanceller: Canceller? = nil
         return self.success(&dummyCanceller, successClosure)
@@ -483,7 +483,7 @@ open class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     ///
     /// - Returns: New `Task`
     ///
-    public func success<Progress2, Value2, Error2>(successClosure: @escaping (Value) -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, Error>
+    public func success<Progress2, Value2, Error2>(_ successClosure: @escaping (Value) -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, Error>
     {
         var dummyCanceller: Canceller? = nil
         return self.success(&dummyCanceller, successClosure)
@@ -519,7 +519,7 @@ open class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     ///
     /// - Returns: New `Task`
     ///
-    @discardableResult public func failure(failureClosure: @escaping (ErrorInfo) -> Value) -> Task
+    @discardableResult public func failure(_ failureClosure: @escaping (ErrorInfo) -> Value) -> Task
     {
         var dummyCanceller: Canceller? = nil
         return self.failure(&dummyCanceller, failureClosure)
@@ -541,7 +541,7 @@ open class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     ///
     /// - Returns: New `Task`
     ///
-    public func failure<Progress2, Error2>(failureClosure: @escaping (ErrorInfo) -> Task<Progress2, Value, Error2>) -> Task<Progress2, Value, Error2>
+    public func failure<Progress2, Error2>(_ failureClosure: @escaping (ErrorInfo) -> Task<Progress2, Value, Error2>) -> Task<Progress2, Value, Error2>
     {
         var dummyCanceller: Canceller? = nil
         return self.failure(&dummyCanceller, failureClosure)
