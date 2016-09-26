@@ -43,7 +43,7 @@ internal class _StateMachine<Progress, Value, Error>
         self.state = _Atomic(paused ? .Paused : .Running)
     }
     
-    @discardableResult internal func addProgressTupleHandler(_ token: inout _HandlerToken?, _ progressTupleHandler: ProgressTupleHandler) -> Bool
+    @discardableResult internal func addProgressTupleHandler(_ token: inout _HandlerToken?, _ progressTupleHandler: @escaping ProgressTupleHandler) -> Bool
     {
         self._lock.lock()
         defer { self._lock.unlock() }
