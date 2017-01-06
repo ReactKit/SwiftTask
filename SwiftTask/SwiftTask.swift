@@ -362,7 +362,7 @@ open class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
         return self.progress(&dummyCanceller, progressClosure)
     }
     
-    public func progress<C: Canceller>(_ canceller: inout C?, _ progressClosure: @escaping (ProgressTuple) -> Void) -> Self
+    @discardableResult public func progress<C: Canceller>(_ canceller: inout C?, _ progressClosure: @escaping (ProgressTuple) -> Void) -> Self
     {
         var token: _HandlerToken? = nil
         self._machine.addProgressTupleHandler(&token, progressClosure)
@@ -388,7 +388,7 @@ open class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
         return self.then(&dummyCanceller, thenClosure)
     }
     
-    public func then<Value2, C: Canceller>(_ canceller: inout C?, _ thenClosure: @escaping (Value?, ErrorInfo?) -> Value2) -> Task<Progress, Value2, Error>
+    @discardableResult public func then<Value2, C: Canceller>(_ canceller: inout C?, _ thenClosure: @escaping (Value?, ErrorInfo?) -> Value2) -> Task<Progress, Value2, Error>
     {
         return self.then(&canceller) { (value, errorInfo) -> Task<Progress, Value2, Error> in
             return Task<Progress, Value2, Error>(value: thenClosure(value, errorInfo))
@@ -403,7 +403,7 @@ open class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     ///
     /// - Returns: New `Task`
     ///
-    public func then<Progress2, Value2, Error2>(_ thenClosure: @escaping (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, Error2>
+    @discardableResult public func then<Progress2, Value2, Error2>(_ thenClosure: @escaping (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, Error2>
     {
         var dummyCanceller: Canceller? = nil
         return self.then(&dummyCanceller, thenClosure)
@@ -417,7 +417,7 @@ open class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     //
     /// - Returns: New `Task`
     ///
-    public func then<Progress2, Value2, Error2, C: Canceller>(_ canceller: inout C?, _ thenClosure: @escaping (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, Error2>
+    @discardableResult public func then<Progress2, Value2, Error2, C: Canceller>(_ canceller: inout C?, _ thenClosure: @escaping (Value?, ErrorInfo?) -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, Error2>
     {
         return Task<Progress2, Value2, Error2> { [unowned self, weak canceller] newMachine, progress, fulfill, _reject, configure in
             
@@ -468,7 +468,7 @@ open class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
         return self.success(&dummyCanceller, successClosure)
     }
     
-    public func success<Value2, C: Canceller>(_ canceller: inout C?, _ successClosure: @escaping (Value) -> Value2) -> Task<Progress, Value2, Error>
+    @discardableResult public func success<Value2, C: Canceller>(_ canceller: inout C?, _ successClosure: @escaping (Value) -> Value2) -> Task<Progress, Value2, Error>
     {
         return self.success(&canceller) { (value: Value) -> Task<Progress, Value2, Error> in
             return Task<Progress, Value2, Error>(value: successClosure(value))
@@ -483,13 +483,13 @@ open class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     ///
     /// - Returns: New `Task`
     ///
-    public func success<Progress2, Value2, Error2>(_ successClosure: @escaping (Value) -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, Error>
+    @discardableResult public func success<Progress2, Value2, Error2>(_ successClosure: @escaping (Value) -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, Error>
     {
         var dummyCanceller: Canceller? = nil
         return self.success(&dummyCanceller, successClosure)
     }
     
-    public func success<Progress2, Value2, Error2, C: Canceller>(_ canceller: inout C?, _ successClosure: @escaping (Value) -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, Error>
+    @discardableResult public func success<Progress2, Value2, Error2, C: Canceller>(_ canceller: inout C?, _ successClosure: @escaping (Value) -> Task<Progress2, Value2, Error2>) -> Task<Progress2, Value2, Error>
     {
         var localCanceller = canceller; defer { canceller = localCanceller }
         return Task<Progress2, Value2, Error> { [unowned self] newMachine, progress, fulfill, _reject, configure in
@@ -525,7 +525,7 @@ open class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
         return self.failure(&dummyCanceller, failureClosure)
     }
     
-    public func failure<C: Canceller>(_ canceller: inout C?, _ failureClosure: @escaping (ErrorInfo) -> Value) -> Task
+    @discardableResult public func failure<C: Canceller>(_ canceller: inout C?, _ failureClosure: @escaping (ErrorInfo) -> Value) -> Task
     {
         return self.failure(&canceller) { (errorInfo: ErrorInfo) -> Task in
             return Task(value: failureClosure(errorInfo))
@@ -541,13 +541,13 @@ open class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     ///
     /// - Returns: New `Task`
     ///
-    public func failure<Progress2, Error2>(_ failureClosure: @escaping (ErrorInfo) -> Task<Progress2, Value, Error2>) -> Task<Progress2, Value, Error2>
+    @discardableResult public func failure<Progress2, Error2>(_ failureClosure: @escaping (ErrorInfo) -> Task<Progress2, Value, Error2>) -> Task<Progress2, Value, Error2>
     {
         var dummyCanceller: Canceller? = nil
         return self.failure(&dummyCanceller, failureClosure)
     }
     
-    public func failure<Progress2, Error2, C: Canceller>(_ canceller: inout C?, _ failureClosure: @escaping (ErrorInfo) -> Task<Progress2, Value, Error2>) -> Task<Progress2, Value, Error2>
+    @discardableResult public func failure<Progress2, Error2, C: Canceller>(_ canceller: inout C?, _ failureClosure: @escaping (ErrorInfo) -> Task<Progress2, Value, Error2>) -> Task<Progress2, Value, Error2>
     {
         var localCanceller = canceller; defer { canceller = localCanceller }
         return Task<Progress2, Value, Error2> { [unowned self] newMachine, progress, fulfill, _reject, configure in
