@@ -10,7 +10,7 @@ import SwiftTask
 import Alamofire
 import XCTest
 
-class AlamofireTests: _TestCase
+class AlamofireTests: TestCase
 {
     typealias Progress = (bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64)
 

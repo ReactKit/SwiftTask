@@ -6,40 +6,30 @@
 //  Copyright (c) 2015年 Yasuhiro Inami. All rights reserved.
 //
 
-import Foundation
-
-public protocol Cancellable
-{
-    associatedtype _Error
+public protocol Cancellable {
+    associatedtype ErrorType
     
-    func cancel(error: _Error) -> Bool
+    func cancel(error: ErrorType) -> Bool
 }
 
-public class Canceller: Cancellable
-{
+public class Canceller: Cancellable {
     private var cancelHandler: (() -> Void)?
     
-    public required init(cancelHandler: @escaping () -> Void)
-    {
+    public required init(cancelHandler: @escaping () -> Void) {
         self.cancelHandler = cancelHandler
     }
     
-    @discardableResult public func cancel(error: Void = ()) -> Bool
-    {
-        if let cancelHandler = self.cancelHandler {
-            self.cancelHandler = nil
-            cancelHandler()
-            return true
-        }
+    @discardableResult public func cancel(error: Void = ()) -> Bool {
+        guard let cancelHandler = cancelHandler else { return false }
         
-        return false
+        self.cancelHandler = nil
+        cancelHandler()
+        return true
     }
 }
 
-public class AutoCanceller: Canceller
-{
-    deinit
-    {
-        self.cancel()
+public class AutoCanceller: Canceller {
+    deinit {
+        cancel()
     }
 }

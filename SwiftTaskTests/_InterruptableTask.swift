@@ -1,5 +1,5 @@
 //
-//  _InterruptableTask.swift
+//  InterruptableTask.swift
 //  SwiftTask
 //
 //  Created by Yasuhiro Inami on 2014/12/25.
@@ -8,15 +8,15 @@
 
 import SwiftTask
 import Async
-typealias _InterruptableTask = Task<Int, String, String>
+typealias InterruptableTask = Task<Int, String, String>
 
 /// 1. Invokes `progressCount/2` progresses at t=0.2
 /// 2. Checks cancel & pause at t=0.4
 /// 3. Invokes remaining `progressCount-progressCount/2` progresses at t=0.4~ (if not paused)
 /// 4. Either fulfills with "OK" or rejects with "ERROR" at t=0.4~ (if not paused)
-func _interruptableTask(progressCount: Int, finalState: TaskState = .Fulfilled) -> _InterruptableTask
+func _interruptableTask(progressCount: Int, finalState: TaskState = .Fulfilled) -> InterruptableTask
 {
-    return _InterruptableTask { progress, fulfill, reject, configure in
+    return InterruptableTask { progress, fulfill, reject, configure in
         
         // NOTE: not a good flag, watch out for race condition!
         var isCancelled = false

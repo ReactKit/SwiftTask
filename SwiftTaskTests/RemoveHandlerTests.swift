@@ -10,7 +10,7 @@ import SwiftTask
 import Async
 import XCTest
 
-class RemoveHandlerTests: _TestCase
+class RemoveHandlerTests: TestCase
 {
     func testRemoveProgress()
     {

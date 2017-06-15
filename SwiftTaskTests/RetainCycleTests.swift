@@ -44,7 +44,7 @@ class Player
     }
 }
 
-class RetainCycleTests: _TestCase
+class RetainCycleTests: TestCase
 {
     typealias Task = SwiftTask.Task<Float, String, ErrorString>
     

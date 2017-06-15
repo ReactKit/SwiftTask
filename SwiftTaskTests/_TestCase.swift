@@ -1,5 +1,5 @@
 //
-//  _TestCase.swift
+//  TestCase.swift
 //  SwiftTask
 //
 //  Created by Yasuhiro Inami on 2014/08/21.
@@ -12,7 +12,7 @@ import XCTest
 
 typealias ErrorString = String
 
-class _TestCase: XCTestCase
+class TestCase: XCTestCase
 {
     override func setUp()
     {

@@ -10,7 +10,7 @@ import SwiftTask
 import Async
 import XCTest
 
-class BasicTests: _TestCase
+class BasicTests: TestCase
 {
     func testExample()
     {

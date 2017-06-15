@@ -19,7 +19,7 @@ class AsyncSwiftTaskTests: SwiftTaskTests
     override var isAsync: Bool { return true }
 }
 
-class SwiftTaskTests: _TestCase
+class SwiftTaskTests: TestCase
 {
     //--------------------------------------------------
     // MARK: - Init
@@ -536,7 +536,7 @@ class SwiftTaskTests: _TestCase
         let task = _interruptableTask(progressCount: 5)    // 1st async task (5 progresses)
         
         // chain async-task with then
-        let task3 = task.then { _ -> _InterruptableTask in
+        let task3 = task.then { _ -> InterruptableTask in
             let task2 = _interruptableTask(progressCount: 7)    // 2st async task (7 progresses)
             return task2
         }
@@ -565,7 +565,7 @@ class SwiftTaskTests: _TestCase
         let task = _interruptableTask(progressCount: 5)    // 1st async task (5 progresses)
         
         // chain async-task with success
-        let task3 = task.success { _ -> _InterruptableTask in
+        let task3 = task.success { _ -> InterruptableTask in
             let task2 = _interruptableTask(progressCount: 7)    // 2st async task (7 progresses)
             return task2
         }
@@ -594,7 +594,7 @@ class SwiftTaskTests: _TestCase
         let task = _interruptableTask(progressCount: 5, finalState: .Rejected)  // 1st async task (5 progresses -> rejected)
         
         // chain async-task with failure
-        let task3 = task.failure { _ -> _InterruptableTask in
+        let task3 = task.failure { _ -> InterruptableTask in
             let task2 = _interruptableTask(progressCount: 7)    // 2st async task (7 progresses)
             return task2
         }
@@ -664,9 +664,9 @@ class SwiftTaskTests: _TestCase
         
         let task1 = _interruptableTask(progressCount: 5)
         
-        var task2: _InterruptableTask? = nil
+        var task2: InterruptableTask? = nil
         
-        let task3 = task1.then { value, errorInfo -> _InterruptableTask in
+        let task3 = task1.then { value, errorInfo -> InterruptableTask in
             
             task2 = _interruptableTask(progressCount: 5)
             return task2!
@@ -757,10 +757,10 @@ class SwiftTaskTests: _TestCase
         let expect = self.expectation(withDescription: #function)
         
         let task = _interruptableTask(progressCount: 5)
-        weak var innerTask: _InterruptableTask?
+        weak var innerTask: InterruptableTask?
         
         // chain async-task with `then`
-        let task2 = task.then { _ -> _InterruptableTask in
+        let task2 = task.then { _ -> InterruptableTask in
             innerTask = _interruptableTask(progressCount: 5)
             return innerTask!
         }

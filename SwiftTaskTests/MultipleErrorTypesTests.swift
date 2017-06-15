@@ -10,7 +10,7 @@ import SwiftTask
 import Async
 import XCTest
 
-class MultipleErrorTypesTests: _TestCase
+class MultipleErrorTypesTests: TestCase
 {
     enum MyEnum: CustomStringConvertible
     {

@@ -26,11 +26,11 @@ private enum WrappedError
     case ByTask2(Error2)
     case ByTask3(Error3)
 
-    /// For external cancellation -> internal rejection conversion.
+    /// For external cancellation -> rejection conversion.
     case Cancelled
 }
 
-class MultipleTasksTests: _TestCase
+class MultipleTasksTests: TestCase
 {
     func testMultipleTasksTests_success1_success2_success3()
     {
@@ -165,7 +165,7 @@ extension Task
                 return Task<Progress, Value, WrappedError>(error: f(error))
             }
             else {
-                // converts external cancellation -> internal rejection
+                // converts external cancellation -> rejection
                 return Task<Progress, Value, WrappedError>(error: .Cancelled)
             }
         }

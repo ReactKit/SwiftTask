@@ -9,7 +9,7 @@
 import SwiftTask
 import XCTest
 
-class TypeInferenceTests: _TestCase
+class TypeInferenceTests: TestCase
 {
     func testTypeInference()
     {
