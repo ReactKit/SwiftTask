@@ -46,8 +46,8 @@ open class Task<Progress, Value, Error> {
     public typealias FulfillHandler = (Value) -> Void
     public typealias RejectHandler = (Error) -> Void
     public typealias Configuration = TaskConfiguration
-    public typealias PromiseInitClosure = (_ fulfill: FulfillHandler, _ reject: RejectHandler) -> Void
-    public typealias InitClosure = (_ progress: @escaping ProgressHandler, _ fulfill: FulfillHandler, _ reject: RejectHandler, _ configure: TaskConfiguration) -> Void
+    public typealias PromiseInitClosure = (_ fulfill: @escaping FulfillHandler, _ reject: @escaping RejectHandler) -> Void
+    public typealias InitClosure = (_ progress: @escaping ProgressHandler, _ fulfill: @escaping FulfillHandler, _ reject: @escaping RejectHandler, _ configure:  TaskConfiguration) -> Void
     public typealias BulkProgress = (completedCount: Int, totalCount: Int)
     
     typealias Machine = StateMachine<Progress, Value, Error>
