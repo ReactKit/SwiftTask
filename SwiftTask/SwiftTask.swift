@@ -366,11 +366,12 @@ open class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
     {
         var token: _HandlerToken? = nil
         self._machine.addProgressTupleHandler(&token, progressClosure)
-        
+        let theToken = token
+
         canceller = C { [weak self] in
-            self?._machine.removeProgressTupleHandler(token)
+            self?._machine.removeProgressTupleHandler(theToken)
         }
-        
+
         return self
     }
     
