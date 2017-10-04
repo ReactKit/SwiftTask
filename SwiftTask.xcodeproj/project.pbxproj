@@ -20,8 +20,6 @@
 		1F6A8CA319A4E4F200369A5D /* SwiftTaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F46DEE3199EDF1000F97868 /* SwiftTaskTests.swift */; };
 		1FB3B8F31B0A194F00F78900 /* _Atomic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FB3B8F21B0A194F00F78900 /* _Atomic.swift */; };
 		1FB3B8F71C5CF2CA00C1A479 /* SwiftTask.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F46DED4199EDF1000F97868 /* SwiftTask.framework */; };
-		1FCF71121AD8CD2B007079C2 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FCF71111AD8CD2B007079C2 /* Alamofire.framework */; };
-		1FCF71161AD8CD38007079C2 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FCF71151AD8CD38007079C2 /* Alamofire.framework */; };
 		1FD7197B1AFE387C00BC38C4 /* Cancellable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FD7197A1AFE387C00BC38C4 /* Cancellable.swift */; };
 		1FF52EB41A4C395A00B4BA28 /* _InterruptableTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF52EB31A4C395A00B4BA28 /* _InterruptableTask.swift */; };
 		1FF52EB51A4C395A00B4BA28 /* _InterruptableTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF52EB31A4C395A00B4BA28 /* _InterruptableTask.swift */; };
@@ -104,7 +102,6 @@
 			files = (
 				48A1E8221A366F9C007619EB /* SwiftTask.framework in Frameworks */,
 				1F4C7AD71B7CD27200DEB1AE /* Async.framework in Frameworks */,
-				1FCF71161AD8CD38007079C2 /* Alamofire.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -114,7 +111,6 @@
 			files = (
 				1FB3B8F71C5CF2CA00C1A479 /* SwiftTask.framework in Frameworks */,
 				1F4C7AD91B7CD27600DEB1AE /* Async.framework in Frameworks */,
-				1FCF71121AD8CD2B007079C2 /* Alamofire.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
