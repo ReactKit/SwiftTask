@@ -114,7 +114,7 @@ internal class _StateMachine<Progress, Value, Error>
             }
             
             for handler in self._progressTupleHandlers {
-                handler(oldProgress: oldProgress, newProgress: progress)
+                handler((oldProgress: oldProgress, newProgress: progress))
             }
         }
     }
