@@ -536,7 +536,7 @@ class SwiftTaskTests: _TestCase
         let task = _interruptableTask(progressCount: 5)    // 1st async task (5 progresses)
         
         // chain async-task with then
-        let task3 = task.then { _ -> _InterruptableTask in
+        let task3 = task.then { _,_  -> _InterruptableTask in
             let task2 = _interruptableTask(progressCount: 7)    // 2st async task (7 progresses)
             return task2
         }
@@ -760,7 +760,7 @@ class SwiftTaskTests: _TestCase
         weak var innerTask: _InterruptableTask?
         
         // chain async-task with `then`
-        let task2 = task.then { _ -> _InterruptableTask in
+        let task2 = task.then { _,_  -> _InterruptableTask in
             innerTask = _interruptableTask(progressCount: 5)
             return innerTask!
         }

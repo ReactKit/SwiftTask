@@ -86,8 +86,8 @@ class RemoveHandlerTests: _TestCase
             
         }.then { value, errorInfo -> Void in
             
-            print("value = \(value)")
-            print("errorInfo = \(errorInfo)")
+            print("value = \(String(describing: value))")
+            print("errorInfo = \(String(describing: errorInfo))")
             
             XCTAssertTrue(value == nil)
             XCTAssertTrue(errorInfo != nil)

@@ -107,7 +107,7 @@ open class Task<Progress, Value, Error>: Cancellable, CustomStringConvertible
             case .Rejected, .Cancelled:
                 valueString = "errorInfo=\(self.errorInfo!)"
             default:
-                valueString = "progress=\(self.progress)"
+                valueString = "progress=\(String(describing: self.progress))"
         }
         
         return "<\(self.name); state=\(self.state.rawValue); \(valueString!))>"

@@ -29,7 +29,7 @@ class _TestCase: XCTestCase
     func wait(_ timeout: TimeInterval = 3)
     {
         self.waitForExpectations(timeout: timeout) { error in
-            print("wait error = \(error)")
+            print("wait error = \(String(describing: error))")
         }
     }
     
