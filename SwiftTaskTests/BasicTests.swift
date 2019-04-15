@@ -52,7 +52,7 @@ class BasicTests: _TestCase
             
         }.then { value, errorInfo -> Task in // `task.then {...}` = JavaScript's `promise.then(onFulfilled, onRejected)`
             
-            print("value = \(value)") // either "Now OK" or "Now RECOVERED"
+            print("value = \(value ?? "")") // either "Now OK" or "Now RECOVERED"
             
             XCTAssertTrue(value!.hasPrefix("Now"))
             XCTAssertTrue(errorInfo == nil)
@@ -61,7 +61,7 @@ class BasicTests: _TestCase
             
         }.then { value, errorInfo -> Void in
                 
-            print("errorInfo = \(errorInfo)")
+            print("errorInfo = \(errorInfo ?? "")")
             
             XCTAssertTrue(value == nil)
             XCTAssertEqual(errorInfo!.error!, "ABORT")

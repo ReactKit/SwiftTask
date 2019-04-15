@@ -27,9 +27,16 @@ internal final class _RecursiveLock
     {
         pthread_mutexattr_destroy(self.attribute)
         pthread_mutex_destroy(self.mutex)
-        
+        #if swift(>=4.1)
+        self.attribute.deallocate()
+        #else
         self.attribute.deallocate(capacity: 1)
+        #endif
+        #if swift(>=4.1)
+        self.mutex.deallocate()
+        #else
         self.mutex.deallocate(capacity: 1)
+        #endif
     }
     
     internal func lock()
